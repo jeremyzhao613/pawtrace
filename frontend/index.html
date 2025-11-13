@@ -1,0 +1,2436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>PawTrace · Pixel Pet Social</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#ff914d',
+            secondary: '#ffe3c7',
+            accent: '#ffc86b',
+            neutral: '#fff7ed',
+            dark: '#3b2414',
+          },
+          fontFamily: {
+            pixel: ['"Press Start 2P"', 'system-ui', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .pixel-border {
+        box-shadow:
+          0 0 0 2px theme('colors.dark'),
+          4px 4px 0 0 theme('colors.dark');
+      }
+      .pixel-button {
+        @apply bg-primary text-white px-4 py-2 font-medium pixel-border uppercase text-xs tracking-wide transition-all duration-200 hover:scale-105 active:scale-95;
+      }
+      .pixel-card {
+        @apply bg-neutral pixel-border rounded-sm p-4 animation-slideIn;
+      }
+      .pixel-input {
+        @apply w-full border-2 border-dark px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary text-sm transition-all;
+      }
+      .map-marker {
+        @apply absolute w-8 h-8 rounded-full border-2 border-dark flex items-center justify-center text-white font-semibold cursor-pointer transition-transform duration-200 shadow-lg;
+        background: linear-gradient(135deg, #ff914d, #d46a2e);
+        box-shadow: 4px 4px 0 rgba(59, 36, 20, 0.55);
+      }
+      .map-marker:hover {
+        transform: translateY(-4px) scale(1.1);
+      }
+      .map-marker-park,
+      .map-marker-cafe {
+        background: linear-gradient(135deg, #ff914d, #d46a2e);
+      }
+      .map-pet-icon {
+        @apply absolute flex flex-col items-center gap-1 text-xs pointer-events-auto;
+      }
+      .scroll-section {
+        @apply transition-transform duration-700 ease-out opacity-0 translate-y-6;
+      }
+      .scroll-section.visible {
+        @apply opacity-100 translate-y-0;
+      }
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .animation-slideIn {
+        animation: slideIn 0.3s ease-out;
+      }
+      @keyframes pulse-glow {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(255, 145, 77, 0.7); }
+        50% { box-shadow: 0 0 0 8px rgba(255, 145, 77, 0); }
+      }
+      .pulse-glow {
+        animation: pulse-glow 2s infinite;
+      }
+      @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+      .animate-fadeIn {
+        animation: fadeIn 0.3s ease-out;
+      }
+      @keyframes slideInLeft {
+        from {
+          opacity: 0;
+          transform: translateX(-20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+      .animate-slideInLeft {
+        animation: slideInLeft 0.3s ease-out;
+      }
+      @keyframes pixelWalk {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-4px); }
+      }
+      .animate-pixel-walk {
+        animation: pixelWalk 0.6s ease-in-out infinite;
+      }
+      @keyframes bounce-pet {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+      }
+      .animate-bounce-pet {
+        animation: bounce-pet 0.4s ease-in-out;
+      }
+      .draggable {
+        cursor: grab;
+      }
+      .draggable:active {
+        cursor: grabbing;
+      }
+      .map-container {
+        touch-action: pinch-zoom;
+      }
+    }
+  </style>
+</head>
+<body class="bg-neutral text-dark min-h-screen font-sans">
+  <!-- LOGIN SCREEN -->
+  <div id="login-screen" class="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-100 via-amber-50 to-yellow-100">
+    <div class="max-w-5xl w-full px-4">
+      <div class="grid md:grid-cols-[1.2fr,1fr] gap-8 items-center">
+        <!-- Left: marketing copy -->
+        <div class="space-y-6 scroll-section">
+          <div class="inline-flex items-center gap-2 bg-secondary/70 px-3 py-1 rounded-full text-xs font-medium pixel-border">
+            <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+            Live pet map · Pet community · Pixel UI
+          </div>
+          <h1 class="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight">
+            PawTrace – <span class="text-primary">pixel world</span> for real pets.
+          </h1>
+          <p class="text-sm md:text-base text-gray-700 max-w-xl">
+            Connect with other pet lovers, explore interactive Taicang campus map, share pet moments,
+            and manage all your pets from one playful dashboard.
+          </p>
+          <div class="flex flex-wrap gap-3 text-xs md:text-sm font-semibold">
+            <span class="flex items-center gap-2 px-3 py-1 rounded-full bg-secondary/70">
+              <i class="fas fa-map-marked-alt text-primary"></i>
+              Virtual campus pet map
+            </span>
+            <span class="flex items-center gap-2 px-3 py-1 rounded-full bg-secondary/70">
+              <i class="fas fa-users text-primary"></i>
+              Pet owner community
+            </span>
+            <span class="flex items-center gap-2 px-3 py-1 rounded-full bg-secondary/70">
+              <i class="fas fa-paw text-primary"></i>
+              Multi-pet profiles & health
+            </span>
+          </div>
+        </div>
+        <!-- Right: login/register card -->
+        <div class="scroll-section">
+          <div class="pixel-card bg-white/90 backdrop-blur-sm">
+            <div class="flex items-center gap-2 mb-4">
+              <i class="fas fa-paw text-2xl text-primary"></i>
+              <div>
+                <h2 class="text-lg font-bold">Welcome to PawTrace</h2>
+                <p class="text-xs text-gray-600">Sign in to your pet universe</p>
+              </div>
+            </div>
+            <div class="flex text-xs mb-4 bg-neutral rounded-sm overflow-hidden pixel-border">
+              <button id="tab-login" class="flex-1 py-2 text-center bg-primary text-white font-semibold">
+                Log in
+              </button>
+              <button id="tab-register" class="flex-1 py-2 text-center text-gray-600 hover:bg-secondary/60">
+                Create account
+              </button>
+            </div>
+            <!-- Login form -->
+            <form id="login-form" class="space-y-3">
+              <div>
+                <label class="block text-xs font-semibold mb-1">Username</label>
+                <input id="login-username" type="text" class="pixel-input" placeholder="Enter username" required />
+              </div>
+              <div>
+                <label class="block text-xs font-semibold mb-1">Password</label>
+                <input id="login-password" type="password" class="pixel-input" placeholder="••••••••" required />
+              </div>
+              <button type="submit" class="pixel-button w-full mt-2 flex items-center justify-center gap-2">
+                <i class="fas fa-door-open"></i><span>Enter PawTrace</span>
+              </button>
+            </form>
+            <!-- Register form -->
+            <form id="register-form" class="space-y-3 hidden mt-1">
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-xs font-semibold mb-1">Username</label>
+                  <input id="reg-username" type="text" class="pixel-input" placeholder="Your username" required />
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold mb-1">Display name</label>
+                  <input id="reg-displayname" type="text" class="pixel-input" placeholder="Your display name" />
+                </div>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold mb-1">Password</label>
+                <input id="reg-password" type="password" class="pixel-input" placeholder="At least 6 characters" required />
+              </div>
+              <div>
+                <label class="block text-xs font-semibold mb-1">Avatar URL (optional)</label>
+                <input id="reg-avatar" type="url" class="pixel-input" placeholder="https://example.com/avatar.jpg" />
+              </div>
+              <button type="submit" class="pixel-button w-full mt-2 flex items-center justify-center gap-2">
+                <i class="fas fa-user-plus"></i><span>Create account</span>
+              </button>
+            </form>
+            <p id="auth-message" class="text-xs text-red-500 mt-3 h-4"></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN APP -->
+  <div id="app-root" class="hidden min-h-screen flex flex-col">
+    <!-- Top nav -->
+    <header class="sticky top-0 z-20 bg-neutral/90 backdrop-blur border-b border-orange-200">
+      <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 bg-primary text-white flex items-center justify-center pixel-border rounded-sm pulse-glow">
+            <i class="fas fa-paw text-lg"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="font-bold text-base">PawTrace</span>
+              <span class="text-[10px] px-2 py-0.5 rounded-full bg-secondary text-dark font-semibold uppercase tracking-wide">
+                Pixel Beta
+              </span>
+            </div>
+            <p class="text-[11px] text-gray-500">Taicang campus · pet social & health map</p>
+          </div>
+        </div>
+        <nav class="hidden md:flex items-center gap-4 text-xs">
+          <button class="top-tab px-3 py-1.5 rounded-full hover:bg-secondary transition-colors" data-tab="map">Map</button>
+          <button class="top-tab px-3 py-1.5 rounded-full hover:bg-secondary transition-colors" data-tab="pets">Pets</button>
+          <button class="top-tab px-3 py-1.5 rounded-full hover:bg-secondary transition-colors" data-tab="chat">Friends</button>
+          <button class="top-tab px-3 py-1.5 rounded-full hover:bg-secondary transition-colors" data-tab="store">Store</button>
+          <button class="top-tab px-3 py-1.5 rounded-full hover:bg-secondary transition-colors" data-tab="profile">Profile</button>
+        </nav>
+        <div class="flex items-center gap-3">
+          <div class="hidden sm:flex flex-col items-end">
+            <span id="current-user-name" class="text-xs font-semibold">User</span>
+            <span class="text-[10px] text-gray-500">Online</span>
+          </div>
+          <img id="current-user-avatar" class="w-8 h-8 rounded-full object-cover pixel-border bg-secondary cursor-pointer hover:scale-110 transition-transform"
+               src="https://design.gemcoder.com/staticResource/echoAiSystemImages/fdca457404bba5bf76bb0fd8378c6d8d.png"
+               alt="User avatar" onclick="openProfileEditModal()" />
+        </div>
+      </div>
+    </header>
+
+    <!-- Content -->
+    <main class="flex-1 max-w-6xl mx-auto w-full px-4 pb-20 pt-6 md:pb-10">
+      <div class="grid md:grid-cols-[1fr] gap-4">
+        <!-- Tab contents -->
+        <section class="space-y-6">
+          <!-- MAP TAB -->
+          <div id="tab-map" class="tab-page scroll-section">
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <h2 class="text-xl font-bold flex items-center gap-2">
+                  <i class="fas fa-map-marked-alt text-primary"></i>
+                  Taicang Pet Map
+                </h2>
+                <p class="text-xs text-gray-600">
+                  Click markers to discover pet-friendly spots on campus while keeping notes like a campus planner.
+                </p>
+              </div>
+            </div>
+            <div class="grid lg:grid-cols-[1.4fr,0.8fr] gap-4 items-start">
+              <div class="space-y-4">
+                <div class="pixel-card bg-white shadow-sm">
+                  <div class="flex items-center gap-2 text-[11px] text-gray-500">
+                    <i class="fas fa-search text-primary"></i>
+                    <span>Search pet friendly locations...</span>
+                  </div>
+                  <input class="pixel-input mt-3 text-xs w-full" placeholder="e.g. best park or café" />
+                </div>
+                <div class="pixel-card bg-white relative overflow-hidden h-[60vh] map-container" id="map-container">
+                  <div class="absolute inset-0 bg-cover bg-center" id="map-background" style="background-image: url('/assets/taicang-map.jpg');"></div>
+                  <div id="map-markers-layer" class="absolute inset-0"></div>
+                  <div id="map-pets-layer" class="absolute inset-0"></div>
+                  <div id="location-card" class="hidden absolute top-4 left-4 max-w-xs pixel-card bg-neutral/90 animate-slideInLeft z-10">
+                    <div class="flex justify-between items-start gap-3 mb-2">
+                      <div>
+                        <h3 id="loc-name" class="font-semibold text-sm"></h3>
+                        <p id="loc-type" class="text-[11px] text-gray-600"></p>
+                      </div>
+                      <button id="loc-close" class="text-gray-500 hover:text-dark text-xs">
+                        <i class="fas fa-times"></i>
+                      </button>
+                    </div>
+                    <p id="loc-desc" class="text-xs text-gray-700 mb-2"></p>
+                    <p id="loc-rating" class="text-[11px] text-amber-600 mb-2"></p>
+                    <div id="loc-tags" class="flex flex-wrap gap-1 text-[10px] text-dark mb-2"></div>
+                    <div id="loc-pets" class="flex flex-wrap gap-1 text-[11px] mb-2"></div>
+                    <div class="space-y-1 text-[11px] text-gray-700 mb-2">
+                      <p class="flex items-center gap-1">
+                        <i class="fas fa-clock text-primary"></i>
+                        <span id="loc-hours"></span>
+                      </p>
+                      <p class="flex items-center gap-1">
+                        <i class="fas fa-phone text-primary"></i>
+                        <span id="loc-phone"></span>
+                      </p>
+                      <p class="flex items-center gap-1">
+                        <i class="fas fa-map-marker-alt text-primary"></i>
+                        <span id="loc-address"></span>
+                      </p>
+                    </div>
+                    <p id="loc-status" class="text-[10px] text-gray-600 italic mb-2"></p>
+                    <button id="loc-link" class="pixel-button w-full text-[11px] mt-1 opacity-40" type="button" disabled>
+                      <i class="fas fa-directions mr-1"></i>Visit this spot
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div class="space-y-4">
+                <div class="pixel-card bg-white space-y-2">
+                  <h3 class="font-semibold text-sm">Pet Reminders</h3>
+                  <div class="flex items-center gap-2 text-[11px]">
+                    <span>🗓️</span>
+                    Xiao Hei needs vaccination
+                  </div>
+                  <div class="flex items-center gap-2 text-[11px]">
+                    <span>🎂</span>
+                    Xiao Bai's birthday in 3 days
+                  </div>
+                </div>
+                <div class="pixel-card bg-white space-y-3" id="sticky-note-container">
+                  <div class="flex items-center justify-between">
+                    <h3 class="font-semibold text-sm flex items-center gap-2">
+                      <i class="fas fa-sticky-note text-primary"></i>Sticky Notes
+                    </h3>
+                    <button id="clear-sticky-notes" class="text-[10px] text-primary underline" type="button">
+                      Clear all
+                    </button>
+                  </div>
+                  <form id="sticky-note-form" class="space-y-2">
+                    <textarea id="sticky-note-input" class="pixel-input text-xs h-16 resize-none" placeholder="Write a quick map idea..."></textarea>
+                    <button type="submit" class="pixel-button text-[11px] w-full flex items-center justify-center gap-2">
+                      <i class="fas fa-plus"></i>Add note
+                    </button>
+                  </form>
+                  <div>
+                    <p class="text-[10px] text-gray-500 mb-1">Notes</p>
+                    <div id="sticky-note-list" class="space-y-2 text-[11px] text-gray-700"></div>
+                    <p id="sticky-note-empty" class="text-[11px] text-gray-400 italic">No notes yet.</p>
+                  </div>
+                </div>
+                <div class="pixel-card bg-white space-y-2">
+                  <div class="flex items-center justify-between">
+                    <h3 class="font-semibold text-sm flex items-center gap-2">
+                      <i class="fas fa-store text-primary"></i>Pet-friendly Spots
+                    </h3>
+                    <span id="location-count" class="text-[10px] text-gray-500"></span>
+                  </div>
+                  <div id="location-list" class="space-y-2 text-[11px] text-gray-700"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- PETS TAB -->
+          <div id="tab-pets" class="tab-page hidden scroll-section">
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <h2 class="text-xl font-bold flex items-center gap-2">
+                  <i class="fas fa-paw text-primary"></i>
+                  My Pets
+                </h2>
+                <p class="text-xs text-gray-600">Manage all your pets in one place.</p>
+              </div>
+              <div class="flex gap-2">
+                <button id="btn-pet-checkin" class="pixel-button flex items-center gap-2 text-xs">
+                  <i class="fas fa-check"></i><span>Check-in</span>
+                </button>
+                <button id="btn-add-pet" class="pixel-button flex items-center gap-2 text-xs">
+                  <i class="fas fa-plus"></i><span>Add Pet</span>
+                </button>
+              </div>
+            </div>
+            <div class="pixel-card bg-white space-y-3">
+              <div class="flex items-center justify-between">
+                <h3 class="font-semibold text-sm flex items-center gap-2">
+                  <i class="fas fa-users text-primary"></i>Community Pets
+                </h3>
+                <span class="text-[10px] text-gray-500">Tap a card to chat with the owner</span>
+              </div>
+              <div id="community-pet-feed" class="grid md:grid-cols-2 xl:grid-cols-3 gap-4"></div>
+            </div>
+            <div class="flex items-center justify-between mt-6 mb-2">
+              <h3 class="font-semibold text-sm flex items-center gap-2">
+                <i class="fas fa-heart text-primary"></i>My Pets
+              </h3>
+              <p class="text-[11px] text-gray-500">Only visible to you</p>
+            </div>
+            <form id="pet-form" class="pixel-card bg-white space-y-3 text-xs animate-slideIn hidden">
+              <div class="flex items-center justify-between gap-2">
+                <div class="flex items-center gap-2">
+                  <i class="fas fa-plus-circle text-primary"></i>
+                  <h3 class="font-semibold text-sm">Register a new pet</h3>
+                </div>
+                <button type="button" id="btn-close-pet-form" class="text-[11px] text-gray-500 hover:text-dark flex items-center gap-1">
+                  <i class="fas fa-times"></i>Close
+                </button>
+              </div>
+              <div class="grid md:grid-cols-[220px,1fr] gap-4">
+                <div class="bg-secondary/40 rounded-sm p-3 flex flex-col items-center">
+                  <div id="pet-image-preview" class="w-24 h-24 rounded-full bg-white pixel-border flex items-center justify-center overflow-hidden mb-2">
+                    <img id="pet-image-preview-img" class="w-full h-full object-cover hidden" alt="Pet preview" />
+                    <span id="pet-image-placeholder" class="text-[11px] text-gray-500">No photo</span>
+                  </div>
+                  <label class="text-[11px] font-semibold mb-1">Pet photo</label>
+                  <input id="new-pet-image" type="file" accept="image/*" class="pixel-input text-xs" />
+                  <p class="text-[10px] text-gray-500 mt-1 text-center">PNG/JPG up to 5MB</p>
+                </div>
+                <div class="space-y-2">
+                  <input id="new-pet-name" class="pixel-input text-xs" placeholder="Pet name" required />
+                  <div class="grid md:grid-cols-2 gap-2">
+                    <input id="new-pet-type" class="pixel-input text-xs" placeholder="Type (Dog, Cat...)" />
+                    <input id="new-pet-breed" class="pixel-input text-xs" placeholder="Breed" />
+                  </div>
+                  <div class="grid md:grid-cols-2 gap-2">
+                    <input id="new-pet-birthday" type="date" class="pixel-input text-xs" placeholder="Birthday" />
+                    <select id="new-pet-gender" class="pixel-input text-xs">
+                      <option value="">Gender</option>
+                      <option value="Male">Male</option>
+                      <option value="Female">Female</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+                  <div class="grid md:grid-cols-2 gap-2">
+                    <input id="new-pet-status" class="pixel-input text-xs" placeholder="Status (playful, shy, etc.)" />
+                    <input id="new-pet-health" class="pixel-input text-xs" placeholder="Health summary" />
+                  </div>
+                  <input id="new-pet-traits" class="pixel-input text-xs" placeholder="Traits (comma separated)" />
+                </div>
+              </div>
+              <div class="flex gap-2">
+                <button type="submit" class="pixel-button flex-1 text-xs flex items-center gap-2">
+                  <i class="fas fa-paw"></i><span>Save pet</span>
+                </button>
+                <button type="reset" class="pixel-button flex-1 text-xs bg-gray-400 hover:bg-gray-500">
+                  Reset
+                </button>
+              </div>
+            </form>
+            <div id="pet-empty" class="text-center text-gray-500 text-xs hidden">
+              It looks empty. Add a pet and their info will appear here.
+            </div>
+            <div id="pet-list" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 text-xs">
+              <!-- Pets rendered by JS -->
+            </div>
+
+          </div>
+
+          <!-- CHAT TAB -->
+          <div id="tab-chat" class="tab-page hidden scroll-section">
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <h2 class="text-xl font-bold flex items-center gap-2">
+                  <i class="fas fa-comments text-primary"></i>
+                  Friends Chat
+                </h2>
+                <p class="text-xs text-gray-600">
+                  Connect with your pet-loving friends in the community.
+                </p>
+              </div>
+            </div>
+            <div class="grid lg:grid-cols-[320px,1fr] gap-4 text-xs h-[60vh]">
+              <!-- Contacts + Pet Info -->
+              <div class="flex flex-col gap-3">
+                <div class="pixel-card bg-white flex flex-col flex-1">
+                  <div class="mb-3">
+                    <input id="chat-search" class="pixel-input text-xs" placeholder="Search friends..." />
+                  </div>
+                  <div id="contact-list" class="space-y-1 overflow-y-auto flex-1">
+                    <!-- Contacts rendered by JS -->
+                  </div>
+                </div>
+                <!-- Pet Info Panel -->
+                <div class="pixel-card bg-white animate-slideInLeft">
+                  <h3 class="text-xs font-semibold mb-2 flex items-center gap-2">
+                    <i class="fas fa-paw text-primary"></i>Friend's Pet Info
+                  </h3>
+                  <div id="chat-pet-info" class="space-y-2 text-xs">
+                    <p id="chat-pet-info-placeholder" class="text-gray-500">Select a friend to see their pet details.</p>
+                    <div id="chat-pet-details" class="hidden space-y-1">
+                      <p id="chat-pet-name" class="font-semibold text-sm"></p>
+                      <p id="chat-pet-summary" class="text-[11px] text-gray-600"></p>
+                      <div class="grid grid-cols-2 gap-1 text-[11px] text-gray-600">
+                        <p><span class="font-semibold">Breed:</span> <span id="chat-pet-breed"></span></p>
+                        <p><span class="font-semibold">Age:</span> <span id="chat-pet-age"></span></p>
+                        <p><span class="font-semibold">Health:</span> <span id="chat-pet-health"></span></p>
+                        <div class="flex flex-wrap items-center gap-1 col-span-2">
+                          <span class="font-semibold">Traits:</span>
+                          <div id="chat-pet-traits" class="flex flex-wrap gap-1"></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- Chat window -->
+                <div class="pixel-card bg-white flex flex-col">
+                  <div class="flex items-center justify-between border-b border-orange-100 pb-2 mb-2">
+                    <div class="flex items-center gap-2 flex-1">
+                      <img id="chat-avatar" class="w-8 h-8 rounded-full object-cover pixel-border bg-secondary"
+                           src="" alt="Chat avatar" />
+                    <div class="flex-1">
+                      <div class="flex items-center gap-1">
+                        <span id="chat-name" class="text-sm font-semibold">Select a friend</span>
+                        <span id="chat-pet-tag" class="text-[10px] px-2 py-0.5 rounded-full bg-secondary text-dark hidden"></span>
+                      </div>
+                      <p id="chat-status" class="text-[10px] text-gray-500">Waiting for a conversation.</p>
+                    </div>
+                  </div>
+                  <div class="flex gap-2 text-gray-500 text-xs">
+                    <button class="hover:text-primary transition-colors"><i class="fas fa-ellipsis-v"></i></button>
+                  </div>
+                  </div>
+                  <div class="flex items-center justify-end text-[10px] text-gray-500 gap-1 mb-1">
+                    <button id="chat-scroll-up" class="px-2 py-1 border border-orange-100 rounded hover:bg-secondary transition-colors" type="button">
+                      <i class="fas fa-chevron-up"></i>
+                    </button>
+                    <button id="chat-scroll-down" class="px-2 py-1 border border-orange-100 rounded hover:bg-secondary transition-colors" type="button">
+                      <i class="fas fa-chevron-down"></i>
+                    </button>
+                  </div>
+                  <div id="chat-messages" class="flex-1 overflow-y-auto space-y-3 pr-1">
+                    <!-- Messages rendered by JS -->
+                  </div>
+                <div class="pt-2 border-t border-orange-100 mt-2">
+                  <div class="flex gap-2 mb-2">
+                    <input id="chat-input" class="pixel-input text-xs" placeholder="Type a message..." />
+                    <button id="chat-send" class="pixel-button flex items-center gap-1 text-[11px] whitespace-nowrap">
+                      <i class="fas fa-paper-plane"></i><span>Send</span>
+                    </button>
+                  </div>
+                  <p id="chat-error" class="text-[10px] text-red-500 h-3"></p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- STORE TAB -->
+          <div id="tab-store" class="tab-page hidden scroll-section">
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <h2 class="text-xl font-bold flex items-center gap-2">
+                  <i class="fas fa-store text-primary"></i>
+                  PawTrace Store
+                </h2>
+                <p class="text-xs text-gray-600">
+                  15% of every purchase supports campus pet rescue programs.
+                </p>
+              </div>
+            </div>
+            <div class="pixel-card bg-white mb-4 text-xs text-gray-700">
+              <p class="font-semibold mb-1">Why buy here?</p>
+              <p>Curated snacks, toys, and gear that our community loves. Every receipt highlights how much you contributed to the PawTrace Fund.</p>
+            </div>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4 text-xs">
+              <div class="pixel-card bg-white space-y-2">
+                <img src="https://design.gemcoder.com/staticResource/echoAiSystemImages/1a98a231cfe964a18cdd5f3502fb32bc.png" alt="Snack bundle" class="w-full h-32 object-cover rounded-sm pixel-border" />
+                <h3 class="font-semibold text-sm">Campus Snack Stack</h3>
+                <p class="text-gray-600">Dehydrated chicken cubes + yak cheese chews.</p>
+                <div class="flex items-center justify-between">
+                  <span class="font-bold text-primary text-base">¥88</span>
+                  <button class="pixel-button text-[11px] px-3 py-1">Add to cart</button>
+                </div>
+              </div>
+              <div class="pixel-card bg-white space-y-2">
+                <img src="https://design.gemcoder.com/staticResource/echoAiSystemImages/df853968f0a77fd6b43aed0bb28513f2.png" alt="Harness" class="w-full h-32 object-cover rounded-sm pixel-border" />
+                <h3 class="font-semibold text-sm">Reflective Walk Harness</h3>
+                <p class="text-gray-600">Night-safe straps sized for corgis to huskies.</p>
+                <div class="flex items-center justify-between">
+                  <span class="font-bold text-primary text-base">¥129</span>
+                  <button class="pixel-button text-[11px] px-3 py-1">Add to cart</button>
+                </div>
+              </div>
+              <div class="pixel-card bg-white space-y-2">
+                <img src="https://design.gemcoder.com/staticResource/echoAiSystemImages/a0c9378b7607e96469333185e4376a53.png" alt="Toy set" class="w-full h-32 object-cover rounded-sm pixel-border" />
+                <h3 class="font-semibold text-sm">Pixel Toy Duo</h3>
+                <p class="text-gray-600">Squeaky latte cup + rope dumpling.</p>
+                <div class="flex items-center justify-between">
+                  <span class="font-bold text-primary text-base">¥69</span>
+                  <button class="pixel-button text-[11px] px-3 py-1">Add to cart</button>
+                </div>
+              </div>
+              <div class="pixel-card bg-white space-y-2">
+                <img src="https://design.gemcoder.com/staticResource/echoAiSystemImages/95033e3192d642014a951f965ea4ed5b.png" alt="Cat kit" class="w-full h-32 object-cover rounded-sm pixel-border" />
+                <h3 class="font-semibold text-sm">Dorm Cat Care Kit</h3>
+                <p class="text-gray-600">Freeze-dried tuna, plush wand, calming spray.</p>
+                <div class="flex items-center justify-between">
+                  <span class="font-bold text-primary text-base">¥99</span>
+                  <button class="pixel-button text-[11px] px-3 py-1">Add to cart</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- PROFILE TAB -->
+          <div id="tab-profile" class="tab-page hidden scroll-section">
+            <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
+              <i class="fas fa-user text-primary"></i>
+              My Profile
+            </h2>
+            <div class="grid md:grid-cols-[1.3fr,1fr] gap-4 text-xs">
+          <div class="pixel-card bg-white flex gap-4">
+            <img id="profile-avatar" class="w-16 h-16 rounded-full object-cover pixel-border bg-secondary"
+                 src="https://design.gemcoder.com/staticResource/echoAiSystemImages/fdca457404bba5bf76bb0fd8378c6d8d.png"
+                 alt="Profile avatar" />
+            <div class="space-y-1 flex-1">
+              <div class="flex items-center gap-2">
+                <span id="profile-name" class="font-semibold text-sm">User</span>
+                <span class="px-2 py-0.5 rounded-full bg-secondary text-[10px] font-semibold">Pet lover</span>
+              </div>
+              <p id="profile-username" class="text-[11px] text-gray-600">@user</p>
+              <p id="profile-bio" class="text-[11px] text-gray-700">
+                Welcome to PawTrace! Share your pet journey here.
+                </p>
+              <p id="profile-campus" class="text-[11px] text-gray-600 mt-1"></p>
+              <p id="profile-contact" class="text-[11px] text-gray-600"></p>
+              <p id="profile-star-sign" class="text-[11px] text-gray-600"></p>
+              <div class="border-t border-orange-100 pt-2 mt-2 space-y-1">
+                <p class="font-semibold text-[11px]">My pet focus</p>
+                <p id="profile-main-pet" class="text-[11px] text-gray-700"></p>
+                <p id="profile-pet-notes" class="text-[11px] text-gray-500"></p>
+              </div>
+              <div class="flex gap-3 text-[11px] mt-2">
+                <div>
+                  <p class="font-semibold">Pets</p>
+                  <p id="profile-pet-count">0</p>
+                </div>
+                <div>
+                  <p class="font-semibold">Friends</p>
+                  <p id="profile-friends-count">0</p>
+                </div>
+                <div>
+                      <p class="font-semibold">Campus</p>
+                      <p>Taicang</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+          <div class="pixel-card bg-white space-y-2">
+            <h3 class="font-semibold text-xs mb-2 flex items-center gap-2">
+              <i class="fas fa-cog text-primary"></i>Settings
+            </h3>
+            <button id="btn-edit-profile" class="pixel-button w-full flex items-center justify-center gap-2 text-[11px]">
+              <i class="fas fa-edit"></i><span>Edit Profile</span>
+            </button>
+            <button id="btn-logout" class="pixel-button w-full flex items-center justify-center gap-2 text-[11px] bg-red-500 hover:bg-red-600">
+              <i class="fas fa-sign-out-alt"></i><span>Log out</span>
+            </button>
+          </div>
+          <div class="pixel-card bg-white space-y-2 text-xs">
+            <h3 class="font-semibold flex items-center gap-2">
+              <i class="fas fa-dog text-primary"></i>Manage My Pets
+            </h3>
+            <p class="text-[11px] text-gray-600">All pets you add appear here. Remove any that are no longer active.</p>
+            <div id="profile-pet-manager" class="space-y-2"></div>
+          </div>
+          <div class="pixel-card bg-white space-y-3">
+            <div class="flex items-center justify-between">
+              <h3 class="font-semibold text-xs flex items-center gap-2">
+                <i class="fas fa-moon text-primary"></i>Pet Behavior Insight
+              </h3>
+              <button id="btn-refresh-pet-insight" class="text-[10px] text-primary underline" type="button">
+                Ask AI
+              </button>
+            </div>
+            <p id="pet-insight-text" class="text-[11px] text-gray-700">
+              Save your profile to generate personalized behavior tips.
+            </p>
+          </div>
+        </div>
+          </div>
+        </section>
+      </div>
+    </main>
+
+  </div>
+
+  <!-- PROFILE EDIT MODAL -->
+  <div id="profile-edit-modal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 animate-fadeIn">
+    <div class="pixel-card bg-white max-w-md w-full">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-lg font-bold">Edit Profile</h2>
+        <button onclick="closeProfileEditModal()" class="text-gray-500 hover:text-dark">
+          <i class="fas fa-times text-xl"></i>
+        </button>
+      </div>
+      <div class="space-y-3 text-xs max-h-96 overflow-y-auto">
+        <div class="space-y-2">
+          <label class="block font-semibold mb-1">Avatar</label>
+          <div class="flex items-center gap-3">
+            <div class="w-16 h-16 rounded-full pixel-border bg-secondary overflow-hidden flex items-center justify-center">
+              <img id="profile-avatar-preview-img" src="" alt="Avatar preview" class="w-full h-full object-cover" />
+            </div>
+            <div class="flex-1 space-y-1 text-[11px]">
+              <input id="edit-avatar-file" type="file" accept="image/*" class="pixel-input text-xs" />
+              <p class="text-gray-500">Choose an image from your device (PNG/JPG, up to 5MB).</p>
+            </div>
+          </div>
+        </div>
+        <div>
+          <label class="block font-semibold mb-1">Display Name</label>
+          <input id="edit-display-name" type="text" class="pixel-input" />
+        </div>
+        <div>
+          <label class="block font-semibold mb-1">Bio</label>
+          <textarea id="edit-bio" class="pixel-input h-16 resize-none" placeholder="Tell us about yourself and your pets..."></textarea>
+        </div>
+        <div>
+          <label class="block font-semibold mb-1">Campus</label>
+          <input id="edit-campus" type="text" class="pixel-input" placeholder="e.g., Taicang" />
+        </div>
+        <div>
+          <label class="block font-semibold mb-1">Contact Info (WeChat/Email)</label>
+          <input id="edit-contact" type="text" class="pixel-input" placeholder="Your contact info" />
+        </div>
+        <div>
+          <label class="block font-semibold mb-1">Star Sign</label>
+          <input id="edit-star-sign" type="text" class="pixel-input" placeholder="e.g., Libra" />
+        </div>
+        <div class="grid md:grid-cols-2 gap-2">
+          <div>
+            <label class="block font-semibold mb-1">Main Pet Name</label>
+            <input id="edit-main-pet-name" type="text" class="pixel-input" placeholder="Mocha" />
+          </div>
+          <div>
+            <label class="block font-semibold mb-1">Main Pet Type/Breed</label>
+            <input id="edit-main-pet-type" type="text" class="pixel-input" placeholder="Corgi" />
+          </div>
+        </div>
+        <div>
+          <label class="block font-semibold mb-1">Main Pet Birthday</label>
+          <input id="edit-main-pet-birth" type="date" class="pixel-input" />
+        </div>
+        <div>
+          <label class="block font-semibold mb-1">Notes about your pet</label>
+          <textarea id="edit-main-pet-notes" class="pixel-input h-16 resize-none" placeholder="Favorite toys, routines, etc."></textarea>
+        </div>
+        <div class="flex gap-2 pt-2">
+          <button id="btn-save-profile" class="pixel-button flex-1 text-xs">
+            <i class="fas fa-save"></i> Save
+          </button>
+          <button onclick="closeProfileEditModal()" class="pixel-button flex-1 text-xs bg-gray-400 hover:bg-gray-500">
+            <i class="fas fa-times"></i> Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- IMAGE SHARE MODAL -->
+  <div id="share-image-modal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 animate-fadeIn">
+    <div class="pixel-card bg-white max-w-md w-full">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-lg font-bold">Share Image with Friend</h2>
+        <button onclick="closeShareImageModal()" class="text-gray-500 hover:text-dark">
+          <i class="fas fa-times text-xl"></i>
+        </button>
+      </div>
+      <div class="space-y-3 text-xs max-h-96 overflow-y-auto">
+        <div>
+          <label class="block font-semibold mb-1">Image URL</label>
+          <input id="share-image-url" type="url" class="pixel-input" placeholder="https://example.com/pet.jpg" />
+        </div>
+        <div>
+          <label class="block font-semibold mb-1">Caption</label>
+          <textarea id="share-image-caption" class="pixel-input h-12 resize-none" placeholder="Add a caption..."></textarea>
+        </div>
+        <div id="share-image-preview" class="hidden mt-2">
+          <img id="share-preview-img" src="" alt="Preview" class="w-full rounded-sm border-2 border-dark" />
+        </div>
+        <div class="flex gap-2 pt-2">
+          <button id="btn-send-image" class="pixel-button flex-1 text-xs">
+            <i class="fas fa-paper-plane"></i> Send
+          </button>
+          <button onclick="closeShareImageModal()" class="pixel-button flex-1 text-xs bg-gray-400 hover:bg-gray-500">
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --- Modal Functions ---
+    function openProfileEditModal() {
+      const currentUser = getCurrentUser();
+      if (!currentUser) return;
+      pendingAvatarData = null;
+      if (editAvatarFileInput) editAvatarFileInput.value = '';
+      if (profileAvatarPreviewImg) {
+        profileAvatarPreviewImg.src = currentUser.avatar || DEFAULT_PET_AVATAR;
+      }
+      document.getElementById('edit-display-name').value = currentUser.displayName || '';
+      document.getElementById('edit-bio').value = currentUser.bio || '';
+      document.getElementById('edit-campus').value = currentUser.campus || 'Taicang';
+      document.getElementById('edit-contact').value = currentUser.contact || '';
+      document.getElementById('edit-star-sign').value = currentUser.starSign || '';
+      document.getElementById('edit-main-pet-name').value = currentUser.mainPetName || '';
+      document.getElementById('edit-main-pet-type').value = currentUser.mainPetType || '';
+      document.getElementById('edit-main-pet-birth').value = currentUser.mainPetBirth || '';
+      document.getElementById('edit-main-pet-notes').value = currentUser.mainPetNotes || '';
+      document.getElementById('profile-edit-modal').classList.remove('hidden');
+    }
+
+    function initStickyNotes() {
+      const form = document.getElementById('sticky-note-form');
+      const input = document.getElementById('sticky-note-input');
+      const listEl = document.getElementById('sticky-note-list');
+      const clearBtn = document.getElementById('clear-sticky-notes');
+      const emptyEl = document.getElementById('sticky-note-empty');
+      const container = document.getElementById('sticky-note-container');
+      if (!form || !input || !listEl) return;
+      let notes = [];
+
+      async function fetchNotes() {
+        try {
+          const res = await fetch(STICKY_NOTES_API);
+          const data = await res.json();
+          notes = Array.isArray(data.notes) ? data.notes : [];
+        } catch (err) {
+          console.error('Failed to load sticky notes', err);
+          notes = notes || [];
+        }
+        render();
+      }
+
+      function render() {
+        listEl.innerHTML = '';
+        if (!notes.length) {
+          emptyEl?.classList.remove('hidden');
+          return;
+        }
+        emptyEl?.classList.add('hidden');
+        notes
+          .slice()
+          .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))
+          .forEach(note => {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'flex items-start justify-between gap-2 bg-secondary/40 px-2 py-2 rounded-sm';
+            wrapper.innerHTML = `
+              <p class="flex-1 text-[11px] text-gray-700 break-words">${note.text}</p>
+              <button class="text-[10px] text-red-500 hover:underline" data-note-id="${note.id}" type="button">Delete</button>
+            `;
+            listEl.appendChild(wrapper);
+          });
+      }
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const text = input.value.trim();
+        if (!text) return;
+        try {
+          const res = await fetch(STICKY_NOTES_API, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text })
+          });
+          if (!res.ok) throw new Error('Failed to save note');
+          input.value = '';
+          await fetchNotes();
+        } catch (err) {
+          console.error('Sticky note save error', err);
+          alert('Unable to save note right now.');
+        }
+      });
+
+      listEl.addEventListener('click', async (event) => {
+        const btn = event.target.closest('[data-note-id]');
+        if (!btn) return;
+        const id = btn.getAttribute('data-note-id');
+        if (!id) return;
+        try {
+          const res = await fetch(`${STICKY_NOTES_API}/${id}`, { method: 'DELETE' });
+          if (!res.ok) throw new Error('Failed to delete note');
+          await fetchNotes();
+        } catch (err) {
+          console.error('Sticky note delete error', err);
+        }
+      });
+
+      clearBtn?.addEventListener('click', async () => {
+        if (!notes.length) return;
+        if (!confirm('Clear all sticky notes?')) return;
+        try {
+          const res = await fetch(STICKY_NOTES_API, { method: 'DELETE' });
+          if (!res.ok) throw new Error('Failed to clear notes');
+          await fetchNotes();
+        } catch (err) {
+          console.error('Sticky note clear error', err);
+        }
+      });
+
+      fetchNotes();
+    }
+
+    function closeProfileEditModal() {
+      document.getElementById('profile-edit-modal').classList.add('hidden');
+    }
+
+    function closeShareImageModal() {
+      const modal = document.getElementById('share-image-modal');
+      const preview = document.getElementById('share-image-preview');
+      const previewImg = document.getElementById('share-preview-img');
+      const urlInput = document.getElementById('share-image-url');
+      const captionInput = document.getElementById('share-image-caption');
+      if (modal) modal.classList.add('hidden');
+      if (preview) preview.classList.add('hidden');
+      if (previewImg) previewImg.src = '';
+      if (urlInput) urlInput.value = '';
+      if (captionInput) captionInput.value = '';
+    }
+
+    // --- Simple scroll reveal ---
+    function handleScrollReveal() {
+      const els = document.querySelectorAll('.scroll-section');
+      const trigger = window.innerHeight * 0.9;
+      els.forEach(el => {
+        const rect = el.getBoundingClientRect();
+        if (rect.top < trigger) {
+          el.classList.add('visible');
+        }
+      });
+    }
+    document.addEventListener('scroll', handleScrollReveal);
+    window.addEventListener('load', handleScrollReveal);
+
+    // --- Auth & local storage ---
+    const LS_USERS_KEY = 'pawtrace_users';
+    const LS_CURRENT_USER_KEY = 'pawtrace_current_user';
+
+    function loadUsers() {
+      try {
+        return JSON.parse(localStorage.getItem(LS_USERS_KEY)) || [];
+      } catch { return []; }
+    }
+    function saveUsers(users) {
+      localStorage.setItem(LS_USERS_KEY, JSON.stringify(users));
+    }
+    function setCurrentUser(user) {
+      if (user) localStorage.setItem(LS_CURRENT_USER_KEY, JSON.stringify(user));
+      else localStorage.removeItem(LS_CURRENT_USER_KEY);
+    }
+    function getCurrentUser() {
+      try {
+        return JSON.parse(localStorage.getItem(LS_CURRENT_USER_KEY));
+      } catch { return null; }
+    }
+
+    function seedDemoUser() {
+      let users = loadUsers();
+      if (!users.find(u => u.username === 'demo')) {
+        users.push({
+          username: 'demo',
+          displayName: 'Pet Lover',
+          password: 'demo123',
+          avatar: 'https://design.gemcoder.com/staticResource/echoAiSystemImages/fdca457404bba5bf76bb0fd8378c6d8d.png',
+          bio: 'Welcome to PawTrace!',
+          campus: 'Taicang',
+          contact: 'WeChat',
+          starSign: 'Libra',
+          mainPetName: 'Mocha',
+          mainPetType: 'Corgi',
+          mainPetBirth: '2021-05-15',
+          mainPetNotes: 'Loves fetch and sunset walks.',
+          petInsight: ''
+        });
+        saveUsers(users);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      seedDemoUser();
+
+      const loginScreen = document.getElementById('login-screen');
+      const appRoot = document.getElementById('app-root');
+      const authMsg = document.getElementById('auth-message');
+
+      const tabLogin = document.getElementById('tab-login');
+      const tabRegister = document.getElementById('tab-register');
+      const loginForm = document.getElementById('login-form');
+      const registerForm = document.getElementById('register-form');
+
+      const loginUsername = document.getElementById('login-username');
+      const loginPassword = document.getElementById('login-password');
+      const regUsername = document.getElementById('reg-username');
+      const regDisplayName = document.getElementById('reg-displayname');
+      const regPassword = document.getElementById('reg-password');
+      const regAvatar = document.getElementById('reg-avatar');
+
+      const currentUserNameEl = document.getElementById('current-user-name');
+      const currentUserAvatarEl = document.getElementById('current-user-avatar');
+      const profileAvatarEl = document.getElementById('profile-avatar');
+      const profileNameEl = document.getElementById('profile-name');
+      const profileUsernameEl = document.getElementById('profile-username');
+      const profileBioEl = document.getElementById('profile-bio');
+      const profileCampusEl = document.getElementById('profile-campus');
+      const profileContactEl = document.getElementById('profile-contact');
+      const profileStarSignEl = document.getElementById('profile-star-sign');
+      const profileMainPetEl = document.getElementById('profile-main-pet');
+      const profilePetNotesEl = document.getElementById('profile-pet-notes');
+      const petInsightText = document.getElementById('pet-insight-text');
+      const btnRefreshPetInsight = document.getElementById('btn-refresh-pet-insight');
+      const btnEditProfile = document.getElementById('btn-edit-profile');
+      const btnSaveProfile = document.getElementById('btn-save-profile');
+      const editAvatarFileInput = document.getElementById('edit-avatar-file');
+      const profileAvatarPreviewImg = document.getElementById('profile-avatar-preview-img');
+      const editStarSign = document.getElementById('edit-star-sign');
+      const editMainPetName = document.getElementById('edit-main-pet-name');
+      const editMainPetType = document.getElementById('edit-main-pet-type');
+      const editMainPetBirth = document.getElementById('edit-main-pet-birth');
+      const editMainPetNotes = document.getElementById('edit-main-pet-notes');
+      let pendingAvatarData = null;
+
+      function updateProfileDetails(user) {
+        if (!user) return;
+        if (profileStarSignEl) profileStarSignEl.textContent = user.starSign ? `Star sign: ${user.starSign}` : 'Star sign: Not set';
+        if (profileMainPetEl) profileMainPetEl.textContent = user.mainPetName ? `${user.mainPetName} · ${user.mainPetType || 'Pet'}` : 'Add your main pet to personalize insights.';
+        if (profilePetNotesEl) profilePetNotesEl.textContent = user.mainPetNotes || 'Share habits and quirks to give the AI more context.';
+        if (petInsightText) {
+          petInsightText.textContent = user.petInsight || 'Tap "Ask AI" to get a behavior prediction.';
+        }
+      }
+
+      async function fetchPetInsight(force = false) {
+        const user = getCurrentUser();
+        if (!user || !petInsightText) return;
+        if (!user.starSign && !user.mainPetName) {
+          petInsightText.textContent = 'Add your star sign or main pet info to unlock insights.';
+          return;
+        }
+        if (!force && user.petInsight) {
+          petInsightText.textContent = user.petInsight;
+          return;
+        }
+        petInsightText.textContent = 'Asking AI for a fresh insight...';
+        try {
+          const response = await fetch('/api/pet-prediction', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              profile: {
+                displayName: user.displayName,
+                starSign: user.starSign,
+                petName: user.mainPetName,
+                petType: user.mainPetType,
+                petBirthday: user.mainPetBirth,
+                petNotes: user.mainPetNotes
+              }
+            })
+          });
+          if (!response.ok) {
+            throw new Error('Prediction request failed');
+          }
+          const data = await response.json();
+          const prediction = data.prediction || data.error || 'Unable to predict right now.';
+          petInsightText.textContent = prediction;
+          user.petInsight = prediction;
+          setCurrentUser(user);
+        } catch (err) {
+          console.warn('Pet insight error', err);
+          petInsightText.textContent = user.petInsight || 'Unable to reach AI at the moment.';
+        }
+      }
+
+      btnRefreshPetInsight?.addEventListener('click', () => {
+        fetchPetInsight(true);
+      });
+      editAvatarFileInput?.addEventListener('change', async () => {
+        const file = editAvatarFileInput.files && editAvatarFileInput.files[0];
+        if (!file) {
+          pendingAvatarData = null;
+          if (profileAvatarPreviewImg) {
+            profileAvatarPreviewImg.src = (getCurrentUser()?.avatar) || DEFAULT_PET_AVATAR;
+          }
+          return;
+        }
+        if (file.size > 5 * 1024 * 1024) {
+          alert('Please choose an avatar under 5MB.');
+          editAvatarFileInput.value = '';
+          return;
+        }
+        try {
+          const data = await fileToDataURL(file);
+          pendingAvatarData = data;
+          if (profileAvatarPreviewImg) profileAvatarPreviewImg.src = data;
+        } catch (err) {
+          console.warn('Avatar load failed', err);
+          pendingAvatarData = null;
+        }
+      });
+
+      function showApp(user) {
+        loginScreen.classList.add('hidden');
+        appRoot.classList.remove('hidden');
+        const displayName = user.displayName || user.username;
+        const avatar = user.avatar || 'https://design.gemcoder.com/staticResource/echoAiSystemImages/fdca457404bba5bf76bb0fd8378c6d8d.png';
+        currentUserNameEl.textContent = displayName;
+        currentUserAvatarEl.src = avatar;
+        profileAvatarEl.src = avatar;
+        profileNameEl.textContent = displayName;
+        profileUsernameEl.textContent = '@' + user.username;
+        profileBioEl.textContent = user.bio || 'Welcome to PawTrace!';
+        profileCampusEl.textContent = user.campus || 'Taicang';
+        profileContactEl.textContent = user.contact || 'Contact: N/A';
+        updateProfileDetails(user);
+        document.body.classList.remove('overflow-hidden');
+        initTabs();
+        initMap();
+        initStickyNotes();
+        initPets();
+        initChat();
+        handleScrollReveal();
+        fetchPetInsight();
+      }
+
+      function switchAuthTab(mode) {
+        if (mode === 'login') {
+          tabLogin.classList.add('bg-primary','text-white');
+          tabRegister.classList.remove('bg-primary','text-white');
+          loginForm.classList.remove('hidden');
+          registerForm.classList.add('hidden');
+        } else {
+          tabRegister.classList.add('bg-primary','text-white');
+          tabLogin.classList.remove('bg-primary','text-white');
+          loginForm.classList.add('hidden');
+          registerForm.classList.remove('hidden');
+        }
+        authMsg.textContent = '';
+      }
+
+      tabLogin.addEventListener('click', () => switchAuthTab('login'));
+      tabRegister.addEventListener('click', () => switchAuthTab('register'));
+
+      loginForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const users = loadUsers();
+        const u = users.find(x => x.username === loginUsername.value.trim());
+        if (!u || u.password !== loginPassword.value) {
+          authMsg.textContent = 'Incorrect username or password.';
+          return;
+        }
+        authMsg.textContent = '';
+        setCurrentUser(u);
+        showApp(u);
+      });
+
+      registerForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        let users = loadUsers();
+        const username = regUsername.value.trim();
+        if (!username) {
+          authMsg.textContent = 'Username is required.';
+          return;
+        }
+        if (users.find(x => x.username === username)) {
+          authMsg.textContent = 'This username is already taken.';
+          return;
+        }
+        if (regPassword.value.length < 6) {
+          authMsg.textContent = 'Password should be at least 6 characters.';
+          return;
+        }
+        const newUser = {
+          username,
+          displayName: regDisplayName.value.trim() || username,
+          password: regPassword.value,
+          avatar: regAvatar.value.trim() || 'https://design.gemcoder.com/staticResource/echoAiSystemImages/fdca457404bba5bf76bb0fd8378c6d8d.png',
+          bio: '',
+          campus: 'Taicang',
+          contact: '',
+          starSign: '',
+          mainPetName: '',
+          mainPetType: '',
+          mainPetBirth: '',
+          mainPetNotes: '',
+          petInsight: ''
+        };
+        users.push(newUser);
+        saveUsers(users);
+        setCurrentUser(newUser);
+        authMsg.textContent = '';
+        showApp(newUser);
+      });
+
+      btnEditProfile.addEventListener('click', openProfileEditModal);
+      btnSaveProfile.addEventListener('click', () => {
+        const currentUser = getCurrentUser();
+        if (!currentUser) return;
+        if (pendingAvatarData) {
+          currentUser.avatar = pendingAvatarData;
+        }
+        currentUser.displayName = document.getElementById('edit-display-name').value || currentUser.displayName;
+        currentUser.bio = document.getElementById('edit-bio').value;
+        currentUser.campus = document.getElementById('edit-campus').value;
+        currentUser.contact = document.getElementById('edit-contact').value;
+        currentUser.starSign = editStarSign.value;
+        currentUser.mainPetName = editMainPetName.value;
+        currentUser.mainPetType = editMainPetType.value;
+        currentUser.mainPetBirth = editMainPetBirth.value;
+        currentUser.mainPetNotes = editMainPetNotes.value;
+        currentUser.petInsight = '';
+        setCurrentUser(currentUser);
+        let users = loadUsers();
+        users = users.map(u => u.username === currentUser.username ? currentUser : u);
+        saveUsers(users);
+        showApp(currentUser);
+        closeProfileEditModal();
+      });
+
+      const existing = getCurrentUser();
+      if (existing) {
+        showApp(existing);
+      } else {
+        document.body.classList.add('overflow-hidden');
+      }
+
+      const btnLogout = document.getElementById('btn-logout');
+      if (btnLogout) {
+        btnLogout.addEventListener('click', () => {
+          setCurrentUser(null);
+          window.location.reload();
+        });
+      }
+    });
+
+    // --- Tabs & navigation ---
+    function initTabs() {
+      const tabPages = {
+        map: document.getElementById('tab-map'),
+        pets: document.getElementById('tab-pets'),
+        chat: document.getElementById('tab-chat'),
+        store: document.getElementById('tab-store'),
+        profile: document.getElementById('tab-profile'),
+      };
+      const topTabs = document.querySelectorAll('.top-tab');
+
+      function activateTab(name) {
+        Object.keys(tabPages).forEach(key => {
+          tabPages[key].classList.toggle('hidden', key !== name);
+        });
+        topTabs.forEach(btn => {
+          btn.classList.toggle('text-primary', btn.getAttribute('data-tab') === name);
+        });
+        if (tabPages[name]) {
+          tabPages[name].classList.add('visible');
+        }
+      }
+
+      topTabs.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const name = btn.getAttribute('data-tab');
+          activateTab(name);
+        });
+      });
+      activateTab('map');
+    }
+
+    // --- Map logic ---
+    function initMap() {
+      const card = document.getElementById('location-card');
+      const closeBtn = document.getElementById('loc-close');
+      const linkBtn = document.getElementById('loc-link');
+      const nameEl = document.getElementById('loc-name');
+      const typeEl = document.getElementById('loc-type');
+      const descEl = document.getElementById('loc-desc');
+      const ratingEl = document.getElementById('loc-rating');
+      const petsEl = document.getElementById('loc-pets');
+      const tagsEl = document.getElementById('loc-tags');
+      const hoursEl = document.getElementById('loc-hours');
+      const phoneEl = document.getElementById('loc-phone');
+      const addressEl = document.getElementById('loc-address');
+      const statusEl = document.getElementById('loc-status');
+      const mapMarkersLayer = document.getElementById('map-markers-layer');
+      const mapPetsLayer = document.getElementById('map-pets-layer');
+      const mapContainerEl = document.getElementById('map-container');
+      const locationListEl = document.getElementById('location-list');
+      const locationCountEl = document.getElementById('location-count');
+      if (!mapMarkersLayer) return;
+
+      const locations = {
+        1: {
+          id: '1',
+          name: 'Bright Paws Bookstore',
+          type: 'Pet-friendly bookstore & reading nook',
+          desc: 'Shelves of indie titles with floor cushions where leashed pets can nap beside you.',
+          rating: '4.8 · quiet corners, oat milk bar inside',
+          tags: ['Bookstore', 'Free Wi-Fi', 'Treat jars'],
+          pets: ['Mocha · Corgi', 'Pixel · Border Collie'],
+          hours: 'Mon-Sun · 9:00-20:30',
+          phone: '400-123-7788',
+          address: 'South Learning Street · B1',
+          status: 'Best time: afternoons before 5pm for calm vibes.',
+          link: 'https://taicang.edu/campus/pet-bookstore',
+          category: 'shop',
+          position: { top: '30%', left: '28%' }
+        },
+        2: {
+          id: '2',
+          name: 'Whisker Bean Café',
+          type: 'Latte bar with pet patio',
+          desc: 'Open-air patio with misting fans, water bowls, and a “pup-kin latte” menu.',
+          rating: '4.6 · sunset crowd favorite',
+          tags: ['Café', 'Outdoor Seating', 'Pet menu'],
+          pets: ['Luna · Shiba', 'Momo · Poodle'],
+          hours: 'Daily · 8:00-22:00',
+          phone: '400-321-9900',
+          address: 'Innovation Avenue · Ground floor',
+          status: 'Live acoustic sets on Friday nights.',
+          link: 'https://taicang.edu/campus/whisker-bean',
+          category: 'cafe',
+          position: { top: '48%', left: '61%' }
+        },
+        3: {
+          id: '3',
+          name: 'Tailwind Study Loft',
+          type: 'Pet lounge & study bar',
+          desc: 'Quiet mezzanine with charging ports, beanbags, and a low-volume humidifier for pets.',
+          rating: '4.5 · best for late-night study',
+          tags: ['Study bar', 'Charging ports', 'Pet lounge'],
+          pets: ['Kiko · Husky'],
+          hours: 'Mon-Fri · 12:00-24:00',
+          phone: '0512-8899-6677',
+          address: 'North Dorm Path · L3 mezzanine',
+          status: 'Check-in required after 21:00.',
+          link: 'https://taicang.edu/campus/tailwind-loft',
+          category: 'bookstore',
+          position: { top: '65%', left: '42%' }
+        },
+        4: {
+          id: '4',
+          name: 'Library Plaza Pop-up',
+          type: 'Weekend pet market',
+          desc: 'Vendors rotate every weekend with handmade leashes, organic snacks, and zines.',
+          rating: '4.7 · busy yet friendly',
+          tags: ['Weekend market', 'Workshops', 'Photo booth'],
+          pets: ['Campus club pets'],
+          hours: 'Sat-Sun · 10:00-18:00',
+          phone: 'Hotline: 0512-7788-9000',
+          address: 'Library Plaza center',
+          status: 'Workshops start 14:00 · register online.',
+          link: 'https://taicang.edu/campus/library-plaza',
+          category: 'market',
+          position: { top: '24%', left: '76%' }
+        },
+        5: {
+          id: '5',
+          name: 'Maple Bark Espresso',
+          type: 'Grab-and-go coffee window',
+          desc: 'Quick espresso bar beside the shuttle stop with hooks for leashes and free treats.',
+          rating: '4.4 · rush-hour lifesaver',
+          tags: ['Espresso', 'Grab & go', 'Treat station'],
+          pets: ['Sunny · Golden Retriever'],
+          hours: 'Weekdays · 7:00-19:00',
+          phone: '400-900-5522',
+          address: 'Shuttle Hub West exit',
+          status: 'Limited seating; pickup vibe.',
+          link: 'https://taicang.edu/campus/maple-bark',
+          category: 'cafe',
+          position: { top: '58%', left: '82%' }
+        }
+      };
+
+      const roamingPets = [
+        { id: 'petMarker-1', name: 'Mocha', avatar: 'https://design.gemcoder.com/staticResource/echoAiSystemImages/a0c9378b7607e96469333185e4376a53.png', top: '36%', left: '35%' },
+        { id: 'petMarker-2', name: 'Pixel', avatar: 'https://design.gemcoder.com/staticResource/echoAiSystemImages/1a98a231cfe964a18cdd5f3502fb32bc.png', top: '50%', left: '55%' },
+        { id: 'petMarker-3', name: 'Mochi', avatar: 'https://design.gemcoder.com/staticResource/echoAiSystemImages/df853968f0a77fd6b43aed0bb28513f2.png', top: '28%', left: '60%' }
+      ];
+
+      function renderMarkers() {
+        mapMarkersLayer.innerHTML = '';
+        Object.values(locations).forEach(loc => {
+          const emoji = loc.category === 'cafe' ? '☕️' : loc.category === 'bookstore' ? '📚' : '🛍️';
+          const marker = document.createElement('button');
+          marker.type = 'button';
+          marker.className = 'map-marker pointer-events-auto';
+          marker.style.top = loc.position.top;
+          marker.style.left = loc.position.left;
+          marker.textContent = emoji;
+          marker.setAttribute('aria-label', loc.name);
+          marker.addEventListener('click', (event) => {
+            event.stopPropagation();
+            openLoc(loc.id);
+          });
+          mapMarkersLayer.appendChild(marker);
+        });
+      }
+
+      function renderMapPets() {
+        if (!mapPetsLayer) return;
+        mapPetsLayer.innerHTML = '';
+        roamingPets.forEach(pet => {
+          const wrap = document.createElement('div');
+          wrap.className = 'map-pet-icon';
+          wrap.style.top = pet.top;
+          wrap.style.left = pet.left;
+          wrap.innerHTML = `
+            <div class="w-10 h-10 rounded-full pixel-border overflow-hidden bg-white shadow">
+              <img src="${pet.avatar}" alt="${pet.name}" class="w-full h-full object-cover" />
+            </div>
+            <span class="bg-primary text-white px-2 py-0.5 rounded-full text-[10px]">${pet.name}</span>
+          `;
+          mapPetsLayer.appendChild(wrap);
+        });
+      }
+
+      renderMarkers();
+      renderMapPets();
+
+      function openLoc(id) {
+        const loc = locations[id];
+        if (!loc || !card) return;
+        nameEl.textContent = loc.name;
+        typeEl.textContent = loc.type;
+        descEl.textContent = loc.desc;
+        ratingEl.textContent = loc.rating;
+        if (tagsEl) {
+          tagsEl.innerHTML = (loc.tags || []).length
+            ? loc.tags.map(tag => `<span class="px-2 py-0.5 rounded-full bg-secondary text-dark">${tag}</span>`).join('')
+            : '<span class="text-gray-400">No tags yet</span>';
+        }
+        petsEl.innerHTML = '';
+        (loc.pets || []).forEach(p => {
+          const span = document.createElement('span');
+          span.className = 'px-2 py-0.5 rounded-full bg-secondary text-dark';
+          span.textContent = p;
+          petsEl.appendChild(span);
+        });
+        if (hoursEl) hoursEl.textContent = loc.hours || 'Hours updating soon';
+        if (phoneEl) phoneEl.textContent = loc.phone || 'Phone unavailable';
+        if (addressEl) addressEl.textContent = loc.address || 'No address info yet';
+        if (statusEl) {
+          statusEl.textContent = loc.status || '';
+          statusEl.classList.toggle('hidden', !loc.status);
+        }
+        if (linkBtn) {
+          linkBtn.disabled = !loc.link;
+          if (loc.link) {
+            linkBtn.dataset.href = loc.link;
+            linkBtn.classList.remove('opacity-40');
+          } else {
+            linkBtn.dataset.href = '';
+            linkBtn.classList.add('opacity-40');
+          }
+        }
+        card.classList.remove('hidden');
+      }
+
+      if (leafletMap) {
+        leafletMap.on('click', () => card?.classList.add('hidden'));
+        const createIcon = (emoji) =>
+          L.divIcon({
+            className: '',
+            html: `<div class="map-marker">${emoji || '🐾'}</div>`,
+            iconSize: [32, 32],
+            iconAnchor: [16, 16]
+          });
+        Object.values(locations).forEach(loc => {
+          const emoji = loc.category === 'cafe' ? '☕️' : loc.category === 'bookstore' ? '📚' : '🛍️';
+          const marker = L.marker(loc.coords, { icon: createIcon(emoji) }).addTo(leafletMap);
+          marker.on('click', () => {
+            openLoc(loc.id);
+            leafletMap.panTo(loc.coords);
+          });
+        });
+      }
+
+      function renderLocationList() {
+        if (!locationListEl) return;
+        const items = Object.values(locations);
+        if (locationCountEl) locationCountEl.textContent = `${items.length} spots`;
+        locationListEl.innerHTML = '';
+        items.forEach(loc => {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'w-full text-left border border-orange-100 rounded-sm px-3 py-2 hover:bg-secondary/60 transition-colors';
+          btn.innerHTML = `
+            <p class="font-semibold text-xs text-dark">${loc.name}</p>
+            <p class="text-[10px] text-gray-500">${loc.type}</p>
+            <p class="text-[10px] text-gray-500">${loc.hours}</p>
+          `;
+          btn.addEventListener('click', () => {
+            document.querySelector('[data-tab="map"]')?.click();
+            openLoc(loc.id);
+          });
+          locationListEl.appendChild(btn);
+        });
+      }
+
+      renderLocationList();
+
+      if (linkBtn) {
+        linkBtn.addEventListener('click', () => {
+          const href = linkBtn.dataset.href;
+          if (href) window.open(href, '_blank', 'noreferrer');
+        });
+      }
+
+      if (closeBtn) {
+        closeBtn.addEventListener('click', () => card.classList.add('hidden'));
+      }
+      if (mapContainerEl) {
+        mapContainerEl.addEventListener('click', (event) => {
+          if (event.target === mapContainerEl || event.target.id === 'map-background') {
+            card?.classList.add('hidden');
+          }
+        });
+      }
+    }
+
+    // --- Pet data & UI ---
+    const PETS_DATA_KEY = 'pawtrace_pets';
+    const STICKY_NOTES_API = '/api/sticky-notes';
+    const DEFAULT_PET_AVATAR = 'https://design.gemcoder.com/staticResource/echoAiSystemImages/a0c9378b7607e96469333185e4376a53.png';
+
+    function fileToDataURL(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(new Error('Unable to read file'));
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function getStoredPets() {
+      try { return JSON.parse(localStorage.getItem(PETS_DATA_KEY)) || []; }
+      catch { return []; }
+    }
+    function setStoredPets(pets) {
+      localStorage.setItem(PETS_DATA_KEY, JSON.stringify(pets));
+    }
+
+    function defaultPets() {
+      return [
+        {
+          id: 'pet-1',
+          name: 'Xiao Hei',
+          type: 'Dog',
+          breed: 'Labrador',
+          age: '2 years',
+          gender: 'Male',
+          avatar: 'https://design.gemcoder.com/staticResource/echoAiSystemImages/a0c9378b7607e96469333185e4376a53.png',
+          traits: ['Friendly', 'Active', 'Affectionate'],
+          status: 'Needs at least two walks daily and prefers chicken dog food.',
+          health: 'Vaccinations up to date: Rabies, Distemper, Parvovirus. Next vaccination: 2023/12/15.',
+        },
+        {
+          id: 'pet-2',
+          name: 'Xiao Bai',
+          type: 'Cat',
+          breed: 'Ragdoll',
+          age: '1 year',
+          gender: 'Female',
+          avatar: 'https://design.gemcoder.com/staticResource/echoAiSystemImages/1a98a231cfe964a18cdd5f3502fb32bc.png',
+          traits: ['Quiet', 'Independent', 'Cuddly'],
+          status: 'Enjoys quiet rooms and feather toys, eats tuna-flavor food.',
+          health: 'Vaccinations up to date: FVRCP, Rabies. Next vaccination: 2024/01/20.',
+        },
+        {
+          id: 'pet-3',
+          name: 'Xiao Huang',
+          type: 'Hamster',
+          breed: 'Syrian Hamster',
+          age: '8 months',
+          gender: 'Male',
+          avatar: 'https://design.gemcoder.com/staticResource/echoAiSystemImages/df853968f0a77fd6b43aed0bb28513f2.png',
+          traits: ['Active', 'Curious', 'Nocturnal'],
+          status: 'Sleeps during the day, loves sunflower seeds and late-night runs.',
+          health: 'Healthy; housed in 40x30cm cage with wheel and fresh wood shavings.',
+        }
+      ];
+    }
+
+    const COMMUNITY_PETS = [
+      {
+        id: 'cp-1',
+        name: 'Milk Tea',
+        type: 'Shiba Inu',
+        mood: 'Campus café regular, polite tail wags for everyone.',
+        traits: ['Friendly', 'Latte guardian'],
+        location: 'Whisker Bean Café terrace',
+        photo: 'https://design.gemcoder.com/staticResource/echoAiSystemImages/665b4ca1e15de3e846728ea88ca31fb8.png',
+        ownerContact: 'c1'
+      },
+      {
+        id: 'cp-2',
+        name: 'Nebula',
+        type: 'British Shorthair',
+        mood: 'Sleeps on textbooks until she hears the can opener.',
+        traits: ['Calm', 'Chubby paws'],
+        location: 'Studio dorms · Block C',
+        photo: 'https://design.gemcoder.com/staticResource/echoAiSystemImages/23cd9c9d80bed8a3b3e0b8c536f2e0c0.png',
+        ownerContact: 'c3'
+      },
+      {
+        id: 'cp-3',
+        name: 'Rocket',
+        type: 'Border Collie',
+        mood: 'Practicing frisbee tricks before hackathon demos.',
+        traits: ['High energy', 'Trick nerd'],
+        location: 'Central Lawn',
+        photo: 'https://design.gemcoder.com/staticResource/echoAiSystemImages/1a98a231cfe964a18cdd5f3502fb32bc.png',
+        ownerContact: 'c2'
+      },
+      {
+        id: 'cp-4',
+        name: 'Baozi',
+        type: 'Bichon',
+        mood: 'Wears matching sweaters with owner every Friday.',
+        traits: ['Fashionable', 'Cuddly'],
+        location: 'Tailwind Study Loft beanbags',
+        photo: 'https://design.gemcoder.com/staticResource/echoAiSystemImages/a0c9378b7607e96469333185e4376a53.png',
+        ownerContact: 'c5'
+      },
+      {
+        id: 'cp-5',
+        name: 'Nova',
+        type: 'Ragdoll',
+        mood: 'Hosts silent study sessions on the library stairs.',
+        traits: ['Graceful', 'Focus buddy'],
+        location: 'Library Plaza cushions',
+        photo: 'https://design.gemcoder.com/staticResource/echoAiSystemImages/fdca457404bba5bf76bb0fd8378c6d8d.png',
+        ownerContact: 'c6'
+      },
+      {
+        id: 'cp-6',
+        name: 'Pudding',
+        type: 'Corgi',
+        mood: 'Collects compliments near Maple Bark Espresso every morning.',
+        traits: ['Short legs, big heart'],
+        location: 'Shuttle hub walkway',
+        photo: 'https://design.gemcoder.com/staticResource/echoAiSystemImages/95033e3192d642014a951f965ea4ed5b.png',
+        ownerContact: 'c7'
+      }
+    ];
+
+    function initPets() {
+      let pets = [];
+      const petList = document.getElementById('pet-list');
+      const petEmpty = document.getElementById('pet-empty');
+      const profilePetCount = document.getElementById('profile-pet-count');
+      const btnAddPet = document.getElementById('btn-add-pet');
+      const petForm = document.getElementById('pet-form');
+      const btnClosePetForm = document.getElementById('btn-close-pet-form');
+      const profilePetManager = document.getElementById('profile-pet-manager');
+      const communityPetFeed = document.getElementById('community-pet-feed');
+      const newPetInputs = {
+        name: document.getElementById('new-pet-name'),
+        type: document.getElementById('new-pet-type'),
+        breed: document.getElementById('new-pet-breed'),
+        birthday: document.getElementById('new-pet-birthday'),
+        gender: document.getElementById('new-pet-gender'),
+        status: document.getElementById('new-pet-status'),
+        health: document.getElementById('new-pet-health'),
+        traits: document.getElementById('new-pet-traits'),
+        image: document.getElementById('new-pet-image'),
+      };
+      const petImagePreviewImg = document.getElementById('pet-image-preview-img');
+      const petImagePlaceholder = document.getElementById('pet-image-placeholder');
+
+      function hydratePets() {
+        const stored = getStoredPets();
+        pets = stored && stored.length ? stored : defaultPets();
+        setStoredPets(pets);
+      }
+
+      function resetPetImagePreview() {
+        if (petImagePreviewImg) {
+          petImagePreviewImg.src = '';
+          petImagePreviewImg.classList.add('hidden');
+        }
+        petImagePlaceholder?.classList.remove('hidden');
+        if (newPetInputs.image) {
+          newPetInputs.image.value = '';
+        }
+      }
+
+      function setPetImagePreview(src) {
+        if (!petImagePreviewImg) return;
+        petImagePreviewImg.src = src;
+        petImagePreviewImg.classList.remove('hidden');
+        petImagePlaceholder?.classList.add('hidden');
+      }
+
+      function render() {
+        if (!petList) return;
+        petList.innerHTML = '';
+        if (pets.length === 0) {
+          petEmpty?.classList.remove('hidden');
+          return;
+        }
+        petEmpty?.classList.add('hidden');
+        pets.forEach((p, idx) => {
+          const birthdayDisplay = p.birthday
+            ? (() => {
+                try {
+                  return new Date(p.birthday).toLocaleDateString();
+                } catch { return p.birthday; }
+              })()
+            : (p.age || 'Not set');
+          const petAvatar = p.avatar || DEFAULT_PET_AVATAR;
+          const card = document.createElement('div');
+          card.className = 'pixel-card bg-white flex flex-col gap-2 animate-slideInLeft';
+          card.style.animationDelay = (idx * 0.1) + 's';
+          card.innerHTML = `
+            <div class="flex justify-between items-start gap-2">
+              <h3 class="font-semibold text-sm">${p.name}</h3>
+              <div class="flex gap-2 text-gray-500">
+                <button data-id="${p.id}" class="pet-edit hover:text-primary transition-colors"><i class="fas fa-edit"></i></button>
+              </div>
+            </div>
+            <div class="flex gap-3">
+              <img src="${petAvatar}" alt="${p.name}" class="w-16 h-16 rounded-full object-cover pixel-border bg-secondary" />
+              <div class="space-y-1">
+                <p><span class="font-semibold">Type:</span> ${p.type}</p>
+                <p><span class="font-semibold">Breed:</span> ${p.breed}</p>
+                <p><span class="font-semibold">Birthday:</span> ${birthdayDisplay}</p>
+                <p><span class="font-semibold">Gender:</span> ${p.gender || 'Unknown'}</p>
+              </div>
+            </div>
+            <div class="space-y-2">
+              <div>
+                <p class="font-semibold text-[11px]">Status</p>
+                <p class="text-[11px] text-gray-600">${p.status || 'No recent notes'}</p>
+              </div>
+              <div>
+                <p class="font-semibold text-[11px]">Personality</p>
+                <div class="flex flex-wrap gap-1">
+                  ${(p.traits || []).map(t => `<span class="px-2 py-0.5 rounded-full bg-secondary text-dark">${t}</span>`).join('')}
+                </div>
+              </div>
+              <div>
+                <p class="font-semibold text-[11px]">Health</p>
+                <p class="text-[11px] text-gray-600">${p.health || 'No health notes yet'}</p>
+              </div>
+            </div>
+          `;
+        petList.appendChild(card);
+      });
+      if (profilePetCount) profilePetCount.textContent = pets.length.toString();
+
+        petList.querySelectorAll('.pet-edit').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const id = btn.getAttribute('data-id');
+            const petIndex = pets.findIndex(p => p.id === id);
+            if (petIndex === -1) return;
+            const current = pets[petIndex];
+            const newName = prompt('Edit pet name', current.name) || current.name;
+            pets[petIndex] = { ...current, name: newName };
+            setStoredPets(pets);
+            render();
+          });
+        });
+        renderProfilePetList();
+      }
+
+      function renderProfilePetList() {
+        if (!profilePetManager) return;
+        profilePetManager.innerHTML = '';
+        if (pets.length === 0) {
+          profilePetManager.innerHTML = '<p class="text-gray-400 text-[11px]">No pets yet. Add one from the Pets tab.</p>';
+          return;
+        }
+        pets.forEach(p => {
+          const row = document.createElement('div');
+          row.className = 'flex items-center justify-between bg-secondary/40 px-2 py-2 rounded-sm';
+          row.innerHTML = `
+            <div class="flex items-center gap-2 min-w-0">
+              <img src="${p.avatar || DEFAULT_PET_AVATAR}" class="w-8 h-8 rounded-full object-cover pixel-border bg-white" />
+              <div class="min-w-0">
+                <p class="font-semibold text-[11px] truncate">${p.name}</p>
+                <p class="text-[10px] text-gray-500 truncate">${p.type} · ${p.breed}</p>
+              </div>
+            </div>
+            <button class="text-[10px] text-red-500 hover:underline" data-profile-pet-delete="${p.id}" type="button">
+              Delete
+            </button>
+          `;
+          profilePetManager.appendChild(row);
+        });
+        profilePetManager.querySelectorAll('[data-profile-pet-delete]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const id = btn.getAttribute('data-profile-pet-delete');
+            if (!id) return;
+            if (!confirm('Delete this pet from your account?')) return;
+            pets = pets.filter(p => p.id !== id);
+            setStoredPets(pets);
+            render();
+          });
+        });
+      }
+
+      function renderCommunityPets() {
+        if (!communityPetFeed) return;
+        communityPetFeed.innerHTML = '';
+        COMMUNITY_PETS.forEach((pet, idx) => {
+          const card = document.createElement('div');
+          card.className = 'pixel-card bg-white flex flex-col gap-2 animate-slideIn';
+          card.style.animationDelay = (idx * 0.05) + 's';
+          card.innerHTML = `
+            <div class="relative">
+              <img src="${pet.photo}" alt="${pet.name}" class="w-full h-40 object-cover rounded-sm pixel-border" />
+              <span class="absolute top-2 left-2 bg-primary text-white text-[10px] px-2 py-0.5 rounded-full">Community</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="font-semibold text-sm">${pet.name}</p>
+                <p class="text-[11px] text-gray-600">${pet.type}</p>
+              </div>
+              <button class="text-[10px] text-primary underline" data-community-contact="${pet.ownerContact}">
+                Message owner
+              </button>
+            </div>
+            <p class="text-[11px] text-gray-600">${pet.mood}</p>
+            <p class="text-[10px] text-gray-500"><i class="fas fa-map-marker-alt text-primary mr-1"></i>${pet.location}</p>
+            <div class="flex flex-wrap gap-1 text-[10px]">
+              ${(pet.traits || []).map(tag => `<span class="px-2 py-0.5 rounded-full bg-secondary/60">${tag}</span>`).join('')}
+            </div>
+          `;
+          communityPetFeed.appendChild(card);
+        });
+        communityPetFeed.querySelectorAll('[data-community-contact]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const ownerId = btn.getAttribute('data-community-contact');
+            if (ownerId) {
+              openFriendInChat(ownerId);
+            }
+          });
+        });
+      }
+
+      hydratePets();
+      render();
+      renderCommunityPets();
+
+      newPetInputs.image?.addEventListener('change', () => {
+        const file = newPetInputs.image.files && newPetInputs.image.files[0];
+        if (!file) {
+          resetPetImagePreview();
+          return;
+        }
+        if (file.size > 5 * 1024 * 1024) {
+          alert('Please choose an image under 5MB.');
+          newPetInputs.image.value = '';
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          setPetImagePreview(event.target?.result);
+        };
+        reader.onerror = () => resetPetImagePreview();
+        reader.readAsDataURL(file);
+      });
+
+      function showPetForm() {
+        if (!petForm) return;
+        petForm.classList.remove('hidden');
+        petForm.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+
+      function hidePetForm() {
+        petForm?.classList.add('hidden');
+        resetPetImagePreview();
+      }
+
+      btnAddPet?.addEventListener('click', showPetForm);
+      btnClosePetForm?.addEventListener('click', hidePetForm);
+
+      if (petForm) {
+        petForm.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const name = newPetInputs.name.value.trim();
+          if (!name) return;
+          const file = newPetInputs.image?.files && newPetInputs.image.files[0];
+          let avatar = DEFAULT_PET_AVATAR;
+          if (file) {
+            try {
+              avatar = await fileToDataURL(file);
+            } catch (err) {
+              console.warn('Image load failed', err);
+            }
+          }
+          const traits = (newPetInputs.traits.value || '')
+            .split(',')
+            .map(t => t.trim())
+            .filter(Boolean);
+          const birthdayValue = newPetInputs.birthday?.value || '';
+          const birthdayLabel = birthdayValue
+            ? (() => {
+                try {
+                  return new Date(birthdayValue).toLocaleDateString();
+                } catch { return birthdayValue; }
+              })()
+            : '';
+          const newPet = {
+            id: `pet-${Date.now()}`,
+            name,
+            type: newPetInputs.type.value.trim() || 'Pet',
+            breed: newPetInputs.breed.value.trim() || 'Unknown',
+            age: birthdayLabel,
+            birthday: birthdayValue,
+            gender: newPetInputs.gender.value.trim() || 'Unknown',
+            avatar,
+            traits: traits.length ? traits : ['Playful'],
+            status: newPetInputs.status.value.trim() || 'Just joined the crew.',
+            health: newPetInputs.health.value.trim() || 'No health notes yet.'
+          };
+          pets.push(newPet);
+          setStoredPets(pets);
+          render();
+          petForm.reset();
+          hidePetForm();
+        });
+        petForm.addEventListener('reset', () => {
+          newPetInputs.status.value = '';
+          newPetInputs.health.value = '';
+          hidePetForm();
+        });
+      }
+    }
+
+    // --- Chat assistant integration ---
+    let CHAT_STATE = {
+      contacts: [
+        {
+          id: 'c1',
+          name: 'Lily (Team Lead)',
+          avatar: 'https://design.gemcoder.com/staticResource/echoAiSystemImages/95033e3192d642014a951f965ea4ed5b.png',
+          petName: 'Mocha',
+          petType: 'Corgi',
+          petBreed: 'Welsh Corgi',
+          petAge: '2 years',
+          petHealth: 'Healthy and active',
+          petTraits: ['Loves fetch', 'Calm with kids'],
+          petNotes: 'Mocha prefers short walks and lots of belly rubs.',
+          lastPreview: 'Want to walk in the central lawn tomorrow?',
+        },
+        {
+          id: 'c2',
+          name: 'Eric (Developer)',
+          avatar: 'https://design.gemcoder.com/staticResource/echoAiSystemImages/665b4ca1e15de3e846728ea88ca31fb8.png',
+          petName: 'Pixel',
+          petType: 'Border Collie',
+          petBreed: 'Border Collie',
+          petAge: '3 years',
+          petHealth: 'Excellent, very active',
+          petTraits: ['Agile', 'Mega fetch energy'],
+          petNotes: 'Pixel thrives on new tricks and chasing frisbees.',
+          lastPreview: 'Pixel learned a new trick!',
+        },
+        {
+          id: 'c3',
+          name: 'Mia (Designer)',
+          avatar: 'https://design.gemcoder.com/staticResource/echoAiSystemImages/23cd9c9d80bed8a3b3e0b8c536f2e0c0.png',
+          petName: 'Mochi',
+          petType: 'Cat',
+          petBreed: 'Ragdoll',
+          petAge: '1 year',
+          petHealth: 'Indoor cat, perfect health',
+          petTraits: ['Curious', 'Sun-loving'],
+          petNotes: 'Mochi usually naps near windows and loves gentle chin scratches.',
+          lastPreview: 'Any vet recommendations near campus?',
+        },
+        {
+          id: 'c4',
+          name: 'Leo (Product Manager)',
+          avatar: 'https://design.gemcoder.com/staticResource/echoAiSystemImages/a6892cab6a2e4de1a06ab5df18a4e3ec.png',
+          petName: 'Kiko',
+          petType: 'Husky',
+          petBreed: 'Siberian Husky',
+          petAge: '4 years',
+          petHealth: 'Strong and energetic',
+          petTraits: ['Pack leader', 'Snow lover'],
+          petNotes: 'Kiko is happiest after a long run and enjoys meeting new friends.',
+          lastPreview: 'Planning a weekend dog meetup.',
+        },
+        {
+          id: 'c5',
+          name: 'Zoe (Maker)',
+          avatar: 'https://design.gemcoder.com/staticResource/echoAiSystemImages/fdca457404bba5bf76bb0fd8378c6d8d.png',
+          petName: 'Baozi',
+          petType: 'Bichon',
+          petBreed: 'Bichon Frisé',
+          petAge: '3 years',
+          petHealth: 'Weekly grooming, sensitive skin',
+          petTraits: ['Fashion lover', 'Cuddly'],
+          petNotes: 'Baozi has a wardrobe that rivals roommates. Prefers short walks and café patios.',
+          lastPreview: 'Matching sweaters arrived today!',
+        },
+        {
+          id: 'c6',
+          name: 'Iris (Art Student)',
+          avatar: 'https://design.gemcoder.com/staticResource/echoAiSystemImages/665b4ca1e15de3e846728ea88ca31fb8.png',
+          petName: 'Nova',
+          petType: 'Cat',
+          petBreed: 'Ragdoll',
+          petAge: '2 years',
+          petHealth: 'Indoor, loves brushing sessions',
+          petTraits: ['Graceful', 'Focus buddy'],
+          petNotes: 'Nova supervises late-night studio projects and naps on sketchbooks.',
+          lastPreview: 'Nova claimed the new tote bag.',
+        },
+        {
+          id: 'c7',
+          name: 'Aaron (Volunteer)',
+          avatar: 'https://design.gemcoder.com/staticResource/echoAiSystemImages/95033e3192d642014a951f965ea4ed5b.png',
+          petName: 'Pudding',
+          petType: 'Corgi',
+          petBreed: 'Pembroke Corgi',
+          petAge: '5 years',
+          petHealth: 'Healthy, weekly jogs',
+          petTraits: ['Short legs', 'Greets everyone'],
+          petNotes: 'Pudding guards the Maple Bark espresso window and enjoys belly rub tips.',
+          lastPreview: 'Met so many students this morning!',
+        },
+      ],
+      history: {},
+      activeId: null,
+    };
+
+    const LOCAL_CHAT_REPLIES = [
+      'Okay, I understand!',
+      'That’s great!',
+      'Let’s meet this weekend!',
+      'My pet loves this activity too.',
+      'Thanks for letting me know.',
+      'Sounds good!',
+    ];
+    const LOCAL_PET_SUMMARIES = [
+      (contact) => `${contact.petName} is a ${contact.petAge} ${contact.petBreed}. ${contact.petNotes || ''}`,
+      (contact) => {
+        const health = contact.petHealth ? contact.petHealth.toLowerCase() : 'doing well recently.';
+        return `${contact.petName} has been ${health}`;
+      },
+      (contact) => `${contact.petName} loves ${(contact.petTraits && contact.petTraits[0]) || 'play time'} lately.`,
+    ];
+
+    function buildContactProfile(contact) {
+      if (!contact) return '';
+      const traitLine = (contact.petTraits && contact.petTraits.length)
+        ? `Pet traits: ${contact.petTraits.join(', ')}`
+        : '';
+      return [
+        `Contact name: ${contact.name}`,
+        `Pet: ${contact.petName} (${contact.petType}, ${contact.petBreed})`,
+        `Pet age: ${contact.petAge}`,
+        `Pet health: ${contact.petHealth}`,
+        traitLine,
+        contact.petNotes ? `Notes: ${contact.petNotes}` : ''
+      ].filter(Boolean).join('\n');
+    }
+
+    async function requestAssistantResponse(payload = {}) {
+      const { type, contact, contactId, messages = [], fallback } = payload;
+      if (type === 'owner-pet-summary' && contact) {
+        const generator = LOCAL_PET_SUMMARIES[Math.floor(Math.random() * LOCAL_PET_SUMMARIES.length)];
+        return (generator ? generator(contact) : fallback) || 'Pet update coming soon.';
+      }
+      if (!contactId) return fallback || 'Message received.';
+      const sanitizedHistory = messages
+        .slice(-12)
+        .map(m => {
+          let content = (m.content || '').trim();
+          if (m.media?.type === 'image') {
+            const note = `Shared image: ${m.media.src}`;
+            content = content ? `${content}\n${note}` : note;
+          }
+          return {
+            role: m.role === 'assistant' ? 'assistant' : 'user',
+            content
+          };
+        })
+        .filter(m => m.content);
+      try {
+        const response = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contactId,
+            contactProfile: buildContactProfile(contact),
+            messages: sanitizedHistory
+          })
+        });
+        if (!response.ok) throw new Error('AI request failed');
+        const data = await response.json();
+        if (!data.reply) throw new Error('Empty reply');
+        return data.reply.trim();
+      } catch (error) {
+        console.warn('Assistant bridge failed', error);
+        const fallbackReply = LOCAL_CHAT_REPLIES[Math.floor(Math.random() * LOCAL_CHAT_REPLIES.length)];
+        return fallbackReply || fallback || 'Message received.';
+      }
+    }
+
+    function initChat() {
+      const listEl = document.getElementById('contact-list');
+      const searchEl = document.getElementById('chat-search');
+      const chatAvatar = document.getElementById('chat-avatar');
+      const chatName = document.getElementById('chat-name');
+      const chatPetTag = document.getElementById('chat-pet-tag');
+      const chatStatus = document.getElementById('chat-status');
+      const chatMessages = document.getElementById('chat-messages');
+      const chatInput = document.getElementById('chat-input');
+      const chatSend = document.getElementById('chat-send');
+      const chatError = document.getElementById('chat-error');
+      const shareImageUrlInput = document.getElementById('share-image-url');
+      const shareImageCaption = document.getElementById('share-image-caption');
+      const sharePreviewWrapper = document.getElementById('share-image-preview');
+      const sharePreviewImg = document.getElementById('share-preview-img');
+      const chatPetInfoPlaceholder = document.getElementById('chat-pet-info-placeholder');
+      const chatPetDetails = document.getElementById('chat-pet-details');
+      const chatPetName = document.getElementById('chat-pet-name');
+      const chatPetSummary = document.getElementById('chat-pet-summary');
+      const chatPetBreed = document.getElementById('chat-pet-breed');
+      const chatPetAge = document.getElementById('chat-pet-age');
+      const chatPetHealth = document.getElementById('chat-pet-health');
+      const chatPetTraits = document.getElementById('chat-pet-traits');
+      const profileFriendsCount = document.getElementById('profile-friends-count');
+      const chatScrollUp = document.getElementById('chat-scroll-up');
+      const chatScrollDown = document.getElementById('chat-scroll-down');
+
+      if (profileFriendsCount) profileFriendsCount.textContent = CHAT_STATE.contacts.length;
+
+      const getActiveContact = () => CHAT_STATE.contacts.find(c => c.id === CHAT_STATE.activeId);
+      const ensureActiveContact = () => {
+        let contact = getActiveContact();
+        if (!contact && CHAT_STATE.contacts[0]) {
+          activateContact(CHAT_STATE.contacts[0].id);
+          contact = CHAT_STATE.contacts[0];
+        }
+        return contact;
+      };
+      const focusChatInput = () => {
+        if (!chatInput) return;
+        chatInput.focus();
+        chatInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      };
+      const switchToChatTab = () => document.querySelector('[data-tab="chat"]')?.click();
+
+      function renderContacts(filter = '') {
+        if (!listEl) return;
+        listEl.innerHTML = '';
+        CHAT_STATE.contacts
+          .filter(c => c.name.toLowerCase().includes(filter.toLowerCase()))
+          .forEach((c, idx) => {
+            const item = document.createElement('button');
+            item.className = 'w-full flex items-center gap-2 px-2 py-2 rounded hover:bg-secondary text-left transition-colors animate-slideInLeft';
+            item.style.animationDelay = (idx * 0.05) + 's';
+            item.dataset.id = c.id;
+            item.dataset.contactId = c.id;
+            item.innerHTML = `
+              <img src="${c.avatar}" class="w-8 h-8 rounded-full object-cover pixel-border bg-secondary" />
+              <div class="flex-1 min-w-0">
+                <p class="font-semibold text-xs truncate">${c.name}</p>
+                <p class="text-[11px] text-gray-600 truncate">${c.lastPreview}</p>
+              </div>
+            `;
+            item.addEventListener('click', () => activateContact(c.id));
+            listEl.appendChild(item);
+          });
+      }
+
+      function renderHistory(contactId) {
+        if (!chatMessages) return;
+        chatMessages.innerHTML = '';
+        const history = CHAT_STATE.history[contactId] || [];
+        history.forEach(msg => appendMessageBubble(msg, contactId, false));
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
+
+      function appendMessageBubble(message, contactId, scroll = true) {
+        if (!message || !chatMessages) return;
+        const role = message.role;
+        const content = message.content || '';
+        const media = message.media;
+        const isUser = role === 'user';
+        const wrapper = document.createElement('div');
+        wrapper.className = `flex items-end gap-2 ${isUser ? 'justify-end' : ''} animate-slideInLeft`;
+        const bubble = document.createElement('div');
+        bubble.className = `px-3 py-2 max-w-[70%] ${isUser ? 'bg-primary text-white rounded-br-none' : 'bg-secondary text-dark rounded-bl-none'}`;
+        if (media?.type === 'image') {
+          bubble.innerHTML = `
+            <img src="${media.src}" class="w-full h-auto object-cover rounded-sm border-2 border-dark mb-1" />
+            ${content ? `<p class="text-[11px]">${content}</p>` : ''}
+          `;
+        } else {
+          bubble.innerHTML = `<p class="text-[11px]">${content}</p>`;
+        }
+        const avatar = document.createElement('img');
+        const contact = CHAT_STATE.contacts.find(x => x.id === contactId);
+        avatar.src = isUser
+          ? (document.getElementById('current-user-avatar')?.src || '')
+          : (contact?.avatar || '');
+        avatar.className = 'w-7 h-7 rounded-full object-cover pixel-border bg-secondary';
+        if (isUser) {
+          wrapper.appendChild(bubble);
+          wrapper.appendChild(avatar);
+        } else {
+          wrapper.appendChild(avatar);
+          wrapper.appendChild(bubble);
+        }
+        chatMessages.appendChild(wrapper);
+        if (scroll) chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
+
+      const updateOwnerPetPanel = async (contact) => {
+        if (!contact) return;
+        chatPetInfoPlaceholder?.classList.add('hidden');
+        chatPetDetails?.classList.remove('hidden');
+        if (chatPetName) chatPetName.textContent = `${contact.petName} · ${contact.petType}`;
+        if (chatPetBreed) chatPetBreed.textContent = contact.petBreed;
+        if (chatPetAge) chatPetAge.textContent = contact.petAge;
+        if (chatPetHealth) chatPetHealth.textContent = contact.petHealth;
+        if (chatPetTraits) {
+          chatPetTraits.innerHTML = (contact.petTraits || []).length
+            ? contact.petTraits.map(t => `<span class="px-2 py-0.5 rounded-full bg-secondary text-dark">${t}</span>`).join('')
+            : '<span class="text-gray-400">No traits added yet</span>';
+        }
+        if (chatPetSummary) {
+          chatPetSummary.textContent = 'Gathering a quick update...';
+          const fallback = `${contact.petName} is a ${contact.petAge} ${contact.petBreed}. ${contact.petNotes || ''}`;
+          const summary = await requestAssistantResponse({
+            type: 'owner-pet-summary',
+            contactId: contact.id,
+            contact,
+            fallback
+          });
+          chatPetSummary.textContent = summary;
+        }
+      };
+
+      const handleAssistantReply = async (contact, contactId, fallback) => {
+        if (!contact) return;
+        if (chatStatus) chatStatus.textContent = 'Thinking...';
+        const history = CHAT_STATE.history[contactId] || [];
+        const reply = await requestAssistantResponse({
+          type: 'conversation',
+          contactId,
+          contact,
+          messages: history,
+          fallback
+        });
+        const assistantMessage = { role: 'assistant', content: reply };
+        history.push(assistantMessage);
+        CHAT_STATE.history[contactId] = history;
+        appendMessageBubble(assistantMessage, contactId);
+        if (chatStatus) chatStatus.textContent = `Online · ${contact.petType} owner`;
+      };
+
+      function activateContact(id) {
+        CHAT_STATE.activeId = id;
+        const c = CHAT_STATE.contacts.find(x => x.id === id);
+        if (!c) return;
+        if (chatAvatar) chatAvatar.src = c.avatar;
+        if (chatName) chatName.textContent = c.name;
+        if (chatPetTag) {
+          chatPetTag.textContent = c.petName + ' · ' + c.petType;
+          chatPetTag.classList.remove('hidden');
+        }
+        if (chatStatus) chatStatus.textContent = 'Online · ' + c.petType + ' owner';
+        updateOwnerPetPanel(c);
+        if (!CHAT_STATE.history[id]) {
+          CHAT_STATE.history[id] = [
+            { role: 'assistant', content: `Hi! I'm ${c.name} and this is ${c.petName}.` }
+          ];
+        }
+        renderHistory(id);
+      }
+
+      async function sendMessage() {
+        if (!chatInput) return;
+        chatError.textContent = '';
+        const text = chatInput.value.trim();
+        const contact = getActiveContact();
+        if (!contact) {
+          chatError.textContent = 'Select a friend first.';
+          return;
+        }
+        if (!text) return;
+        const history = CHAT_STATE.history[contact.id] || [];
+        const userMessage = { role: 'user', content: text };
+        history.push(userMessage);
+        CHAT_STATE.history[contact.id] = history;
+        appendMessageBubble(userMessage, contact.id);
+        chatInput.value = '';
+        await handleAssistantReply(contact, contact.id, `Thanks for the update on ${contact.petName}.`);
+      }
+
+      async function sendImageMessage() {
+        const contact = getActiveContact();
+        if (!contact) {
+          alert('Select a friend first.');
+          return;
+        }
+        const imageUrl = shareImageUrlInput?.value.trim();
+        const caption = shareImageCaption?.value.trim();
+        if (!imageUrl) {
+          alert('Please enter an image URL.');
+          return;
+        }
+        const history = CHAT_STATE.history[contact.id] || [];
+        const imageMessage = {
+          role: 'user',
+          content: caption || 'Shared a photo',
+          media: { type: 'image', src: imageUrl }
+        };
+        history.push(imageMessage);
+        CHAT_STATE.history[contact.id] = history;
+        appendMessageBubble(imageMessage, contact.id);
+        closeShareImageModal();
+        await handleAssistantReply(contact, contact.id, `${contact.petName} got a new photo!`);
+      }
+
+      renderContacts();
+
+      chatScrollUp?.addEventListener('click', () => {
+        if (!chatMessages) return;
+        chatMessages.scrollBy({ top: -160, behavior: 'smooth' });
+      });
+      chatScrollDown?.addEventListener('click', () => {
+        if (!chatMessages) return;
+        chatMessages.scrollBy({ top: 160, behavior: 'smooth' });
+      });
+
+      searchEl?.addEventListener('input', () => {
+        renderContacts(searchEl.value);
+      });
+      chatSend?.addEventListener('click', sendMessage);
+      chatInput?.addEventListener('keydown', e => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          sendMessage();
+        }
+      });
+
+      if (shareImageUrlInput && sharePreviewImg) {
+        shareImageUrlInput.addEventListener('input', () => {
+          const url = shareImageUrlInput.value.trim();
+          if (!url) {
+            sharePreviewWrapper?.classList.add('hidden');
+            sharePreviewImg.src = '';
+          } else {
+            sharePreviewImg.src = url;
+            sharePreviewWrapper?.classList.remove('hidden');
+          }
+        });
+      }
+
+      const btnSendImage = document.getElementById('btn-send-image');
+      if (btnSendImage) {
+        btnSendImage.addEventListener('click', sendImageMessage);
+      }
+
+      if (CHAT_STATE.contacts[0]) {
+        activateContact(CHAT_STATE.contacts[0].id);
+      }
+
+      window.openFriendInChat = (friendId) => {
+        switchToChatTab();
+        setTimeout(() => {
+          document.querySelector(`[data-contact-id="${friendId}"]`)?.click();
+          focusChatInput();
+        }, 80);
+      };
+
+      window.scrollToChatTab = () => {
+        if (CHAT_STATE.contacts[0]) {
+          window.openFriendInChat(CHAT_STATE.contacts[0].id);
+        } else {
+          switchToChatTab();
+          focusChatInput();
+        }
+      };
+
+      // ========== PET CHECK-IN SYSTEM ==========
+      function initPetCheckIn() {
+        const checkInBtn = document.getElementById('btn-pet-checkin');
+        if (!checkInBtn) return;
+
+        function getCheckInData() {
+          const data = localStorage.getItem('pawtrace_checkins');
+          return data ? JSON.parse(data) : {};
+        }
+
+        function saveCheckInData(data) {
+          localStorage.setItem('pawtrace_checkins', JSON.stringify(data));
+        }
+
+        checkInBtn.addEventListener('click', () => {
+          const pets = JSON.parse(localStorage.getItem('pawtrace_pets') || '[]');
+          if (pets.length === 0) {
+            alert('No pets to check in!');
+            return;
+          }
+
+          const today = new Date().toISOString().split('T')[0];
+          const checkins = getCheckInData();
+
+          pets.forEach(pet => {
+            if (!checkins[pet.id]) checkins[pet.id] = {};
+            checkins[pet.id][today] = true;
+          });
+
+          saveCheckInData(checkins);
+          alert('✓ Check-in complete! All pets marked for today.');
+        });
+      }
+
+      // Initialize all features
+      initPetCheckIn();
+    }
+  </script>
+</body>
+</html>

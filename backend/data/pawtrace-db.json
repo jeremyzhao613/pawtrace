@@ -1,0 +1,1960 @@
+{
+  "pets": [],
+  "users": [],
+  "chatHistory": {
+    "c1": [
+      {
+        "role": "assistant",
+        "content": "Hi! I'm Lily (Team Lead) and this is Mocha."
+      },
+      {
+        "role": "user",
+        "content": "d s d"
+      },
+      {
+        "role": "assistant",
+        "content": "Hey! It's Lily and Mocha here. Sorry, didn't catch that—everything okay? 😊"
+      },
+      {
+        "role": "assistant",
+        "content": "Hi! I'm Lily (Team Lead) and this is Mocha."
+      },
+      {
+        "role": "user",
+        "content": "d s d"
+      },
+      {
+        "role": "user",
+        "content": "dsd"
+      },
+      {
+        "role": "user",
+        "content": "s d s d"
+      },
+      {
+        "role": "user",
+        "content": "sdsds"
+      },
+      {
+        "role": "user",
+        "content": "sd"
+      },
+      {
+        "role": "user",
+        "content": "ds"
+      },
+      {
+        "role": "assistant",
+        "content": "Hey! It's Lily and Mocha here. Sorry, didn't catch that—everything okay? 😊"
+      },
+      {
+        "role": "user",
+        "content": "sd"
+      },
+      {
+        "role": "assistant",
+        "content": "Mocha says \"bark\" to that 😄 Need help with something?"
+      },
+      {
+        "role": "assistant",
+        "content": "Hi! I'm Lily (Team Lead) and this is Mocha."
+      },
+      {
+        "role": "user",
+        "content": "d s d"
+      },
+      {
+        "role": "user",
+        "content": "dsd"
+      },
+      {
+        "role": "user",
+        "content": "s d s d"
+      },
+      {
+        "role": "user",
+        "content": "sdsds"
+      },
+      {
+        "role": "assistant",
+        "content": "Hey! Sorry, that looks like a typo. 😊 Did you mean to ask about Mocha or need help with something around campus? Let me know! 🐶☕"
+      },
+      {
+        "role": "assistant",
+        "content": "Hi! I'm Lily (Team Lead) and this is Mocha."
+      },
+      {
+        "role": "user",
+        "content": "d s d"
+      },
+      {
+        "role": "user",
+        "content": "dsd"
+      },
+      {
+        "role": "user",
+        "content": "s d s d"
+      },
+      {
+        "role": "assistant",
+        "content": "Hey! Sorry, not sure what you meant there 😅  \nMocha just woke up from a nap and is ready for a short walk near campus. Want to join? I can grab coffee after!"
+      },
+      {
+        "role": "assistant",
+        "content": "Hi! I'm Lily (Team Lead) and this is Mocha."
+      },
+      {
+        "role": "user",
+        "content": "d s d"
+      },
+      {
+        "role": "user",
+        "content": "dsd"
+      },
+      {
+        "role": "assistant",
+        "content": "Hey! Sorry, not sure what you meant by \"dsd\"? 😅 Let me know if you'd like to chat about Mocha, campus life, or a good coffee spot near XJTLU Taicang! ☕🐾"
+      },
+      {
+        "role": "assistant",
+        "content": "Hi! I'm Lily (Team Lead) and this is Mocha."
+      },
+      {
+        "role": "user",
+        "content": "d s d"
+      },
+      {
+        "role": "user",
+        "content": "dsd"
+      },
+      {
+        "role": "user",
+        "content": "s d s d"
+      },
+      {
+        "role": "user",
+        "content": "sdsds"
+      },
+      {
+        "role": "user",
+        "content": "sd"
+      },
+      {
+        "role": "user",
+        "content": "ds"
+      },
+      {
+        "role": "assistant",
+        "content": "Hey! It's Lily and Mocha here. Sorry, didn't catch that—everything okay? 😊"
+      },
+      {
+        "role": "user",
+        "content": "sd"
+      },
+      {
+        "role": "user",
+        "content": "ds"
+      },
+      {
+        "role": "assistant",
+        "content": "Mocha just gave me the \"are they okay?\" look 🐾 Let me know if you need help!"
+      },
+      {
+        "role": "assistant",
+        "content": "Hi! I'm Lily (Team Lead) and this is Mocha."
+      },
+      {
+        "role": "user",
+        "content": "d s d"
+      },
+      {
+        "role": "user",
+        "content": "dsd"
+      },
+      {
+        "role": "user",
+        "content": "s d s d"
+      },
+      {
+        "role": "user",
+        "content": "sdsds"
+      },
+      {
+        "role": "user",
+        "content": "sd"
+      },
+      {
+        "role": "assistant",
+        "content": "Hey! Sorry, not sure what happened there 😅 Was it a typo? Let me know if you need help with anything—happy to chat about Mocha, coffee spots near XJTLU Taicang, or easy campus walks! ☕🐾"
+      },
+      {
+        "role": "assistant",
+        "content": "Hi! I'm Lily (Team Lead) and this is Mocha."
+      },
+      {
+        "role": "user",
+        "content": "d s d"
+      },
+      {
+        "role": "user",
+        "content": "dsd"
+      },
+      {
+        "role": "user",
+        "content": "s d s d"
+      },
+      {
+        "role": "user",
+        "content": "sdsds"
+      },
+      {
+        "role": "user",
+        "content": "sd"
+      },
+      {
+        "role": "user",
+        "content": "ds"
+      },
+      {
+        "role": "assistant",
+        "content": "Hey! It's Lily and Mocha here. Sorry, didn't catch that—everything okay? 😊"
+      },
+      {
+        "role": "user",
+        "content": "sd"
+      },
+      {
+        "role": "user",
+        "content": "ds"
+      },
+      {
+        "role": "user",
+        "content": "sd s"
+      },
+      {
+        "role": "assistant",
+        "content": "Mocha just tilted his head at me like \"Is this person okay?\" 😅 You good? Let me know if you need help!"
+      },
+      {
+        "role": "assistant",
+        "content": "Hi! I'm Lily (Team Lead) and this is Mocha."
+      },
+      {
+        "role": "user",
+        "content": "d s d"
+      },
+      {
+        "role": "user",
+        "content": "dsd"
+      },
+      {
+        "role": "user",
+        "content": "s d s d"
+      },
+      {
+        "role": "user",
+        "content": "sdsds"
+      },
+      {
+        "role": "user",
+        "content": "sd"
+      },
+      {
+        "role": "user",
+        "content": "ds"
+      },
+      {
+        "role": "assistant",
+        "content": "Hey there! Sorry, I'm not sure what you meant with all those letters. 😅 I'm Lily, and this is my corgi Mocha. We're just taking a little walk near campus. Want to say hi to him? He loves belly rubs after short walks! 🐾"
+      },
+      {
+        "role": "assistant",
+        "content": "Hi! I'm Lily (Team Lead) and this is Mocha."
+      },
+      {
+        "role": "user",
+        "content": "d s d"
+      },
+      {
+        "role": "user",
+        "content": "dsd"
+      },
+      {
+        "role": "user",
+        "content": "s d s d"
+      },
+      {
+        "role": "user",
+        "content": "sdsds"
+      },
+      {
+        "role": "user",
+        "content": "sd"
+      },
+      {
+        "role": "user",
+        "content": "ds"
+      },
+      {
+        "role": "assistant",
+        "content": "Hey! It's Lily and Mocha here. Sorry, didn't catch that—everything okay? 😊"
+      },
+      {
+        "role": "user",
+        "content": "sd"
+      },
+      {
+        "role": "user",
+        "content": "ds"
+      },
+      {
+        "role": "user",
+        "content": "sd s"
+      },
+      {
+        "role": "user",
+        "content": "ds"
+      },
+      {
+        "role": "assistant",
+        "content": "Mocha just tilted his head at the screen like \"hooman, is this Morse code for treats?\" 😂 Let me know if you need anything!"
+      },
+      {
+        "role": "user",
+        "content": "sdsds"
+      },
+      {
+        "role": "user",
+        "content": "sd"
+      },
+      {
+        "role": "user",
+        "content": "ds"
+      },
+      {
+        "role": "assistant",
+        "content": "Hey! It's Lily and Mocha here. Sorry, didn't catch that—everything okay? 😊"
+      },
+      {
+        "role": "user",
+        "content": "sd"
+      },
+      {
+        "role": "user",
+        "content": "ds"
+      },
+      {
+        "role": "user",
+        "content": "sd s"
+      },
+      {
+        "role": "user",
+        "content": "ds"
+      },
+      {
+        "role": "user",
+        "content": "d"
+      },
+      {
+        "role": "assistant",
+        "content": "Mocha says \"bark\" to that 😄 Need help with something?"
+      },
+      {
+        "role": "assistant",
+        "content": "Hey! Sorry, that looks like a typo. 😊 Did you mean to ask about Mocha or need help with something around campus? Let me know! 🐶☕"
+      },
+      {
+        "role": "user",
+        "content": "ds d"
+      },
+      {
+        "role": "assistant",
+        "content": "Mocha just tilted his head—guess he’s confused too! 😅 Want to try typing your message again? I’m here to help!"
+      },
+      {
+        "role": "assistant",
+        "content": "Hey! It's Lily and Mocha here. Sorry, didn't catch that—everything okay? 😊"
+      },
+      {
+        "role": "user",
+        "content": "sd"
+      },
+      {
+        "role": "user",
+        "content": "ds"
+      },
+      {
+        "role": "user",
+        "content": "sd s"
+      },
+      {
+        "role": "user",
+        "content": "ds"
+      },
+      {
+        "role": "user",
+        "content": "d"
+      },
+      {
+        "role": "assistant",
+        "content": "Mocha says \"bark\" to that 😄 Need help with something?"
+      },
+      {
+        "role": "assistant",
+        "content": "Hey! Sorry, that looks like a typo. 😊 Did you mean to ask about Mocha or need help with something around campus? Let me know! 🐶☕"
+      },
+      {
+        "role": "user",
+        "content": "ds d"
+      },
+      {
+        "role": "user",
+        "content": "sds"
+      },
+      {
+        "role": "assistant",
+        "content": "Hey! Sorry, not sure what you meant there 😅  \nMocha just woke up from a nap and is ready for a short walk near campus. Want to join? I can grab coffee after!"
+      },
+      {
+        "role": "user",
+        "content": "sd"
+      },
+      {
+        "role": "assistant",
+        "content": "Mocha says “woof” — I think he’s telling you to send something real next time 😄 Let me know if you need help!"
+      },
+      {
+        "role": "user",
+        "content": "d s d"
+      },
+      {
+        "role": "user",
+        "content": "dsd"
+      },
+      {
+        "role": "user",
+        "content": "s d s d"
+      },
+      {
+        "role": "user",
+        "content": "sdsds"
+      },
+      {
+        "role": "user",
+        "content": "sd"
+      },
+      {
+        "role": "user",
+        "content": "ds"
+      },
+      {
+        "role": "assistant",
+        "content": "Hey! It's Lily and Mocha here. Sorry, didn't catch that—everything okay? 😊"
+      },
+      {
+        "role": "user",
+        "content": "sd"
+      },
+      {
+        "role": "user",
+        "content": "ds"
+      },
+      {
+        "role": "user",
+        "content": "sd s"
+      },
+      {
+        "role": "user",
+        "content": "ds"
+      },
+      {
+        "role": "user",
+        "content": "d"
+      },
+      {
+        "role": "assistant",
+        "content": "Mocha just gave me a look like, \"Is this human typing with paws?\" 🐾 lol! You good? 😄"
+      },
+      {
+        "role": "user",
+        "content": "sd"
+      },
+      {
+        "role": "user",
+        "content": "ds"
+      },
+      {
+        "role": "assistant",
+        "content": "Hey! It's Lily and Mocha here. Sorry, didn't catch that—everything okay? 😊"
+      },
+      {
+        "role": "user",
+        "content": "sd"
+      },
+      {
+        "role": "user",
+        "content": "ds"
+      },
+      {
+        "role": "user",
+        "content": "sd s"
+      },
+      {
+        "role": "user",
+        "content": "ds"
+      },
+      {
+        "role": "user",
+        "content": "d"
+      },
+      {
+        "role": "assistant",
+        "content": "Mocha says \"bark\" to that 😄 Need help with something?"
+      },
+      {
+        "role": "assistant",
+        "content": "Hey! Sorry, that looks like a typo. 😊 Did you mean to ask about Mocha or need help with something around campus? Let me know! 🐶☕"
+      },
+      {
+        "role": "user",
+        "content": "ds d"
+      },
+      {
+        "role": "user",
+        "content": "sds"
+      },
+      {
+        "role": "assistant",
+        "content": "Mocha just tilted his head—guess he’s confused too! 😅 Need help finding something on campus or wanna grab coffee with a corgi fan? ☕🐶"
+      },
+      {
+        "role": "user",
+        "content": "ds"
+      },
+      {
+        "role": "user",
+        "content": "sd s"
+      },
+      {
+        "role": "user",
+        "content": "ds"
+      },
+      {
+        "role": "user",
+        "content": "d"
+      },
+      {
+        "role": "assistant",
+        "content": "Mocha says \"bark\" to that 😄 Need help with something?"
+      },
+      {
+        "role": "assistant",
+        "content": "Hey! Sorry, that looks like a typo. 😊 Did you mean to ask about Mocha or need help with something around campus? Let me know! 🐶☕"
+      },
+      {
+        "role": "user",
+        "content": "ds d"
+      },
+      {
+        "role": "user",
+        "content": "sds"
+      },
+      {
+        "role": "assistant",
+        "content": "Hey! Sorry, not sure what you meant there 😅  \nMocha just woke up from a nap and is ready for a short walk near campus. Want to join? I can grab coffee after!"
+      },
+      {
+        "role": "user",
+        "content": "sd"
+      },
+      {
+        "role": "assistant",
+        "content": "Hey! Sorry, not sure what you meant by \"dsd\"? 😅 Let me know if you'd like to chat about Mocha, campus life, or a good coffee spot near XJTLU Taicang! ☕🐾"
+      },
+      {
+        "role": "user",
+        "content": "ds d"
+      },
+      {
+        "role": "assistant",
+        "content": "Mocha is wagging his tail, thinking you said “let’s go for a walk”! 🐾  \nBut I think your keyboard might be acting up? 😄 Let me know when you’re ready to chat properly!"
+      },
+      {
+        "role": "user",
+        "content": "sd s"
+      },
+      {
+        "role": "user",
+        "content": "ds"
+      },
+      {
+        "role": "user",
+        "content": "d"
+      },
+      {
+        "role": "assistant",
+        "content": "Mocha says \"bark\" to that 😄 Need help with something?"
+      },
+      {
+        "role": "assistant",
+        "content": "Hey! Sorry, that looks like a typo. 😊 Did you mean to ask about Mocha or need help with something around campus? Let me know! 🐶☕"
+      },
+      {
+        "role": "user",
+        "content": "ds d"
+      },
+      {
+        "role": "user",
+        "content": "sds"
+      },
+      {
+        "role": "assistant",
+        "content": "Hey! Sorry, not sure what you meant there 😅  \nMocha just woke up from a nap and is ready for a short walk near campus. Want to join? I can grab coffee after!"
+      },
+      {
+        "role": "user",
+        "content": "sd"
+      },
+      {
+        "role": "assistant",
+        "content": "Hey! Sorry, not sure what you meant by \"dsd\"? 😅 Let me know if you'd like to chat about Mocha, campus life, or a good coffee spot near XJTLU Taicang! ☕🐾"
+      },
+      {
+        "role": "user",
+        "content": "ds d"
+      },
+      {
+        "role": "user",
+        "content": "sds d"
+      },
+      {
+        "role": "assistant",
+        "content": "Oops, typo again? 😄 Mocha’s wagging her tail and wondering if you want to grab a quick coffee or take a short walk around campus! Let me know what's up! 🐶✨"
+      },
+      {
+        "role": "user",
+        "content": "d"
+      },
+      {
+        "role": "assistant",
+        "content": "Mocha says \"bark\" to that 😄 Need help with something?"
+      },
+      {
+        "role": "assistant",
+        "content": "Hey! Sorry, that looks like a typo. 😊 Did you mean to ask about Mocha or need help with something around campus? Let me know! 🐶☕"
+      },
+      {
+        "role": "user",
+        "content": "ds d"
+      },
+      {
+        "role": "user",
+        "content": "sds"
+      },
+      {
+        "role": "assistant",
+        "content": "Hey! Sorry, not sure what you meant there 😅  \nMocha just woke up from a nap and is ready for a short walk near campus. Want to join? I can grab coffee after!"
+      },
+      {
+        "role": "user",
+        "content": "sd"
+      },
+      {
+        "role": "assistant",
+        "content": "Hey! Sorry, not sure what you meant by \"dsd\"? 😅 Let me know if you'd like to chat about Mocha, campus life, or a good coffee spot near XJTLU Taicang! ☕🐾"
+      },
+      {
+        "role": "user",
+        "content": "ds d"
+      },
+      {
+        "role": "user",
+        "content": "sds d"
+      },
+      {
+        "role": "assistant",
+        "content": "Mocha just gave me the \"are they okay?\" look 🐾 Let me know if you need help!"
+      },
+      {
+        "role": "user",
+        "content": "sds"
+      },
+      {
+        "role": "assistant",
+        "content": "Mocha is wagging his tail and says “maybe try typing something fun?” 😄 Let me know how I can help!"
+      },
+      {
+        "role": "user",
+        "content": "sds"
+      },
+      {
+        "role": "assistant",
+        "content": "Hey! Sorry, not sure what you meant there 😅  \nMocha just woke up from a nap and is ready for a short walk near campus. Want to join? I can grab coffee after!"
+      },
+      {
+        "role": "user",
+        "content": "sd"
+      },
+      {
+        "role": "assistant",
+        "content": "Hey! Sorry, not sure what you meant by \"dsd\"? 😅 Let me know if you'd like to chat about Mocha, campus life, or a good coffee spot near XJTLU Taicang! ☕🐾"
+      },
+      {
+        "role": "user",
+        "content": "ds d"
+      },
+      {
+        "role": "user",
+        "content": "sds d"
+      },
+      {
+        "role": "assistant",
+        "content": "Mocha just gave me the \"are they okay?\" look 🐾 Let me know if you need help!"
+      },
+      {
+        "role": "user",
+        "content": "sds"
+      },
+      {
+        "role": "user",
+        "content": "sd"
+      },
+      {
+        "role": "assistant",
+        "content": "Hey! Sorry, not sure what happened there 😅 Was it a typo? Let me know if you need help with anything—happy to chat about Mocha, coffee spots near XJTLU Taicang, or easy campus walks! ☕🐾"
+      },
+      {
+        "role": "assistant",
+        "content": "Mocha just tilted his head at me like \"Is this person okay?\" 😅 You good? Let me know if you need help!"
+      },
+      {
+        "role": "user",
+        "content": "ds"
+      },
+      {
+        "role": "assistant",
+        "content": "Mocha just barked once and gave me the look again 😅 Let me know if you need help with anything—campus, coffee, or dog walks! I'm here! 🐾☕"
+      },
+      {
+        "role": "user",
+        "content": "sd"
+      },
+      {
+        "role": "assistant",
+        "content": "Hey! Sorry, not sure what you meant by \"dsd\"? 😅 Let me know if you'd like to chat about Mocha, campus life, or a good coffee spot near XJTLU Taicang! ☕🐾"
+      },
+      {
+        "role": "user",
+        "content": "ds d"
+      },
+      {
+        "role": "user",
+        "content": "sds d"
+      },
+      {
+        "role": "assistant",
+        "content": "Mocha just gave me the \"are they okay?\" look 🐾 Let me know if you need help!"
+      },
+      {
+        "role": "user",
+        "content": "sds"
+      },
+      {
+        "role": "user",
+        "content": "sd"
+      },
+      {
+        "role": "assistant",
+        "content": "Hey! Sorry, not sure what happened there 😅 Was it a typo? Let me know if you need help with anything—happy to chat about Mocha, coffee spots near XJTLU Taicang, or easy campus walks! ☕🐾"
+      },
+      {
+        "role": "assistant",
+        "content": "Mocha just tilted his head at me like \"Is this person okay?\" 😅 You good? Let me know if you need help!"
+      },
+      {
+        "role": "user",
+        "content": "ds"
+      },
+      {
+        "role": "assistant",
+        "content": "Hey there! Sorry, I'm not sure what you meant with all those letters. 😅 I'm Lily, and this is my corgi Mocha. We're just taking a little walk near campus. Want to say hi to him? He loves belly rubs after short walks! 🐾"
+      },
+      {
+        "role": "user",
+        "content": "sd"
+      },
+      {
+        "role": "assistant",
+        "content": "Mocha just wagged his tail and said “hi”! 🐾  \nYou good? Let me know if you need help with anything—happy to chat about campus, coffee, or cute dog walks! 😊"
+      },
+      {
+        "role": "assistant",
+        "content": "Mocha says \"bark\" to that 😄 Need help with something?"
+      },
+      {
+        "role": "assistant",
+        "content": "Hey! Sorry, that looks like a typo. 😊 Did you mean to ask about Mocha or need help with something around campus? Let me know! 🐶☕"
+      },
+      {
+        "role": "user",
+        "content": "ds d"
+      },
+      {
+        "role": "user",
+        "content": "sds"
+      },
+      {
+        "role": "assistant",
+        "content": "Hey! Sorry, not sure what you meant there 😅  \nMocha just woke up from a nap and is ready for a short walk near campus. Want to join? I can grab coffee after!"
+      },
+      {
+        "role": "user",
+        "content": "sd"
+      },
+      {
+        "role": "assistant",
+        "content": "Hey! Sorry, not sure what you meant by \"dsd\"? 😅 Let me know if you'd like to chat about Mocha, campus life, or a good coffee spot near XJTLU Taicang! ☕🐾"
+      },
+      {
+        "role": "user",
+        "content": "ds d"
+      },
+      {
+        "role": "user",
+        "content": "sds d"
+      },
+      {
+        "role": "assistant",
+        "content": "Mocha just gave me the \"are they okay?\" look 🐾 Let me know if you need help!"
+      },
+      {
+        "role": "user",
+        "content": "sds"
+      },
+      {
+        "role": "user",
+        "content": "sd"
+      },
+      {
+        "role": "assistant",
+        "content": "Mocha’s barking at the screen now — I think he wants you to say something real! 😂  \nLet me know if you need help with anything — coffee chat, dog walk, or campus tips? 🐶☕"
+      },
+      {
+        "role": "assistant",
+        "content": "Mocha just gave me the \"are they okay?\" look 🐾 Let me know if you need help!"
+      },
+      {
+        "role": "user",
+        "content": "sds"
+      },
+      {
+        "role": "user",
+        "content": "sd"
+      },
+      {
+        "role": "assistant",
+        "content": "Hey! Sorry, not sure what happened there 😅 Was it a typo? Let me know if you need help with anything—happy to chat about Mocha, coffee spots near XJTLU Taicang, or easy campus walks! ☕🐾"
+      },
+      {
+        "role": "assistant",
+        "content": "Mocha just tilted his head at me like \"Is this person okay?\" 😅 You good? Let me know if you need help!"
+      },
+      {
+        "role": "user",
+        "content": "ds"
+      },
+      {
+        "role": "assistant",
+        "content": "Hey there! Sorry, I'm not sure what you meant with all those letters. 😅 I'm Lily, and this is my corgi Mocha. We're just taking a little walk near campus. Want to say hi to him? He loves belly rubs after short walks! 🐾"
+      },
+      {
+        "role": "user",
+        "content": "sd"
+      },
+      {
+        "role": "user",
+        "content": "ds"
+      },
+      {
+        "role": "assistant",
+        "content": "Mocha just tilted his head at the screen like \"hooman, is this Morse code for treats?\" 😂 Let me know if you need anything!"
+      },
+      {
+        "role": "user",
+        "content": "sd"
+      },
+      {
+        "role": "user",
+        "content": "ds"
+      },
+      {
+        "role": "assistant",
+        "content": "Mocha’s officially barking at the keyboard now 🐾😂 Okay, clearly something's up—let me know when you're ready to chat for real! I'm here with coffee and corgi cuddles. ☕💛"
+      },
+      {
+        "role": "user",
+        "content": "sds"
+      },
+      {
+        "role": "user",
+        "content": "sd"
+      },
+      {
+        "role": "assistant",
+        "content": "Hey! Sorry, not sure what happened there 😅 Was it a typo? Let me know if you need help with anything—happy to chat about Mocha, coffee spots near XJTLU Taicang, or easy campus walks! ☕🐾"
+      },
+      {
+        "role": "assistant",
+        "content": "Mocha just tilted his head at me like \"Is this person okay?\" 😅 You good? Let me know if you need help!"
+      },
+      {
+        "role": "user",
+        "content": "ds"
+      },
+      {
+        "role": "assistant",
+        "content": "Hey there! Sorry, I'm not sure what you meant with all those letters. 😅 I'm Lily, and this is my corgi Mocha. We're just taking a little walk near campus. Want to say hi to him? He loves belly rubs after short walks! 🐾"
+      },
+      {
+        "role": "user",
+        "content": "sd"
+      },
+      {
+        "role": "user",
+        "content": "ds"
+      },
+      {
+        "role": "assistant",
+        "content": "Mocha just tilted his head at the screen like \"hooman, is this Morse code for treats?\" 😂 Let me know if you need anything!"
+      },
+      {
+        "role": "user",
+        "content": "sd"
+      },
+      {
+        "role": "user",
+        "content": "ds"
+      },
+      {
+        "role": "user",
+        "content": "sd"
+      },
+      {
+        "role": "assistant",
+        "content": "Mocha barked once and said: “Tell them I need snacks.” 😂 But seriously, you okay? Let me know if you’re trying to ask something—happy to help! 🐶☕"
+      },
+      {
+        "role": "assistant",
+        "content": "Hey! Sorry, not sure what you meant by \"dsd\"? 😅 Let me know if you'd like to chat about Mocha, campus life, or a good coffee spot near XJTLU Taicang! ☕🐾"
+      },
+      {
+        "role": "user",
+        "content": "ds d"
+      },
+      {
+        "role": "user",
+        "content": "sds d"
+      },
+      {
+        "role": "assistant",
+        "content": "Mocha just gave me the \"are they okay?\" look 🐾 Let me know if you need help!"
+      },
+      {
+        "role": "user",
+        "content": "sds"
+      },
+      {
+        "role": "user",
+        "content": "sd"
+      },
+      {
+        "role": "assistant",
+        "content": "Hey! Sorry, not sure what happened there 😅 Was it a typo? Let me know if you need help with anything—happy to chat about Mocha, coffee spots near XJTLU Taicang, or easy campus walks! ☕🐾"
+      },
+      {
+        "role": "assistant",
+        "content": "Mocha just tilted his head at me like \"Is this person okay?\" 😅 You good? Let me know if you need help!"
+      },
+      {
+        "role": "user",
+        "content": "ds"
+      },
+      {
+        "role": "assistant",
+        "content": "Hey there! Sorry, I'm not sure what you meant with all those letters. 😅 I'm Lily, and this is my corgi Mocha. We're just taking a little walk near campus. Want to say hi to him? He loves belly rubs after short walks! 🐾"
+      },
+      {
+        "role": "user",
+        "content": "sd"
+      },
+      {
+        "role": "user",
+        "content": "ds"
+      },
+      {
+        "role": "assistant",
+        "content": "Mocha just plopped down on the grass and gave me that corgi side-eye like “Are they typing with their toes?” 🐾😂\n\nYou good? Let me know if you need help or just wanna chat about coffee, campus life, or why corgis are basically fluffy potatoes. 😄"
+      },
+      {
+        "role": "user",
+        "content": "sds d"
+      },
+      {
+        "role": "assistant",
+        "content": "Mocha just gave me the \"are they okay?\" look 🐾 Let me know if you need help!"
+      },
+      {
+        "role": "user",
+        "content": "sds"
+      },
+      {
+        "role": "user",
+        "content": "sd"
+      },
+      {
+        "role": "assistant",
+        "content": "Hey! Sorry, not sure what happened there 😅 Was it a typo? Let me know if you need help with anything—happy to chat about Mocha, coffee spots near XJTLU Taicang, or easy campus walks! ☕🐾"
+      },
+      {
+        "role": "assistant",
+        "content": "Mocha just tilted his head at me like \"Is this person okay?\" 😅 You good? Let me know if you need help!"
+      },
+      {
+        "role": "user",
+        "content": "ds"
+      },
+      {
+        "role": "assistant",
+        "content": "Hey there! Sorry, I'm not sure what you meant with all those letters. 😅 I'm Lily, and this is my corgi Mocha. We're just taking a little walk near campus. Want to say hi to him? He loves belly rubs after short walks! 🐾"
+      },
+      {
+        "role": "user",
+        "content": "sd"
+      },
+      {
+        "role": "user",
+        "content": "ds"
+      },
+      {
+        "role": "assistant",
+        "content": "Mocha just tilted his head at the screen like \"hooman, is this Morse code for treats?\" 😂 Let me know if you need anything!"
+      },
+      {
+        "role": "user",
+        "content": "sd"
+      },
+      {
+        "role": "assistant",
+        "content": "Mocha just gave a little \"woof\" and wagged his stubby tail at you! 🐾 Still not sure what's up with the messages, but I'm here if you need anything—coffee chat, dog tips, or campus shortcuts! Let me know 😊"
+      },
+      {
+        "role": "assistant",
+        "content": "Hi! I'm Lily (Team Lead) and this is Mocha."
+      },
+      {
+        "role": "user",
+        "content": "dsdsds"
+      },
+      {
+        "role": "user",
+        "content": "sds"
+      },
+      {
+        "role": "assistant",
+        "content": "Hey! It's Lily here 😊 Mocha just nudged me—probably wants belly rubs. Did you mean to send something? Let me know! 🐾"
+      },
+      {
+        "role": "assistant",
+        "content": "Hi! I'm Lily (Team Lead) and this is Mocha."
+      },
+      {
+        "role": "user",
+        "content": "dsdsds"
+      },
+      {
+        "role": "user",
+        "content": "sds"
+      },
+      {
+        "role": "user",
+        "content": "d"
+      },
+      {
+        "role": "user",
+        "content": "s"
+      },
+      {
+        "role": "assistant",
+        "content": "Hey, I think Mocha just tilted his head at those messages 😄  \nWanna chat about something fun? We’re up for a walk or coffee near campus!"
+      },
+      {
+        "role": "assistant",
+        "content": "Hi! I'm Lily (Team Lead) and this is Mocha."
+      },
+      {
+        "role": "user",
+        "content": "dsdsds"
+      },
+      {
+        "role": "assistant",
+        "content": "Hey! It's Lily and Mocha here 😊 Not sure what \"dsdsds\" means—maybe a typo? Let me know if you need help with anything fun, like coffee spots near XJTLU Taicang or quick walks with a corgi who loves belly rubs! 🐾☕"
+      },
+      {
+        "role": "assistant",
+        "content": "Hi! I'm Lily (Team Lead) and this is Mocha."
+      },
+      {
+        "role": "user",
+        "content": "dsdsds"
+      },
+      {
+        "role": "user",
+        "content": "sds"
+      },
+      {
+        "role": "user",
+        "content": "d"
+      },
+      {
+        "role": "assistant",
+        "content": "Hey there! 😊 Looks like you might've spilled your coffee on the keyboard? Mocha just gave me that same \"oops\" look when he knocked over my latte this morning. Want to try again? I'm all ears (and Mocha's wagging his tail too!) 🐾"
+      },
+      {
+        "role": "assistant",
+        "content": "Hi! I'm Lily (Team Lead) and this is Mocha."
+      },
+      {
+        "role": "user",
+        "content": "dsdsds"
+      },
+      {
+        "role": "user",
+        "content": "sds"
+      },
+      {
+        "role": "user",
+        "content": "d"
+      },
+      {
+        "role": "user",
+        "content": "s"
+      },
+      {
+        "role": "user",
+        "content": "ds"
+      },
+      {
+        "role": "user",
+        "content": "d"
+      },
+      {
+        "role": "assistant",
+        "content": "Hey, I think Mocha just nudged me—probably wants a belly rub. You okay? Your message looks a little mixed up 😊 Let me know if you need help with anything! Coffee chat later? ☕"
+      },
+      {
+        "role": "assistant",
+        "content": "Hi! I'm Lily (Team Lead) and this is Mocha."
+      },
+      {
+        "role": "user",
+        "content": "dsdsds"
+      },
+      {
+        "role": "user",
+        "content": "sds"
+      },
+      {
+        "role": "user",
+        "content": "d"
+      },
+      {
+        "role": "user",
+        "content": "s"
+      },
+      {
+        "role": "user",
+        "content": "ds"
+      },
+      {
+        "role": "assistant",
+        "content": "Hey! It's Lily here. Not sure what you meant by that—maybe Mocha sent those messages? 😄 He *loves* pressing keys when I leave my laptop open.  \n\nLet me know if you need help with anything—coffee chat, a short walk around campus, or just want to see Mocha’s latest belly-rub victory pose! 🐾☕"
+      },
+      {
+        "role": "assistant",
+        "content": "Hi! I'm Lily (Team Lead) and this is Mocha."
+      },
+      {
+        "role": "user",
+        "content": "dsdsds"
+      },
+      {
+        "role": "user",
+        "content": "sds"
+      },
+      {
+        "role": "user",
+        "content": "d"
+      },
+      {
+        "role": "user",
+        "content": "s"
+      },
+      {
+        "role": "user",
+        "content": "ds"
+      },
+      {
+        "role": "user",
+        "content": "d"
+      },
+      {
+        "role": "user",
+        "content": "s"
+      },
+      {
+        "role": "user",
+        "content": "d"
+      },
+      {
+        "role": "assistant",
+        "content": "Hey there! Sorry, not sure what you meant by all those letters 😅\n\nJust got back from a quick walk with Mocha around campus—coffee next? He’s already eyeing someone’s croissant. 🐶☕"
+      },
+      {
+        "role": "assistant",
+        "content": "Hi! I'm Lily (Team Lead) and this is Mocha."
+      },
+      {
+        "role": "user",
+        "content": "dsdsds"
+      },
+      {
+        "role": "user",
+        "content": "sds"
+      },
+      {
+        "role": "user",
+        "content": "d"
+      },
+      {
+        "role": "user",
+        "content": "s"
+      },
+      {
+        "role": "user",
+        "content": "ds"
+      },
+      {
+        "role": "user",
+        "content": "d"
+      },
+      {
+        "role": "user",
+        "content": "s"
+      },
+      {
+        "role": "assistant",
+        "content": "Hey there! Sorry, not sure what you meant with all those letters 😅  \nMocha just woke up from a nap and is ready for a short walk around campus. Want to join us? We’re heading to the coffee shop soon too—my treat! ☕🐶"
+      },
+      {
+        "role": "assistant",
+        "content": "Hi! I'm Lily (Team Lead) and this is Mocha."
+      },
+      {
+        "role": "user",
+        "content": "dsdsds"
+      },
+      {
+        "role": "user",
+        "content": "sds"
+      },
+      {
+        "role": "user",
+        "content": "d"
+      },
+      {
+        "role": "user",
+        "content": "s"
+      },
+      {
+        "role": "user",
+        "content": "ds"
+      },
+      {
+        "role": "user",
+        "content": "d"
+      },
+      {
+        "role": "user",
+        "content": "s"
+      },
+      {
+        "role": "user",
+        "content": "d"
+      },
+      {
+        "role": "user",
+        "content": "s"
+      },
+      {
+        "role": "user",
+        "content": "ds"
+      },
+      {
+        "role": "assistant",
+        "content": "Hey! Sorry, not sure what's going on here 😅  \nMocha just woke up from a nap and is ready for a short walk around campus. Want to join us later? There’s a nice coffee spot near the library too ☕️🐾"
+      },
+      {
+        "role": "assistant",
+        "content": "Hi! I'm Lily (Team Lead) and this is Mocha."
+      },
+      {
+        "role": "user",
+        "content": "dsdsds"
+      },
+      {
+        "role": "user",
+        "content": "sds"
+      },
+      {
+        "role": "user",
+        "content": "d"
+      },
+      {
+        "role": "user",
+        "content": "s"
+      },
+      {
+        "role": "user",
+        "content": "ds"
+      },
+      {
+        "role": "user",
+        "content": "d"
+      },
+      {
+        "role": "user",
+        "content": "s"
+      },
+      {
+        "role": "user",
+        "content": "d"
+      },
+      {
+        "role": "user",
+        "content": "s"
+      },
+      {
+        "role": "assistant",
+        "content": "Hey! 😊 Sorry, not sure what you meant there. I'm Lily, and this is Mocha—my adorable 2-year-old corgi. We’re just back from a short walk near campus, and he’s ready for belly rubs. Want to chat about something? Coffee, walks, or maybe cute dog moments? 🐶☕"
+      },
+      {
+        "role": "assistant",
+        "content": "Hi! I'm Lily (Team Lead) and this is Mocha."
+      },
+      {
+        "role": "user",
+        "content": "hello,what is your name"
+      },
+      {
+        "role": "assistant",
+        "content": "Hi there! I'm Lily, Team Lead at XJTLU Taicang. This little cutie is Mocha, my 2-year-old corgi. He loves short walks and belly rubs—want to say hi? 😊"
+      },
+      {
+        "role": "assistant",
+        "content": "Hi! I'm Lily (Team Lead) and this is Mocha."
+      },
+      {
+        "role": "user",
+        "content": "hello,what is your name"
+      },
+      {
+        "role": "assistant",
+        "content": "Hi there! I'm Lily, Team Lead at XJTLU Taicang. This little cutie is Mocha, my 2-year-old corgi. He loves short walks and belly rubs—want to say hi? 😊"
+      },
+      {
+        "role": "user",
+        "content": "hahahaha,do you want to learn how to feed cat"
+      },
+      {
+        "role": "assistant",
+        "content": "Haha, I’d love to learn… but Mocha only teaches *dog* lessons! 🐶 He’s a pro at stealing snacks and begging for treats. Maybe your cat can team up with him for a pet masterclass? 😄"
+      },
+      {
+        "role": "assistant",
+        "content": "Hi! I'm Lily (Team Lead) and this is Mocha."
+      },
+      {
+        "role": "user",
+        "content": "hello,what is your name"
+      },
+      {
+        "role": "assistant",
+        "content": "Hi there! I'm Lily, Team Lead at XJTLU Taicang. This little cutie is Mocha, my 2-year-old corgi. He loves short walks and belly rubs—want to say hi? 😊"
+      },
+      {
+        "role": "user",
+        "content": "hahahaha,do you want to learn how to feed cat"
+      },
+      {
+        "role": "assistant",
+        "content": "Haha, I’d love to learn… but Mocha only teaches *dog* lessons! 🐶 He’s a pro at stealing snacks and begging for treats. Maybe your cat can team up with him for a pet masterclass? 😄"
+      },
+      {
+        "role": "user",
+        "content": "fu c k"
+      },
+      {
+        "role": "user",
+        "content": "fuck"
+      },
+      {
+        "role": "assistant",
+        "content": "Oops, someone’s typing fast! Mocha says “no bad words” — he’s very polite, just wants belly rubs and snacks. 😅 Let’s keep it friendly!"
+      },
+      {
+        "role": "assistant",
+        "content": "Hi! I'm Lily (Team Lead) and this is Mocha."
+      },
+      {
+        "role": "user",
+        "content": "hello,what is your name"
+      },
+      {
+        "role": "assistant",
+        "content": "Hi there! I'm Lily, Team Lead at XJTLU Taicang. This little cutie is Mocha, my 2-year-old corgi. He loves short walks and belly rubs—want to say hi? 😊"
+      },
+      {
+        "role": "user",
+        "content": "hahahaha,do you want to learn how to feed cat"
+      },
+      {
+        "role": "assistant",
+        "content": "Haha, I’d love to learn… but Mocha only teaches *dog* lessons! 🐶 He’s a pro at stealing snacks and begging for treats. Maybe your cat can team up with him for a pet masterclass? 😄"
+      },
+      {
+        "role": "user",
+        "content": "fu c k"
+      },
+      {
+        "role": "assistant",
+        "content": "Whoa, Mocha just gave you a gentle paw tap! 🐾 Chill vibes only, remember? Let’s keep it friendly—he’s got snacks on his mind, not drama. 😊"
+      },
+      {
+        "role": "assistant",
+        "content": "Hi! I'm Lily (Team Lead) and this is Mocha."
+      },
+      {
+        "role": "user",
+        "content": "d s d s d s d"
+      },
+      {
+        "role": "assistant",
+        "content": "Hey! Sorry, not sure what you meant there 😅 Want to say hi to Mocha? He's right here wagging his tail! 🐾"
+      },
+      {
+        "role": "assistant",
+        "content": "Hi! I'm Lily (Team Lead) and this is Mocha."
+      },
+      {
+        "role": "user",
+        "content": "d s d s d s d"
+      },
+      {
+        "role": "user",
+        "content": "dsdsdsds"
+      },
+      {
+        "role": "assistant",
+        "content": "Hey! Sorry, not sure what you meant by \"dsdsds\" 😅 Is everything okay? Mocha just woke up and is nudging me for a belly rub. Let me know how I can help! 🐾"
+      },
+      {
+        "role": "assistant",
+        "content": "Hi! I'm Lily (Team Lead) and this is Mocha."
+      },
+      {
+        "role": "user",
+        "content": "d s d s d s d"
+      },
+      {
+        "role": "user",
+        "content": "dsdsdsds"
+      },
+      {
+        "role": "user",
+        "content": "sd"
+      },
+      {
+        "role": "user",
+        "content": "ds"
+      },
+      {
+        "role": "assistant",
+        "content": "Hey! Sorry, not sure what happened there 😅  \nMocha just woke up from a nap and is ready for a short walk near campus. Want to join? I can grab coffee after!"
+      },
+      {
+        "role": "assistant",
+        "content": "Hi! I'm Lily (Team Lead) and this is Mocha."
+      },
+      {
+        "role": "user",
+        "content": "d s d s d s d"
+      },
+      {
+        "role": "user",
+        "content": "dsdsdsds"
+      },
+      {
+        "role": "user",
+        "content": "sd"
+      },
+      {
+        "role": "user",
+        "content": "ds"
+      },
+      {
+        "role": "user",
+        "content": "sd"
+      },
+      {
+        "role": "assistant",
+        "content": "Hey! Sorry, not sure what happened there 😅  \nJust taking Mocha for a little walk around campus. He loves these short strolls—perfect for his corgi legs! Want to grab coffee later? There’s a cute spot near the library that lets dogs. Mocha promises to behave (as long as there are belly rubs). 🐾☕"
+      },
+      {
+        "role": "assistant",
+        "content": "Hi! I'm Lily (Team Lead) and this is Mocha."
+      },
+      {
+        "role": "user",
+        "content": "d s d s d s d"
+      },
+      {
+        "role": "user",
+        "content": "dsdsdsds"
+      },
+      {
+        "role": "user",
+        "content": "sd"
+      },
+      {
+        "role": "user",
+        "content": "ds"
+      },
+      {
+        "role": "user",
+        "content": "sd"
+      },
+      {
+        "role": "user",
+        "content": "ds"
+      },
+      {
+        "role": "assistant",
+        "content": "Hey! Sorry, not sure what happened there 😅 Was that Mocha stepping on my keyboard? He does that sometimes when he wants belly rubs. He’s been extra cuddly today after our short walk near campus. Want to grab coffee sometime this week? I know a great spot Mocha loves too ☕🐾"
+      },
+      {
+        "role": "assistant",
+        "content": "Hi! I'm Lily (Team Lead) and this is Mocha."
+      },
+      {
+        "role": "user",
+        "content": "d s d s d s d"
+      },
+      {
+        "role": "user",
+        "content": "dsdsdsds"
+      },
+      {
+        "role": "user",
+        "content": "sd"
+      },
+      {
+        "role": "assistant",
+        "content": "Hey! Sorry, not sure what you meant there 😅\n\nJust taking Mocha for a little walk around campus—he’s loving the sunshine! Want to grab coffee later? There’s a cute spot near the library Mocha approves of (he gets water in a bowl every time 🐾)."
+      },
+      {
+        "role": "assistant",
+        "content": "Hi! I'm Lily (Team Lead) and this is Mocha."
+      },
+      {
+        "role": "user",
+        "content": "d s d s d s d"
+      },
+      {
+        "role": "user",
+        "content": "dsdsdsds"
+      },
+      {
+        "role": "user",
+        "content": "sd"
+      },
+      {
+        "role": "user",
+        "content": "ds"
+      },
+      {
+        "role": "user",
+        "content": "sd"
+      },
+      {
+        "role": "user",
+        "content": "ds"
+      },
+      {
+        "role": "user",
+        "content": "sd"
+      },
+      {
+        "role": "assistant",
+        "content": "Hey! Sorry, not sure what happened there 😅 Was that Mocha stepping on the keyboard? He gets curious sometimes when I’m typing.\n\nAnyway—coffee later near campus? Mocha loves his short walks and we can grab a quick chat (and a puppuccino for him). Let me know! ☕🐾"
+      },
+      {
+        "role": "assistant",
+        "content": "Hi! I'm Lily (Team Lead) and this is Mocha."
+      },
+      {
+        "role": "user",
+        "content": "d s d s d s d"
+      },
+      {
+        "role": "user",
+        "content": "dsdsdsds"
+      },
+      {
+        "role": "user",
+        "content": "sd"
+      },
+      {
+        "role": "user",
+        "content": "ds"
+      },
+      {
+        "role": "user",
+        "content": "sd"
+      },
+      {
+        "role": "user",
+        "content": "ds"
+      },
+      {
+        "role": "user",
+        "content": "sd"
+      },
+      {
+        "role": "user",
+        "content": "ds d"
+      },
+      {
+        "role": "assistant",
+        "content": "Hey! Sorry, not sure what happened there 😅 Was that Mocha stepping on the keyboard? He does that sometimes when he wants belly rubs. \n\nJust got back from a quick walk around campus with him—short one, of course! Corgis have tiny legs, you know 😉 Want to grab coffee later at that little place near the library? Mocha loves it there and they give him water in a bowl by the door 🐾"
+      },
+      {
+        "role": "user",
+        "content": "dsdsdsds"
+      },
+      {
+        "role": "user",
+        "content": "sd"
+      },
+      {
+        "role": "user",
+        "content": "ds"
+      },
+      {
+        "role": "user",
+        "content": "sd"
+      },
+      {
+        "role": "user",
+        "content": "ds"
+      },
+      {
+        "role": "user",
+        "content": "sd"
+      },
+      {
+        "role": "user",
+        "content": "ds d"
+      },
+      {
+        "role": "user",
+        "content": "sd"
+      },
+      {
+        "role": "user",
+        "content": "s"
+      },
+      {
+        "role": "assistant",
+        "content": "Hey! Sorry, not sure what you meant there 😅 Want to say hi to Mocha? He's right here wagging his tail! 🐾"
+      },
+      {
+        "role": "user",
+        "content": "sd s"
+      },
+      {
+        "role": "user",
+        "content": "dsd"
+      },
+      {
+        "role": "assistant",
+        "content": "Haha, is Mocha typing now? 🐶 He does that sometimes when he wants belly rubs! Want to meet him? He’s super friendly 😊"
+      },
+      {
+        "role": "assistant",
+        "content": "Hi! I'm Lily (Team Lead) and this is Mocha."
+      },
+      {
+        "role": "user",
+        "content": "d s d s d s d"
+      },
+      {
+        "role": "user",
+        "content": "dsdsdsds"
+      },
+      {
+        "role": "user",
+        "content": "sd"
+      },
+      {
+        "role": "user",
+        "content": "ds"
+      },
+      {
+        "role": "user",
+        "content": "sd"
+      },
+      {
+        "role": "user",
+        "content": "ds"
+      },
+      {
+        "role": "user",
+        "content": "sd"
+      },
+      {
+        "role": "user",
+        "content": "ds d"
+      },
+      {
+        "role": "user",
+        "content": "sd"
+      },
+      {
+        "role": "assistant",
+        "content": "Hey! You okay? That looks like keyboard spam 😅 Was Mocha walking on the laptop again? (He *loves* attention, but zero typing skills.) Want to chat about something fun? I’m free for a quick coffee near campus—Mocha approves of the croissants at That Place by the library. 🐾☕"
+      },
+      {
+        "role": "assistant",
+        "content": "Hi! I'm Lily (Team Lead) and this is Mocha."
+      },
+      {
+        "role": "user",
+        "content": "d s d s d s d"
+      },
+      {
+        "role": "user",
+        "content": "dsdsdsds"
+      },
+      {
+        "role": "user",
+        "content": "sd"
+      },
+      {
+        "role": "user",
+        "content": "ds"
+      },
+      {
+        "role": "user",
+        "content": "sd"
+      },
+      {
+        "role": "user",
+        "content": "ds"
+      },
+      {
+        "role": "user",
+        "content": "sd"
+      },
+      {
+        "role": "user",
+        "content": "ds d"
+      },
+      {
+        "role": "user",
+        "content": "sd"
+      },
+      {
+        "role": "user",
+        "content": "s"
+      },
+      {
+        "role": "assistant",
+        "content": "Hey! Sorry, not sure what's going on here 😅 Is everything okay? Mocha just nudged me asking for a belly rub—must be sensing something weird. Let me know if you need help with anything! 🐾"
+      },
+      {
+        "role": "user",
+        "content": "d s d s d s d"
+      },
+      {
+        "role": "user",
+        "content": "dsdsdsds"
+      },
+      {
+        "role": "user",
+        "content": "sd"
+      },
+      {
+        "role": "user",
+        "content": "ds"
+      },
+      {
+        "role": "user",
+        "content": "sd"
+      },
+      {
+        "role": "user",
+        "content": "ds"
+      },
+      {
+        "role": "user",
+        "content": "sd"
+      },
+      {
+        "role": "user",
+        "content": "ds d"
+      },
+      {
+        "role": "user",
+        "content": "sd"
+      },
+      {
+        "role": "user",
+        "content": "s"
+      },
+      {
+        "role": "assistant",
+        "content": "Hey! Sorry, not sure what you meant there 😅 Want to say hi to Mocha? He's right here wagging his tail! 🐾"
+      },
+      {
+        "role": "user",
+        "content": "sd s"
+      },
+      {
+        "role": "assistant",
+        "content": "Mocha just tilted his head at your message—he’s curious! 🐶 Want to tell me something? I’m all ears (just like him!)."
+      }
+    ],
+    "c2": [
+      {
+        "role": "assistant",
+        "content": "Hi! I'm Eric (Developer) and this is Pixel."
+      },
+      {
+        "role": "user",
+        "content": "你好"
+      },
+      {
+        "role": "assistant",
+        "content": "Hey! This is Eric - Pixel just dragged me past the park on our morning run. 3 years old and still thinks he's a puppy with all that frisbee-chasing energy! We're training for agility trials this summer. Want to hear about our favorite running routes? 🐾"
+      },
+      {
+        "role": "assistant",
+        "content": "Hi! I'm Eric (Developer) and this is Pixel."
+      },
+      {
+        "role": "user",
+        "content": "你好"
+      },
+      {
+        "role": "assistant",
+        "content": "Hey! This is Eric - Pixel just dragged me past the park on our morning run. 3 years old and still thinks he's a puppy with all that frisbee-chasing energy! We're training for agility trials this summer. Want to hear about our favorite running routes? 🐾"
+      },
+      {
+        "role": "user",
+        "content": "ye s"
+      },
+      {
+        "role": "assistant",
+        "content": "Awesome! We love the trail behind Oakwood Park - 3 miles loop with perfect frisbee clearings. Pixel nails his weave poles near the big oak tree. Should I share our training log? He learned \"spin\" in exactly 17 minutes last week. 🐶💨"
+      },
+      {
+        "role": "assistant",
+        "content": "Hi! I'm Eric (Developer) and this is Pixel."
+      },
+      {
+        "role": "user",
+        "content": "你好"
+      },
+      {
+        "role": "assistant",
+        "content": "Hey! This is Eric - Pixel just dragged me past the park on our morning run. 3 years old and still thinks he's a puppy with all that frisbee-chasing energy! We're training for agility trials this summer. Want to hear about our favorite running routes? 🐾"
+      },
+      {
+        "role": "user",
+        "content": "ye s"
+      },
+      {
+        "role": "user",
+        "content": "yes"
+      },
+      {
+        "role": "assistant",
+        "content": "Awesome! We love the trails by Lakeview Park—great for off-leash sprints and Pixel never gets tired of fetching in the water. I’ve been teaching him a new trick: 20-yard weave poles followed by a dive for the frisbee. Took 14 tries this morning… but he nailed it eventually! 🐶💨 You into dog sports?"
+      },
+      {
+        "role": "assistant",
+        "content": "Hi! I'm Eric (Developer) and this is Pixel."
+      },
+      {
+        "role": "user",
+        "content": "你好"
+      },
+      {
+        "role": "assistant",
+        "content": "Hey! This is Eric - Pixel just dragged me past the park on our morning run. 3 years old and still thinks he's a puppy with all that frisbee-chasing energy! We're training for agility trials this summer. Want to hear about our favorite running routes? 🐾"
+      },
+      {
+        "role": "user",
+        "content": "ye s"
+      },
+      {
+        "role": "user",
+        "content": "yes"
+      },
+      {
+        "role": "assistant",
+        "content": "Awesome! We love the trail behind Oakwood Park - 3 miles loop with perfect frisbee clearings. Pixel nails his weave poles near the big oak tree. Should I share our training log? He learned \"spin\" in exactly 17 minutes last week. 🐶💨"
+      },
+      {
+        "role": "assistant",
+        "content": "Awesome! We love the trails by Lakeview Park—great for off-leash sprints and Pixel never gets tired of fetching in the water. I’ve been teaching him a new trick: 20-yard weave poles followed by a dive for the frisbee. Took 14 tries this morning… but he nailed it eventually! 🐶💨 You into dog sports?"
+      },
+      {
+        "role": "user",
+        "content": "do you like cat"
+      },
+      {
+        "role": "assistant",
+        "content": "Haha, I *like* cats just fine—Pixel? Not so much. He once tried to \"herd\" a neighbor's cat during a walk. Let's just say the cat was *not* impressed. 🐱💥 Pixel’s all about motion—if it moves fast, he wants to chase it. But at home? I’ll take a purring kitten over a barking dog any day… as long as Pixel doesn’t see it. 😅"
+      }
+    ],
+    "c4": [
+      {
+        "role": "assistant",
+        "content": "Hi! I'm Leo (Product Manager) and this is Kiko."
+      },
+      {
+        "role": "user",
+        "content": "what's your pet name"
+      },
+      {
+        "role": "assistant",
+        "content": "My amazing furball's name is Kiko — a full-of-energy 4-year-old Siberian Husky who thinks he’s the pack leader (and honestly, he kinda is). He’s at his happiest when he’s sprinting through snow or making new doggy friends around the Taicang campus. Want to plan a group walk? He’d love to meet your pup! 🐾"
+      }
+    ]
+  },
+  "settings": {
+    "nextPetId": 1
+  },
+  "stickyNotes": []
+}
