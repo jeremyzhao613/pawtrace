@@ -4,6 +4,9 @@
   <meta charset="UTF-8" />
   <title>PawTrace · Pixel Pet Social</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="preconnect" href="https://cdn.tailwindcss.com" crossorigin>
+  <link rel="preconnect" href="https://cdn.bootcdn.net" crossorigin>
+  <link rel="preload" as="image" href="/assets/m1.jpg">
   <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Font Awesome -->
@@ -13,11 +16,11 @@
       theme: {
         extend: {
           colors: {
-            primary: '#ff914d',
-            secondary: '#ffe3c7',
-            accent: '#ffc86b',
-            neutral: '#fff7ed',
-            dark: '#3b2414',
+            primary: '#99cdd8',
+            secondary: '#e1f5f8',
+            accent: '#bfe5ec',
+            neutral: '#fffef1',
+            dark: '#1f3b42',
           },
           fontFamily: {
             pixel: ['"Press Start 2P"', 'system-ui', 'sans-serif'],
@@ -27,38 +30,60 @@
     }
   </script>
   <style type="text/tailwindcss">
+    @layer base {
+      body {
+        @apply bg-neutral text-dark;
+        background-image:
+          radial-gradient(circle at 14% 18%, rgba(255, 210, 233, 0.35), transparent 55%),
+          radial-gradient(circle at 78% 6%, rgba(255, 245, 253, 0.7), transparent 60%),
+          radial-gradient(circle at 65% 30%, rgba(255, 200, 220, 0.35), transparent 60%),
+          linear-gradient(180deg, #fffef8 0%, #ffeef6 40%, #fffef1 100%);
+        min-height: 100vh;
+      }
+    }
     @layer utilities {
       .pixel-border {
+        border: 1px solid rgba(255, 255, 255, 0.55);
         box-shadow:
-          0 0 0 2px theme('colors.dark'),
-          4px 4px 0 0 theme('colors.dark');
+          0 10px 35px rgba(31, 59, 66, 0.08),
+          0 2px 10px rgba(31, 59, 66, 0.06),
+          inset 0 1px 0 rgba(255, 255, 255, 0.6);
+        background-clip: padding-box;
       }
       .pixel-button {
-        @apply bg-primary text-white px-4 py-2 font-medium pixel-border uppercase text-xs tracking-wide transition-all duration-200 hover:scale-105 active:scale-95;
+        @apply bg-primary/90 text-dark px-5 py-2 font-medium rounded-full tracking-wide transition-all duration-200 shadow-lg shadow-primary/20 hover:-translate-y-0.5;
+        min-height: 44px;
       }
       .pixel-card {
-        @apply bg-neutral pixel-border rounded-sm p-4 animation-slideIn;
+        @apply bg-white/70 border border-white/60 rounded-3xl p-6 backdrop-blur-2xl text-dark shadow-[0_25px_70px_rgba(31,59,66,0.08)];
+        background-color: rgba(255, 255, 255, 0.7);
       }
       .pixel-input {
-        @apply w-full border-2 border-dark px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary text-sm transition-all;
+        @apply w-full border border-white/70 px-4 py-2.5 rounded-2xl bg-white/70 text-sm text-dark placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/60 focus:border-primary/40 transition-all;
+      }
+      .pixel-input:focus {
+        box-shadow: 0 0 0 10px rgba(153, 205, 216, 0.14);
       }
       .map-marker {
         @apply absolute w-8 h-8 rounded-full border-2 border-dark flex items-center justify-center text-white font-semibold cursor-pointer transition-transform duration-200 shadow-lg;
-        background: linear-gradient(135deg, #ff914d, #d46a2e);
-        box-shadow: 4px 4px 0 rgba(59, 36, 20, 0.55);
+        background: linear-gradient(135deg, #99cdd8, #5ba7b8);
+        box-shadow: 4px 4px 0 rgba(31, 59, 66, 0.55);
       }
       .map-marker:hover {
         transform: translateY(-4px) scale(1.1);
       }
       .map-marker-park,
       .map-marker-cafe {
-        background: linear-gradient(135deg, #ff914d, #d46a2e);
+        background: linear-gradient(135deg, #99cdd8, #5ba7b8);
+      }
+      #map-pets-layer {
+        pointer-events: none;
       }
       .map-pet-icon {
         @apply absolute flex flex-col items-center gap-1 text-xs pointer-events-auto;
       }
       .scroll-section {
-        @apply transition-transform duration-700 ease-out opacity-0 translate-y-6;
+        @apply transition-transform duration-700 ease-out opacity-100 translate-y-0;
       }
       .scroll-section.visible {
         @apply opacity-100 translate-y-0;
@@ -77,8 +102,8 @@
         animation: slideIn 0.3s ease-out;
       }
       @keyframes pulse-glow {
-        0%, 100% { box-shadow: 0 0 0 0 rgba(255, 145, 77, 0.7); }
-        50% { box-shadow: 0 0 0 8px rgba(255, 145, 77, 0); }
+        0%, 100% { box-shadow: 0 0 0 0 rgba(153, 205, 216, 0.7); }
+        50% { box-shadow: 0 0 0 8px rgba(153, 205, 216, 0); }
       }
       .pulse-glow {
         animation: pulse-glow 2s infinite;
@@ -120,105 +145,1240 @@
       .draggable {
         cursor: grab;
       }
-      .draggable:active {
+      .draggable:active,
+      .draggable.grabbing {
         cursor: grabbing;
       }
       .map-container {
         touch-action: pinch-zoom;
       }
+      .map-marker {
+        position: absolute;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        border: 2px solid rgba(56, 189, 248, 0.8);
+        background: rgba(255, 255, 255, 0.9);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transform: translate(-50%, -50%);
+        cursor: pointer;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+      .map-marker:hover {
+        transform: translate(-50%, -50%) scale(1.1);
+      }
+      .map-marker--active {
+        box-shadow: 0 0 0 8px rgba(59, 130, 246, 0.25);
+        transform: translate(-50%, -50%) scale(1.15);
+        animation: mapMarkerPulse 1.6s ease-in-out infinite;
+      }
+      .map-pet {
+        position: absolute;
+        width: 64px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.15rem;
+        transform: translate(-50%, -50%);
+        pointer-events: none;
+        animation: pixelWalk 2.4s ease-in-out infinite;
+      }
+      .map-pet-circle {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: rgba(59, 130, 246, 0.15);
+        border: 1px solid rgba(59, 130, 246, 0.4);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+      }
+      .map-pet-name {
+        font-size: 0.65rem;
+        color: #0f172a;
+        font-weight: 600;
+        text-shadow: 0 1px 4px rgba(255, 255, 255, 0.8);
+      }
+      .community-card {
+        display: flex;
+        flex-direction: column;
+        gap: 0.65rem;
+        border-radius: 1.25rem;
+        padding: 0.85rem;
+        background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.85));
+        border: 1px solid rgba(255, 255, 255, 0.6);
+        box-shadow: 0 20px 50px rgba(31, 59, 66, 0.12);
+      }
+      .community-cover {
+        position: relative;
+        width: 100%;
+        aspect-ratio: 4 / 5;
+        border-radius: 1rem;
+        overflow: hidden;
+        background: linear-gradient(135deg, #dff3f7, #ffeef6);
+      }
+      .community-cover img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      .community-badge {
+        position: absolute;
+        top: 0.5rem;
+        left: 0.5rem;
+        padding: 0.2rem 0.55rem;
+        border-radius: 999px;
+        font-size: 0.65rem;
+        font-weight: 700;
+        background: rgba(153,205,216,0.9);
+        color: #0f172a;
+        box-shadow: 0 6px 12px rgba(31,59,66,0.18);
+      }
+      .community-location {
+        position: absolute;
+        bottom: 0.5rem;
+        left: 0.5rem;
+        padding: 0.3rem 0.65rem;
+        border-radius: 0.75rem;
+        font-size: 0.68rem;
+        font-weight: 600;
+        background: rgba(15,23,42,0.6);
+        color: #fff;
+        backdrop-filter: blur(6px);
+      }
+      .location-tag {
+        border-radius: 999px;
+        padding: 0.15rem 0.7rem;
+        font-size: 0.6rem;
+        background: rgba(15, 23, 42, 0.08);
+        color: #0f172a;
+      }
+      .ai-panel {
+        position: relative;
+        overflow: hidden;
+        background: radial-gradient(circle at 20% 20%, rgba(153,205,216,0.25), transparent 60%),
+          radial-gradient(circle at 80% 0%, rgba(255,207,228,0.25), transparent 60%),
+          rgba(255,255,255,0.7);
+      }
+      .ai-panel::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(120deg, rgba(153,205,216,0.35), rgba(255,207,228,0.3));
+        opacity: 0.5;
+        filter: blur(60px);
+        z-index: 0;
+      }
+      .ai-panel > * {
+        position: relative;
+        z-index: 1;
+      }
+      .ai-ribbon {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.4rem 1rem;
+        border-radius: 999px;
+        font-size: 0.65rem;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        background: rgba(31, 59, 66, 0.08);
+      }
+      .ai-service-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 0.75rem;
+      }
+      .ai-service-card {
+        border: 1px solid rgba(153,205,216,0.35);
+        border-radius: 1.75rem;
+        padding: 1rem;
+        background: rgba(255,255,255,0.7);
+        box-shadow: 0 20px 40px rgba(31,59,66,0.12);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+      .ai-service-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 25px 55px rgba(31,59,66,0.18);
+      }
+      .ai-service-card-mobile {
+        display: grid;
+        align-content: start;
+        gap: 0.35rem;
+      }
+      .ai-card-icon {
+        width: 2.25rem;
+        height: 2.25rem;
+      }
+      .ai-card-desc {
+        line-height: 1.35;
+      }
+      @media (max-width: 640px) {
+        .ai-service-card-mobile {
+          padding: 0.75rem 0.7rem;
+          border-radius: 1.15rem;
+          gap: 0.4rem;
+        }
+        .ai-service-card-mobile .ai-card-icon {
+          width: 1.9rem;
+          height: 1.9rem;
+        }
+        .ai-service-card-mobile .ai-card-desc {
+          font-size: 0.7rem;
+          line-height: 1.2;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        }
+        .ai-service-card-mobile .text-sm {
+          font-size: 0.8rem;
+        }
+      }
+      @keyframes aiGlow {
+        0% { box-shadow: 0 0 40px rgba(153,205,216,0.15); }
+        50% { box-shadow: 0 0 55px rgba(255,207,228,0.35); }
+        100% { box-shadow: 0 0 40px rgba(153,205,216,0.15); }
+      }
+      .ai-output-panel {
+        animation: aiGlow 6s ease-in-out infinite;
+      }
+      .ai-output-panel .ai-fade {
+        animation: fadeSlideIn 0.35s ease-out;
+      }
+      .glass-panel {
+        @apply bg-white/60 border border-white/50 rounded-[2.5rem] p-8 backdrop-blur-3xl shadow-[0_45px_120px_rgba(31,59,66,0.08)];
+        position: relative;
+        overflow: hidden;
+      }
+      .glass-panel > * {
+        position: relative;
+        z-index: 1;
+      }
+      .glass-panel::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        pointer-events: none;
+      }
+      .halo-pulse {
+        position: absolute;
+        filter: blur(60px);
+        opacity: 0.7;
+        pointer-events: none;
+        z-index: 0;
+        animation: auroraShift 12s ease-in-out infinite alternate;
+      }
+      .halo-soft-pink {
+        background: radial-gradient(circle, rgba(255, 208, 226, 0.75), rgba(255, 226, 239, 0.4), transparent 65%);
+      }
+      #login-screen {
+        position: relative;
+        overflow: hidden;
+        background:
+          radial-gradient(circle at 20% 20%, rgba(255, 210, 233, 0.85), transparent 52%),
+          radial-gradient(circle at 80% 12%, rgba(180, 224, 245, 0.78), transparent 48%),
+          linear-gradient(135deg, #fdf3fb 0%, #ffe5f0 45%, #eaf6ff 100%);
+        isolation: isolate;
+      }
+      #login-screen::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/2/29/BlankMap-World6.svg/2000px-BlankMap-World6.svg.png');
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: 140%;
+        opacity: 0.6;
+        mix-blend-mode: screen;
+        filter: drop-shadow(0 20px 45px rgba(255, 180, 215, 0.45));
+        pointer-events: none;
+        }
+      @keyframes floatUp {
+        from { opacity: 0; transform: translateY(14px) scale(0.98); }
+        to { opacity: 1; transform: translateY(0) scale(1); }
+      }
+      .login-animate {
+        opacity: 0;
+        animation: floatUp 0.7s ease forwards;
+        animation-delay: var(--delay, 0s);
+      }
+      .login-bg-layer {
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at 20% 20%, rgba(153,205,216,0.28), transparent 45%),
+          radial-gradient(circle at 80% 10%, rgba(255,210,233,0.32), transparent 50%),
+          linear-gradient(135deg, rgba(255, 255, 255, 0.65), rgba(255, 255, 255, 0));
+        opacity: 0.8;
+        pointer-events: none;
+      }
+      .login-orb {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(50px);
+        opacity: 0.45;
+        pointer-events: none;
+        mix-blend-mode: screen;
+      }
+      .login-orb.a { width: 240px; height: 240px; background: #99cdd8; top: -60px; left: -40px; }
+      .login-orb.b { width: 180px; height: 180px; background: #ffd2e9; bottom: 40px; left: 20%; }
+      .login-orb.c { width: 200px; height: 200px; background: #c7f2ff; top: 10%; right: -60px; }
+      .login-chip {
+        padding: 0.35rem 0.75rem;
+        border-radius: 999px;
+        background: linear-gradient(135deg, rgba(153,205,216,0.2), rgba(91,167,184,0.25));
+        border: 1px solid rgba(255,255,255,0.6);
+        box-shadow: 0 12px 30px rgba(31,59,66,0.14);
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: #1f3b42;
+      }
+      @keyframes gentlePan {
+        0% { transform: translate3d(-2%, -1%, 0) scale(1.01); opacity: 0.28; }
+        50% { transform: translate3d(2%, 2%, 0) scale(1.02); opacity: 0.38; }
+        100% { transform: translate3d(-1%, 1%, 0) scale(1.01); opacity: 0.3; }
+      }
+      .map-container::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at 30% 30%, rgba(153,205,216,0.15), transparent 45%),
+          radial-gradient(circle at 70% 60%, rgba(255,207,228,0.18), transparent 50%);
+        mix-blend-mode: screen;
+        pointer-events: none;
+        animation: gentlePan 18s ease-in-out infinite;
+      }
+      @keyframes mapMarkerPulse {
+        0% { box-shadow: 0 0 0 6px rgba(59, 130, 246, 0.12); }
+        50% { box-shadow: 0 0 0 10px rgba(153, 205, 216, 0.26); }
+        100% { box-shadow: 0 0 0 6px rgba(59, 130, 246, 0.12); }
+      }
+      .app-shell-wrapper {
+        width: 100%;
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+      .app-sidebar {
+        @apply hidden lg:flex flex-col gap-8 w-full lg:w-64 2xl:w-72;
+      }
+      .app-nav-button {
+        @apply flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold text-gray-600 transition-all duration-200;
+        background: rgba(255, 255, 255, 0.5);
+        border: 1px solid transparent;
+      }
+      .app-nav-button i {
+        @apply text-primary text-lg;
+      }
+      .app-nav-button.active {
+        background: linear-gradient(135deg, rgba(153, 205, 216, 0.25), rgba(153, 205, 216, 0.5));
+        border-color: rgba(153, 205, 216, 0.4);
+        @apply text-dark;
+      }
+      .app-shell.collapsed .app-sidebar {
+        width: 88px;
+        min-width: 88px;
+        padding-inline: 1.25rem;
+      }
+      .app-shell.collapsed .app-nav-button span,
+      .app-shell.collapsed .app-sidebar h3,
+      .app-shell.collapsed .app-sidebar .text-xs {
+        display: none !important;
+      }
+      .app-shell.collapsed .app-nav-button {
+        justify-content: center;
+        padding-inline: 0.65rem;
+      }
+      .app-shell.collapsed .app-shell-wrapper {
+        max-width: calc(100% - 88px);
+      }
+      .app-shell.collapsed main {
+        padding-inline: 1rem;
+      }
+      .map-layout {
+        align-items: stretch;
+      }
+      .map-sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+        height: 100%;
+      }
+      .map-sidebar .pixel-card {
+        flex-shrink: 0;
+      }
+      .map-location-card {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+      }
+      .map-location-card #location-list {
+        flex: 1;
+        overflow-y: auto;
+        padding-right: 0.35rem;
+      }
+      .map-location-card #location-list::-webkit-scrollbar {
+        width: 6px;
+      }
+      .map-location-card #location-list::-webkit-scrollbar-thumb {
+        background: rgba(153, 205, 216, 0.6);
+        border-radius: 999px;
+      }
+      .map-location-card #location-list::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.4);
+        border-radius: 999px;
+      }
+      main.app-main {
+        min-height: 70vh;
+        display: flex;
+        flex-direction: column;
+      }
+      main.app-main > section {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+      }
+      .tab-page {
+        flex: 1;
+        min-height: 60vh;
+      }
+      #mobile-tabbar {
+        pointer-events: none;
+        display: none;
+      }
+      #mobile-tabbar.hidden {
+        display: none !important;
+      }
+      #mobile-tabbar .mobile-tabbar {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 0.55rem;
+        padding: 0.75rem 0.9rem;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.65);
+        background: rgba(255, 255, 255, 0.92);
+        box-shadow: 0 22px 40px rgba(31, 59, 66, 0.2);
+        backdrop-filter: blur(18px);
+        pointer-events: auto;
+      }
+      #mobile-tabbar .app-tab {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.35rem 0.25rem;
+        border-radius: 1.25rem;
+        border: 1px solid transparent;
+        font-size: 0.68rem;
+        font-weight: 600;
+        color: #5a6b72;
+      }
+      #mobile-tabbar .app-tab i {
+        font-size: 1rem;
+        color: #1f3b42;
+      }
+      #mobile-tabbar .app-tab.active {
+        color: #1f3b42;
+        border-color: rgba(153, 205, 216, 0.45);
+        background: rgba(153, 205, 216, 0.2);
+        box-shadow: 0 12px 18px rgba(153, 205, 216, 0.25);
+      }
+      @media (max-width: 1024px) {
+        #app-root {
+          padding: 2.5rem 1.5rem 8rem;
+        }
+        .glass-panel {
+          padding: 1.5rem;
+        }
+        .pixel-card {
+          padding: 1.2rem;
+        }
+        #ai-intro-toggle {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.25rem;
+        }
+        #ai-intro-body {
+          display: none;
+        }
+        #ai-intro-body.show {
+          display: block;
+        }
+        .chat-layout {
+          display: flex;
+          flex-direction: column;
+        }
+        .chat-main {
+          order: 1;
+        }
+        .chat-left-pane {
+          order: 2;
+          display: none;
+          position: fixed;
+          inset: 0;
+          z-index: 50;
+          background: rgba(255, 255, 255, 0.97);
+          padding: 1rem;
+          border-radius: 1.5rem;
+          box-shadow: 0 20px 60px rgba(31, 59, 66, 0.25);
+          overflow-y: auto;
+        }
+        .chat-left-pane.open {
+          display: flex;
+        }
+        .chat-toggle-contacts {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.35rem;
+        }
+        .chat-back-btn {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.35rem;
+        }
+        .pet-scroll-card {
+          max-height: 620px;
+        }
+        .pet-scroll-body {
+          overflow-y: auto;
+          max-height: 520px;
+        }
+        .chat-main {
+          min-height: 70vh;
+          position: relative;
+        }
+        #chat-messages {
+          padding-bottom: 0.5rem;
+        }
+        .chat-input-bar {
+          position: sticky;
+          bottom: 0;
+          background: rgba(255, 255, 255, 0.95);
+          border-radius: 1.25rem;
+          padding-bottom: 0.25rem;
+        }
+        .community-cover {
+          aspect-ratio: 3 / 4;
+          border-radius: 1.1rem;
+        }
+        .community-card {
+          padding: 0.75rem;
+          gap: 0.55rem;
+        }
+      }
+      @media (max-width: 768px) {
+        body {
+          overflow-x: hidden;
+        }
+        #login-screen {
+          padding: 3.5rem 1.5rem;
+        }
+        .app-shell header.glass-panel {
+          display: none;
+        }
+        #login-screen .glass-panel {
+          margin-bottom: 1.5rem;
+        }
+        #login-screen h1 {
+          font-size: clamp(2rem, 6vw, 2.8rem);
+        }
+        .app-shell {
+          gap: 1.5rem;
+        }
+        .app-shell > .flex-1 {
+          order: 1;
+        }
+        .app-sidebar {
+          order: 2;
+          display: none;
+        }
+        #mobile-tabbar {
+          display: block;
+        }
+        .glass-panel {
+          padding: 1.25rem;
+        }
+        .pixel-card {
+          padding: 1rem;
+        }
+        header.glass-panel {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+        #map-container {
+          height: 50vh;
+        }
+      }
+      @media (max-width: 540px) {
+        #app-root {
+          padding: 2rem 1rem 8.5rem;
+        }
+        #login-screen {
+          padding: 2.5rem 1.1rem;
+        }
+        #login-screen .grid {
+          grid-template-columns: 1fr;
+        }
+        #mobile-tabbar .app-tab {
+          font-size: 0.6rem;
+        }
+        .pixel-input {
+          padding: 0.65rem 0.85rem;
+        }
+        .pixel-button {
+          padding: 0.7rem 1rem;
+        }
+        .community-card {
+          border-radius: 1rem;
+        }
+        .community-location {
+          font-size: 0.62rem;
+        }
+        #community-pet-feed {
+          gap: 0.8rem;
+        }
+        .community-cover {
+          aspect-ratio: 9 / 16;
+        }
+      }
+      @keyframes auroraShift {
+        0% {
+          transform: translateY(-10%) translateX(0);
+        }
+        50% {
+          transform: translateY(10%) translateX(4%);
+        }
+        100% {
+          transform: translateY(-5%) translateX(-4%);
+        }
+      }
+      .status-pill.active,
+      .status-pill:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 25px 45px rgba(20, 34, 48, 0.35);
+      }
+      .magic-bento-halo {
+        position: relative;
+        isolation: isolate;
+        overflow: hidden;
+      }
+      .magic-bento-halo::before,
+      .magic-bento-halo::after {
+        content: '';
+        position: absolute;
+        border-radius: 999px;
+        filter: blur(60px);
+        opacity: 0.7;
+        animation: magicHalo 8s ease-in-out infinite alternate;
+        pointer-events: none;
+        z-index: 0;
+      }
+      .chat-toggle-contacts {
+        display: none;
+      }
+      .chat-back-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+      }
+      .contact-hover-card {
+        position: absolute;
+        z-index: 60;
+        width: 240px;
+        background: rgba(255, 255, 255, 0.96);
+        border: 1px solid rgba(255, 255, 255, 0.7);
+        border-radius: 1.2rem;
+        box-shadow: 0 20px 50px rgba(31, 59, 66, 0.2);
+        padding: 0.75rem;
+        pointer-events: none;
+        opacity: 0;
+        transform: translateY(6px);
+        transition: opacity 0.16s ease, transform 0.16s ease;
+        backdrop-filter: blur(10px);
+      }
+      .contact-hover-card.show {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      .contact-hover-card h4 {
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: #1f3b42;
+      }
+      .contact-hover-card p {
+        font-size: 0.76rem;
+        color: #4b5563;
+        line-height: 1.3;
+      }
+      .contact-hover-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.35rem;
+        margin-top: 0.35rem;
+      }
+      .contact-hover-tags span {
+        font-size: 0.7rem;
+        padding: 0.2rem 0.5rem;
+        border-radius: 999px;
+        background: rgba(153, 205, 216, 0.22);
+        color: #1f3b42;
+        font-weight: 600;
+      }
+      /* True Focus text highlight */
+      .true-focus {
+        position: relative;
+        display: flex;
+        gap: 0.7rem;
+        align-items: center;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+        color: #1f3b42;
+      }
+      .true-focus-word {
+        position: relative;
+        font-size: clamp(1.6rem, 3vw, 2.1rem);
+        font-weight: 800;
+        cursor: default;
+        transition: filter 0.3s ease, color 0.3s ease;
+        filter: blur(4px);
+        opacity: 0.85;
+      }
+      .true-focus-word.active {
+        filter: blur(0);
+        opacity: 1;
+      }
+      .true-focus-frame {
+        position: absolute;
+        top: 0;
+        left: 0;
+        pointer-events: none;
+        box-sizing: content-box;
+        border: none;
+        opacity: 0;
+      }
+      .true-focus-frame.show {
+        opacity: 1;
+      }
+      .true-focus-corner {
+        position: absolute;
+        width: 0.9rem;
+        height: 0.9rem;
+        border: 3px solid var(--focus-border, #99cdd8);
+        filter: drop-shadow(0 0 6px var(--focus-border, #99cdd8));
+        border-radius: 3px;
+      }
+      .true-focus-corner.tl { top: -8px; left: -8px; border-right: none; border-bottom: none; }
+      .true-focus-corner.tr { top: -8px; right: -8px; border-left: none; border-bottom: none; }
+      .true-focus-corner.bl { bottom: -8px; left: -8px; border-right: none; border-top: none; }
+      .true-focus-corner.br { bottom: -8px; right: -8px; border-left: none; border-top: none; }
+      .chat-input-bar {
+        position: static;
+      }
+      .pet-scroll-card {
+        display: flex;
+        flex-direction: column;
+      }
+      .pet-scroll-body {
+        flex: 1;
+        min-height: 0;
+      }
+      .magic-bento-halo::before {
+        width: 260px;
+        height: 260px;
+        background: radial-gradient(circle, rgba(153, 205, 216, 0.6), transparent 70%);
+        top: -60px;
+        right: -30px;
+      }
+      .magic-bento-halo::after {
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(circle, rgba(255, 207, 228, 0.75), transparent 65%);
+        bottom: -90px;
+        left: -50px;
+        animation-delay: 1.2s;
+      }
+      @keyframes magicHalo {
+        0% {
+          transform: translate3d(0, 0, 0) scale(1);
+        }
+        100% {
+          transform: translate3d(25px, -20px, 0) scale(1.08);
+        }
+      }
+      @keyframes bubblePop {
+        0% { transform: scale(0.98) translateY(4px); opacity: 0; }
+        60% { transform: scale(1.02) translateY(0); opacity: 1; }
+        100% { transform: scale(1); opacity: 1; }
+      }
+      .bubble-entry {
+        animation: bubblePop 0.22s ease-out;
+      }
+      .bubble-image img {
+        box-shadow: 0 10px 28px rgba(31,59,66,0.18);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+      }
+      .bubble-image img:hover {
+        transform: translateY(-3px) scale(1.01);
+        box-shadow: 0 18px 42px rgba(31,59,66,0.25);
+      }
+      @keyframes bubbleSoft {
+        0% { transform: translateY(8px) scale(0.97); opacity: 0; }
+        60% { transform: translateY(-2px) scale(1.02); opacity: 1; }
+        100% { transform: translateY(0) scale(1); opacity: 1; }
+      }
+      .bubble-bounce {
+        animation: bubbleSoft 0.26s ease-out;
+      }
+      @keyframes fadeSlideIn {
+        0% { opacity: 0; transform: translateY(8px); }
+        100% { opacity: 1; transform: translateY(0); }
+      }
+      .ai-fade {
+        animation: fadeSlideIn 0.3s ease-out;
+      }
+      .tab-page {
+        transition: opacity 0.25s ease, transform 0.25s ease;
+      }
+      .tab-page.hidden {
+        display: none;
+        opacity: 0;
+        transform: translateY(6px);
+      }
+      #location-card {
+        transition: opacity 0.25s ease, transform 0.25s ease, backdrop-filter 0.25s ease;
+        opacity: 0;
+        transform: translateY(8px);
+        backdrop-filter: blur(10px);
+        pointer-events: none;
+      }
+      #location-card:not(.hidden) {
+        opacity: 1;
+        transform: translateY(0);
+        pointer-events: auto;
+      }
+      #location-card .pixel-card {
+        backdrop-filter: blur(16px);
+      }
+      #contact-list button {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+      #contact-list button:hover {
+        transform: translateX(-4px);
+        box-shadow: 0 10px 24px rgba(31,59,66,0.12);
+      }
+      /* Shared container tuning */
+      #location-card {
+        max-height: 70vh;
+        overflow-y: auto;
+      }
+      #diag-result {
+        max-height: 340px;
+        overflow-y: auto;
+      }
+      @media (min-width: 1280px) {
+        #diag-result {
+          max-height: 420px;
+        }
+      }
+      #chat-messages {
+        scrollbar-width: thin;
+      }
+      /* Delight animations */
+      .pixel-button {
+        position: relative;
+        overflow: hidden;
+        isolation: isolate;
+      }
+      .pixel-button::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at 20% 20%, rgba(255,255,255,0.6), transparent 40%),
+          radial-gradient(circle at 80% 10%, rgba(255,255,255,0.35), transparent 35%);
+        opacity: 0;
+        transform: translateY(20%);
+        transition: opacity 0.35s ease, transform 0.35s ease;
+        pointer-events: none;
+        z-index: 0;
+      }
+      .pixel-button:hover::after {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      .pixel-button:hover {
+        box-shadow: 0 12px 32px rgba(153, 205, 216, 0.35);
+      }
+      .pixel-card,
+      .glass-panel {
+        transition: transform 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
+      }
+      .pixel-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 28px 80px rgba(31, 59, 66, 0.16);
+        border-color: rgba(153, 205, 216, 0.4);
+      }
+      .glass-panel:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 40px 110px rgba(31, 59, 66, 0.12);
+        border-color: rgba(255, 255, 255, 0.75);
+      }
+      .motion-tilt:hover {
+        transform: translateY(-8px) scale(1.01) rotate(-0.35deg);
+      }
+      @keyframes auroraDrift {
+        0% { transform: translate3d(-4%, -2%, 0) scale(1); opacity: 0.6; }
+        50% { transform: translate3d(4%, 3%, 0) scale(1.05); opacity: 0.85; }
+        100% { transform: translate3d(-3%, 2%, 0) scale(1.02); opacity: 0.7; }
+      }
+      #login-screen::after {
+        content: '';
+        position: absolute;
+        inset: 10% 6%;
+        background: radial-gradient(circle at 30% 30%, rgba(153,205,216,0.35), transparent 45%),
+          radial-gradient(circle at 70% 10%, rgba(255,207,228,0.35), transparent 40%),
+          radial-gradient(circle at 60% 70%, rgba(255, 240, 250, 0.4), transparent 45%);
+        filter: blur(28px);
+        opacity: 0.75;
+        pointer-events: none;
+        mix-blend-mode: screen;
+        animation: auroraDrift 18s ease-in-out infinite alternate;
+        z-index: 0;
+      }
+      .login-aurora {
+        animation: auroraDrift 14s ease-in-out infinite alternate;
+      }
+      .hero-badge {
+        animation: floatUp 0.8s ease forwards, pixelWalk 6s ease-in-out infinite;
+      }
+      .feature-pulse {
+        position: relative;
+        overflow: hidden;
+        isolation: isolate;
+      }
+      .feature-pulse::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at 50% 50%, rgba(153,205,216,0.15), transparent 60%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        z-index: 0;
+      }
+      .feature-pulse:hover::after {
+        opacity: 1;
+      }
+      .feature-pulse > * {
+        position: relative;
+        z-index: 1;
+      }
+      .input-glow:focus {
+        box-shadow: 0 0 0 10px rgba(153, 205, 216, 0.18);
+        transform: translateY(-1px);
+      }
+      @keyframes shimmerBar {
+        0% { background-position: -200% 0; }
+        100% { background-position: 200% 0; }
+      }
+      .tab-shimmer {
+        position: relative;
+        overflow: hidden;
+        isolation: isolate;
+      }
+      .tab-shimmer::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(120deg, rgba(255,255,255,0), rgba(255,255,255,0.45), rgba(255,255,255,0));
+        background-size: 200% 100%;
+        animation: shimmerBar 2s linear infinite;
+        opacity: 0;
+      }
+      .tab-shimmer:hover::after,
+      .tab-shimmer.active::after {
+        opacity: 0.8;
+      }
+      .skeleton {
+        position: relative;
+        overflow: hidden;
+        background: linear-gradient(90deg, rgba(0,0,0,0.04), rgba(0,0,0,0.08), rgba(0,0,0,0.04));
+        background-size: 200% 100%;
+        animation: shimmerBar 1.6s ease-in-out infinite;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+        .map-container::after,
+        .halo-pulse,
+        .ai-output-panel,
+        .hero-badge,
+        .login-aurora,
+        .tab-shimmer::after {
+          animation: none !important;
+        }
+        .bubble-entry,
+        .bubble-bounce,
+        .ai-fade {
+          animation: none !important;
+        }
+      }
+      /* Layout polish for extreme aspect ratios */
+      :root {
+        --safe-bottom: env(safe-area-inset-bottom, 0px);
+      }
+      .chat-input-bar {
+        padding-bottom: calc(var(--safe-bottom) + 0.4rem);
+      }
+      #mobile-tabbar .mobile-tabbar {
+        padding-bottom: calc(var(--safe-bottom) + 0.35rem);
+      }
+      #sticky-note-container,
+      #location-card {
+        scrollbar-width: thin;
+      }
+      @media (max-aspect-ratio: 3/4) {
+        #login-screen {
+          padding: 2.25rem 1.2rem 2.8rem;
+        }
+        #login-screen .glass-panel {
+          margin-bottom: 1.25rem;
+        }
+        #login-screen .grid {
+          gap: 1.5rem;
+        }
+        #map-container {
+          height: 46vh;
+          min-height: 360px;
+        }
+        #location-card {
+          max-width: 92vw;
+          left: 0.75rem;
+          right: 0.75rem;
+        }
+        .map-sidebar .pixel-card {
+          max-height: 260px;
+          overflow: hidden;
+        }
+        .map-location-card #location-list {
+          max-height: 240px;
+        }
+        .ai-service-grid {
+          grid-template-columns: 1fr;
+        }
+        /* Mobile breathing room */
+        #app-root {
+          padding-bottom: calc(8rem + var(--safe-bottom));
+        }
+        .pixel-card {
+          border-radius: 1.25rem;
+        }
+        .halo-pulse {
+          opacity: 0.2;
+        }
+        #login-screen h1 {
+          font-size: clamp(1.8rem, 7vw, 2.3rem);
+        }
+        #login-screen .space-y-10 {
+          gap: 1.25rem;
+        }
+      }
+      @media (max-width: 640px) {
+        .glass-panel,
+        .pixel-card {
+          box-shadow: 0 18px 48px rgba(31, 59, 66, 0.08);
+          backdrop-filter: blur(12px);
+        }
+      }
+      @media (min-aspect-ratio: 16/10) {
+        .app-shell-wrapper {
+          max-width: min(1400px, 90vw);
+        }
+        .map-layout {
+          grid-template-columns: 1.6fr 1fr;
+        }
+        #map-container {
+          height: 70vh;
+          min-height: 520px;
+        }
+        .chat-layout {
+          grid-template-columns: 400px 1fr;
+        }
+        .ai-service-grid {
+          grid-template-columns: repeat(5, minmax(0, 1fr));
+        }
+        #diag-panel {
+          gap: 1.25rem;
+        }
+        .glass-panel {
+          padding: 2.25rem;
+        }
+      }
     }
   </style>
 </head>
-<body class="bg-neutral text-dark min-h-screen font-sans">
+<body class="min-h-screen font-sans relative">
+  <!-- SVG sprite (reduces icon font dependency for core nav) -->
+  <svg xmlns="http://www.w3.org/2000/svg" class="hidden">
+    <symbol id="ico-map" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M9 3 3 5.5v15l6-2.5 6 2.5 6-2.5v-15L15 5.5 9 3Zm0 2.2 4.5 1.9v11.7L9 17V5.2ZM5 6.8l2-.8v11.8l-2 .8V6.8Zm14 0v11.7l-2 .8V7.7l2-.9Z"/>
+    </symbol>
+    <symbol id="ico-paw" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M12.5 11.2c.9-.8 2.5-.6 3.4.2.9.8 1.1 2 .3 2.9-.5.6-1.4 1.3-2.3 1.9-.5.4-1.2.4-1.7 0-.9-.6-1.8-1.3-2.3-1.9-.8-.9-.6-2.1.3-2.9.9-.8 2.4-1 3.3-.2ZM8 6.2c.8.6 1 1.7.4 2.5-.6.8-1.7 1-2.5.4-.8-.6-1-1.7-.4-2.5.6-.8 1.7-1 2.5-.4Zm8 0c.8-.6 1.9-.4 2.5.4.6.8.4 1.9-.4 2.5-.8.6-1.9.4-2.5-.4-.6-.8-.4-1.9.4-2.5ZM9 4c0-1.1.8-2 1.8-2S12.5 2.9 12.5 4 11.7 6 10.7 6 9 5.1 9 4Zm6 0c0-1.1.8-2 1.8-2S18.5 2.9 18.5 4 17.7 6 16.7 6 15 5.1 15 4Z"/>
+    </symbol>
+    <symbol id="ico-chat" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M4 4h16a2 2 0 0 1 2 2v9.5a1.5 1.5 0 0 1-1.5 1.5H8l-4 3.5V6a2 2 0 0 1 2-2Zm1.5 3a1 1 0 1 0 0 2h13a1 1 0 0 0 0-2h-13Zm0 4a1 1 0 1 0 0 2h8a1 1 0 1 0 0-2h-8Z"/>
+    </symbol>
+    <symbol id="ico-heart" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M12 21s-7-4.4-9.3-9C.9 9.1 2 5.3 5.3 4.4c2-.5 3.5.4 4.3 1.6.8-1.2 2.4-2.1 4.3-1.6 3.3.9 4.4 4.7 2.6 7.6C19 16.6 12 21 12 21Z"/>
+    </symbol>
+    <symbol id="ico-user" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4Zm0 2c-3.3 0-6 1.7-6 3.8V20h12v-2.2C18 15.7 15.3 14 12 14Z"/>
+    </symbol>
+    <symbol id="ico-send" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M3.4 20.6 21 12 3.4 3.4l-.8 6.8L14 12 2.6 13.8l.8 6.8Z"/>
+    </symbol>
+  </svg>
+  
+  <span class="halo-pulse w-[520px] h-[520px] bg-primary/40 top-10 left-6 rounded-full"></span>
+  <span class="halo-pulse w-[420px] h-[420px] bg-secondary/60 bottom-10 right-16 rounded-full"></span>
+  <span class="halo-pulse halo-soft-pink w-[460px] h-[460px] -bottom-32 left-1/3 rounded-full"></span>
   <!-- LOGIN SCREEN -->
-  <div id="login-screen" class="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-100 via-amber-50 to-yellow-100">
-    <div class="max-w-5xl w-full px-4">
-      <div class="grid md:grid-cols-[1.2fr,1fr] gap-8 items-center">
-        <!-- Left: marketing copy -->
-        <div class="space-y-6 scroll-section">
-          <div class="inline-flex items-center gap-2 bg-secondary/70 px-3 py-1 rounded-full text-xs font-medium pixel-border">
-            <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
-            Live pet map · Pet community · Pixel UI
-          </div>
-          <h1 class="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight">
-            PawTrace – <span class="text-primary">pixel world</span> for real pets.
+  <div id="login-screen" class="relative min-h-screen flex items-center justify-center px-6 py-16">
+    <div class="login-bg-layer"></div>
+    <span class="login-orb a"></span>
+    <span class="login-orb b"></span>
+    <span class="login-orb c"></span>
+    <div class="relative w-full max-w-6xl grid gap-12 lg:grid-cols-[1.2fr,0.8fr] items-center z-10">
+      <!-- Left: marketing copy -->
+      <div class="space-y-10 scroll-section order-2 lg:order-1">
+        <div class="flex flex-wrap items-center gap-4 text-[11px] uppercase tracking-[0.35em] text-gray-500 login-animate" style="--delay:0.05s">
+          <span class="px-4 py-1 rounded-full bg-white/60 border border-white/70 hero-badge">Logo</span>
+        </div>
+        <div class="space-y-5 login-animate" style="--delay:0.12s">
+          <h1 class="text-4xl md:text-5xl font-semibold leading-tight text-slate-900 tracking-tight">
+            PawTrace · pets near you
           </h1>
-          <p class="text-sm md:text-base text-gray-700 max-w-xl">
-            Connect with other pet lovers, explore interactive Taicang campus map, share pet moments,
-            and manage all your pets from one playful dashboard.
+          <p class="text-base md:text-lg text-gray-600 max-w-2xl">
+            Map nearby pets, meet owners, and spot pet-friendly places in one clean view.
           </p>
-          <div class="flex flex-wrap gap-3 text-xs md:text-sm font-semibold">
-            <span class="flex items-center gap-2 px-3 py-1 rounded-full bg-secondary/70">
-              <i class="fas fa-map-marked-alt text-primary"></i>
-              Virtual campus pet map
-            </span>
-            <span class="flex items-center gap-2 px-3 py-1 rounded-full bg-secondary/70">
-              <i class="fas fa-users text-primary"></i>
-              Pet owner community
-            </span>
-            <span class="flex items-center gap-2 px-3 py-1 rounded-full bg-secondary/70">
-              <i class="fas fa-paw text-primary"></i>
-              Multi-pet profiles & health
-            </span>
+          <div class="flex flex-wrap gap-2">
+            <span class="login-chip">Live map</span>
+            <span class="login-chip">Pet cards</span>
+            <span class="login-chip">Chat</span>
+            <span class="login-chip">AI</span>
           </div>
         </div>
-        <!-- Right: login/register card -->
-        <div class="scroll-section">
-          <div class="pixel-card bg-white/90 backdrop-blur-sm">
-            <div class="flex items-center gap-2 mb-4">
-              <i class="fas fa-paw text-2xl text-primary"></i>
+        <div class="rounded-3xl border border-white/60 bg-white/60 p-5 space-y-4 mt-6 shadow-[0_20px_45px_rgba(31,59,66,0.25)] login-animate" style="--delay:0.36s">
+          <div id="core-focus" class="true-focus" aria-hidden="true">
+            <span class="true-focus-word">Dynamic</span>
+            <span class="true-focus-word">Map</span>
+            <span class="true-focus-word">Instant</span>
+            <span class="true-focus-word">Chat</span>
+            <span class="true-focus-word">Pet</span>
+            <span class="true-focus-word">Records</span>
+            <span class="true-focus-word">Nearby</span>
+            <span class="true-focus-word">Pets</span>
+            <span class="true-focus-word">Discovery</span>
+          </div>
+          <div class="grid gap-3 sm:grid-cols-2">
+            <article class="pixel-card space-y-2 login-animate motion-tilt" style="--delay:0.42s">
+              <p class="text-xs uppercase tracking-[0.3em] text-gray-500">Dynamic Map</p>
+              <p class="text-sm text-gray-700">Pinch/zoom a live pet map with locations and routes.</p>
+            </article>
+            <article class="pixel-card space-y-2 login-animate motion-tilt" style="--delay:0.46s">
+              <p class="text-xs uppercase tracking-[0.3em] text-gray-500">Instant Chat</p>
+              <p class="text-sm text-gray-700">DM owners, swap photos, jump to map in one tap.</p>
+            </article>
+            <article class="pixel-card space-y-2 login-animate motion-tilt" style="--delay:0.5s">
+              <p class="text-xs uppercase tracking-[0.3em] text-gray-500">Pet Records</p>
+              <p class="text-sm text-gray-700">Profiles with photos, breeds, shots, habits, and tags.</p>
+            </article>
+            <article class="pixel-card space-y-2 login-animate motion-tilt" style="--delay:0.54s">
+              <p class="text-xs uppercase tracking-[0.3em] text-gray-500">Pet Social</p>
+              <p class="text-sm text-gray-700">Add friends, form groups, share quick updates.</p>
+            </article>
+            <article class="pixel-card space-y-2 login-animate motion-tilt" style="--delay:0.58s">
+              <p class="text-xs uppercase tracking-[0.3em] text-gray-500">Nearby Pets</p>
+              <p class="text-sm text-gray-700">See nearby pets and find walking buddies.</p>
+            </article>
+            <article class="pixel-card space-y-2 login-animate motion-tilt" style="--delay:0.62s">
+              <p class="text-xs uppercase tracking-[0.3em] text-gray-500">Pet Discovery</p>
+              <p class="text-sm text-gray-700">Cues guide you to friendly spots and safe paths.</p>
+            </article>
+          </div>
+        </div>
+      </div>
+      <!-- Right: login/register card -->
+      <div class="order-1 lg:order-2">
+        <div class="glass-panel relative">
+          <div class="relative">
+            <div class="flex items-center justify-between mb-6">
               <div>
-                <h2 class="text-lg font-bold">Welcome to PawTrace</h2>
-                <p class="text-xs text-gray-600">Sign in to your pet universe</p>
+                <p class="text-xs uppercase tracking-[0.35em] text-gray-500">True Focus</p>
+                <h2 class="text-2xl font-semibold text-slate-900">Welcome back</h2>
+              </div>
+              <div class="text-right text-xs text-gray-500">
+                <p class="font-semibold text-primary">PawTrace OS</p>
+                <p>Signature glass UI</p>
               </div>
             </div>
-            <div class="flex text-xs mb-4 bg-neutral rounded-sm overflow-hidden pixel-border">
-              <button id="tab-login" class="flex-1 py-2 text-center bg-primary text-white font-semibold">
+            <div class="flex text-xs mb-6 bg-white/50 rounded-full p-1">
+              <button id="tab-login" class="flex-1 py-2 text-center rounded-full bg-primary text-dark font-semibold tab-shimmer">
                 Log in
               </button>
-              <button id="tab-register" class="flex-1 py-2 text-center text-gray-600 hover:bg-secondary/60">
+              <button id="tab-register" class="flex-1 py-2 text-center rounded-full text-gray-600 hover:bg-white/70 tab-shimmer">
                 Create account
               </button>
             </div>
             <!-- Login form -->
-            <form id="login-form" class="space-y-3">
+            <form id="login-form" class="space-y-4">
               <div>
-                <label class="block text-xs font-semibold mb-1">Username</label>
-                <input id="login-username" type="text" class="pixel-input" placeholder="Enter username" required />
+                <label class="block text-xs font-semibold mb-1 uppercase tracking-[0.3em] text-gray-500">Username</label>
+                <input id="login-username" type="text" class="pixel-input input-glow" placeholder="Username" required />
               </div>
               <div>
-                <label class="block text-xs font-semibold mb-1">Password</label>
-                <input id="login-password" type="password" class="pixel-input" placeholder="••••••••" required />
+                <label class="block text-xs font-semibold mb-1 uppercase tracking-[0.3em] text-gray-500">Password</label>
+                <input id="login-password" type="password" class="pixel-input input-glow" placeholder="Password" required />
               </div>
               <button type="submit" class="pixel-button w-full mt-2 flex items-center justify-center gap-2">
                 <i class="fas fa-door-open"></i><span>Enter PawTrace</span>
               </button>
             </form>
             <!-- Register form -->
-            <form id="register-form" class="space-y-3 hidden mt-1">
-              <div class="grid grid-cols-2 gap-3">
+            <form id="register-form" class="space-y-4 hidden mt-1">
+              <div class="grid grid-cols-2 gap-4">
                 <div>
-                  <label class="block text-xs font-semibold mb-1">Username</label>
-                  <input id="reg-username" type="text" class="pixel-input" placeholder="Your username" required />
+                  <label class="block text-xs font-semibold mb-1 uppercase tracking-[0.3em] text-gray-500">Username</label>
+                  <input id="reg-username" type="text" class="pixel-input input-glow" placeholder="Your username" required />
                 </div>
                 <div>
-                  <label class="block text-xs font-semibold mb-1">Display name</label>
-                  <input id="reg-displayname" type="text" class="pixel-input" placeholder="Your display name" />
+                  <label class="block text-xs font-semibold mb-1 uppercase tracking-[0.3em] text-gray-500">Display name</label>
+                  <input id="reg-displayname" type="text" class="pixel-input input-glow" placeholder="Your display name" />
                 </div>
               </div>
               <div>
-                <label class="block text-xs font-semibold mb-1">Password</label>
-                <input id="reg-password" type="password" class="pixel-input" placeholder="At least 6 characters" required />
-              </div>
-              <div>
-                <label class="block text-xs font-semibold mb-1">Avatar URL (optional)</label>
-                <input id="reg-avatar" type="url" class="pixel-input" placeholder="https://example.com/avatar.jpg" />
+                <label class="block text-xs font-semibold mb-1 uppercase tracking-[0.3em] text-gray-500">Password</label>
+                <input id="reg-password" type="password" class="pixel-input input-glow" placeholder="At least 6 characters" required />
               </div>
               <button type="submit" class="pixel-button w-full mt-2 flex items-center justify-center gap-2">
                 <i class="fas fa-user-plus"></i><span>Create account</span>
               </button>
             </form>
-            <p id="auth-message" class="text-xs text-red-500 mt-3 h-4"></p>
+            <p id="auth-message" class="text-xs text-red-500 mt-4 h-4"></p>
+            <div class="mt-6 space-y-2 text-center">
+              <button id="btn-guest-access" type="button" class="pixel-button w-full flex items-center justify-center gap-2 bg-white/70 text-dark hover:bg-white">
+                <i class="fas fa-compass"></i><span>Explore as guest</span>
+              </button>
+              <p class="text-[11px] text-gray-500">Jump into the pet map instantly.</p>
+            </div>
           </div>
         </div>
       </div>
@@ -226,48 +1386,83 @@
   </div>
 
   <!-- MAIN APP -->
-  <div id="app-root" class="hidden min-h-screen flex flex-col">
-    <!-- Top nav -->
-    <header class="sticky top-0 z-20 bg-neutral/90 backdrop-blur border-b border-orange-200">
-      <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-        <div class="flex items-center gap-2">
-          <div class="w-8 h-8 bg-primary text-white flex items-center justify-center pixel-border rounded-sm pulse-glow">
-            <i class="fas fa-paw text-lg"></i>
-          </div>
-          <div>
-            <div class="flex items-center gap-2">
-              <span class="font-bold text-base">PawTrace</span>
-              <span class="text-[10px] px-2 py-0.5 rounded-full bg-secondary text-dark font-semibold uppercase tracking-wide">
-                Pixel Beta
-              </span>
+  <div id="app-root" class="hidden min-h-screen px-4 sm:px-6 py-10 lg:px-12 relative z-10">
+    <span class="halo-pulse hidden lg:block w-[480px] h-[480px] bg-primary/30 -top-16 right-0 rounded-full"></span>
+    <span class="halo-pulse hidden md:block w-[360px] h-[360px] bg-secondary/50 bottom-0 left-10 rounded-full"></span>
+    <span class="halo-pulse halo-soft-blossom hidden xl:block w-[420px] h-[420px] -top-10 left-40 rounded-full"></span>
+    <div class="app-shell-wrapper relative z-10 w-full max-w-6xl mx-auto">
+      <div class="app-shell relative z-10 flex flex-col lg:flex-row gap-6 w-full">
+          <aside class="glass-panel app-sidebar">
+            <div class="flex items-center gap-3">
+              <div class="w-12 h-12 rounded-2xl bg-primary/80 text-white flex items-center justify-center shadow-lg shadow-primary/40">
+                <i class="fas fa-paw text-2xl"></i>
+              </div>
+              <div>
+                <p class="text-[10px] uppercase tracking-[0.5em] text-gray-500">PawTrace</p>
+                <p class="text-xl font-semibold text-slate-900">PawTrace</p>
+              </div>
             </div>
-            <p class="text-[11px] text-gray-500">Taicang campus · pet social & health map</p>
+          <div class="mt-8 rounded-3xl bg-white/70 border border-white/60 p-5 backdrop-blur-2xl">
+            <p class="text-[10px] uppercase tracking-[0.4em] text-gray-500 mb-3">Navigate</p>
+          <div class="flex flex-col gap-2">
+            <button class="app-nav-button app-tab active tab-shimmer" data-tab="map" aria-label="Map">
+              <svg class="w-5 h-5 text-primary" aria-hidden="true"><use href="#ico-map"></use></svg>
+              <span>Map</span>
+            </button>
+              <button class="app-nav-button app-tab tab-shimmer" data-tab="pets" aria-label="Pets">
+                <svg class="w-5 h-5 text-primary" aria-hidden="true"><use href="#ico-paw"></use></svg>
+                <span>Pets</span>
+              </button>
+              <button class="app-nav-button app-tab tab-shimmer" data-tab="chat" aria-label="Chat">
+                <svg class="w-5 h-5 text-primary" aria-hidden="true"><use href="#ico-chat"></use></svg>
+                <span>Chat</span>
+              </button>
+            <button class="app-nav-button app-tab tab-shimmer" data-tab="ai" aria-label="AI Health">
+              <svg class="w-5 h-5 text-primary" aria-hidden="true"><use href="#ico-heart"></use></svg>
+              <span>AI Health</span>
+            </button>
+            <button class="app-nav-button app-tab tab-shimmer" data-tab="profile" aria-label="Profile">
+              <svg class="w-5 h-5 text-primary" aria-hidden="true"><use href="#ico-user"></use></svg>
+              <span>Profile</span>
+            </button>
           </div>
         </div>
-        <nav class="hidden md:flex items-center gap-4 text-xs">
-          <button class="top-tab px-3 py-1.5 rounded-full hover:bg-secondary transition-colors" data-tab="map">Map</button>
-          <button class="top-tab px-3 py-1.5 rounded-full hover:bg-secondary transition-colors" data-tab="pets">Pets</button>
-          <button class="top-tab px-3 py-1.5 rounded-full hover:bg-secondary transition-colors" data-tab="chat">Friends</button>
-          <button class="top-tab px-3 py-1.5 rounded-full hover:bg-secondary transition-colors" data-tab="store">Store</button>
-          <button class="top-tab px-3 py-1.5 rounded-full hover:bg-secondary transition-colors" data-tab="profile">Profile</button>
-        </nav>
-        <div class="flex items-center gap-3">
-          <div class="hidden sm:flex flex-col items-end">
-            <span id="current-user-name" class="text-xs font-semibold">User</span>
-            <span class="text-[10px] text-gray-500">Online</span>
+          <div class="mt-auto rounded-3xl bg-white/70 border border-white/60 p-5">
+            <p class="text-[10px] uppercase tracking-[0.4em] text-gray-500">Now</p>
+            <p class="text-lg font-semibold text-slate-900" id="sidebar-user-name">User</p>
+            <p class="text-sm text-gray-500 mb-3">Taicang Campus</p>
+            <div class="flex flex-col gap-2">
+              <button class="px-4 py-2 rounded-full bg-primary/70 text-dark text-sm font-semibold shadow-lg shadow-primary/30" onclick="openProfileEditModal()">
+                Edit profile card
+              </button>
+              <button class="px-4 py-2 rounded-full bg-white/70 text-sm font-semibold text-red-500 border border-white/60 shadow-sm transition-colors hover:text-white hover:bg-red-400"
+                      data-action="logout">
+                Log out
+              </button>
+            </div>
           </div>
-          <img id="current-user-avatar" class="w-8 h-8 rounded-full object-cover pixel-border bg-secondary cursor-pointer hover:scale-110 transition-transform"
-               src="https://design.gemcoder.com/staticResource/echoAiSystemImages/fdca457404bba5bf76bb0fd8378c6d8d.png"
-               alt="User avatar" onclick="openProfileEditModal()" />
-        </div>
-      </div>
-    </header>
-
-    <!-- Content -->
-    <main class="flex-1 max-w-6xl mx-auto w-full px-4 pb-20 pt-6 md:pb-10">
-      <div class="grid md:grid-cols-[1fr] gap-4">
-        <!-- Tab contents -->
-        <section class="space-y-6">
+        </aside>
+        <div class="flex-1 flex flex-col gap-6">
+          <header class="glass-panel flex flex-wrap items-center justify-between gap-6">
+              <div>
+                <p class="text-[10px] uppercase tracking-[0.3em] text-gray-500">PawTrace</p>
+              <h2 class="text-lg font-semibold text-slate-900 leading-tight"></h2>
+              </div>
+              <div class="flex items-center gap-4">
+                <div class="hidden sm:flex flex-col text-right text-sm space-y-0.5">
+                  <span id="current-user-name" class="font-semibold">User</span>
+                  <span class="text-[11px] text-gray-500">Connected</span>
+                </div>
+                <div class="relative">
+                  <img id="current-user-avatar" loading="lazy" decoding="async" class="w-12 h-12 rounded-2xl object-cover border border-white/70 shadow-lg cursor-pointer hover:-translate-y-0.5 transition-transform"
+                     src="https://design.gemcoder.com/staticResource/echoAiSystemImages/fdca457404bba5bf76bb0fd8378c6d8d.png"
+                     alt="User avatar" onclick="openProfileEditModal()" />
+                  <span class="absolute -bottom-1 -right-1 px-2 py-0.5 text-[10px] font-semibold rounded-full bg-emerald-500 text-white shadow-lg">Online</span>
+                </div>
+              </div>
+          </header>
+          <main class="glass-panel flex-1 overflow-hidden app-main">
+            <section class="space-y-8 flex flex-col flex-1">
           <!-- MAP TAB -->
           <div id="tab-map" class="tab-page scroll-section">
             <div class="flex items-center justify-between mb-4">
@@ -281,17 +1476,17 @@
                 </p>
               </div>
             </div>
-            <div class="grid lg:grid-cols-[1.4fr,0.8fr] gap-4 items-start">
+            <div class="grid map-layout lg:grid-cols-[1.4fr,0.8fr] gap-4 items-start lg:items-stretch">
               <div class="space-y-4">
-                <div class="pixel-card bg-white shadow-sm">
+                <div class="pixel-card shadow-sm">
                   <div class="flex items-center gap-2 text-[11px] text-gray-500">
                     <i class="fas fa-search text-primary"></i>
                     <span>Search pet friendly locations...</span>
                   </div>
                   <input class="pixel-input mt-3 text-xs w-full" placeholder="e.g. best park or café" />
                 </div>
-                <div class="pixel-card bg-white relative overflow-hidden h-[60vh] map-container" id="map-container">
-                  <div class="absolute inset-0 bg-cover bg-center" id="map-background" style="background-image: url('/assets/taicang-map.jpg');"></div>
+                <div class="pixel-card relative overflow-hidden h-[60vh] map-container magic-bento-halo" id="map-container">
+                  <div class="absolute inset-0 bg-cover bg-center" id="map-background" style="background-image: url('/assets/m1.jpg');"></div>
                   <div id="map-markers-layer" class="absolute inset-0"></div>
                   <div id="map-pets-layer" class="absolute inset-0"></div>
                   <div id="location-card" class="hidden absolute top-4 left-4 max-w-xs pixel-card bg-neutral/90 animate-slideInLeft z-10">
@@ -305,7 +1500,7 @@
                       </button>
                     </div>
                     <p id="loc-desc" class="text-xs text-gray-700 mb-2"></p>
-                    <p id="loc-rating" class="text-[11px] text-amber-600 mb-2"></p>
+                    <p id="loc-rating" class="text-[11px] text-primary mb-2"></p>
                     <div id="loc-tags" class="flex flex-wrap gap-1 text-[10px] text-dark mb-2"></div>
                     <div id="loc-pets" class="flex flex-wrap gap-1 text-[11px] mb-2"></div>
                     <div class="space-y-1 text-[11px] text-gray-700 mb-2">
@@ -329,8 +1524,8 @@
                   </div>
                 </div>
               </div>
-              <div class="space-y-4">
-                <div class="pixel-card bg-white space-y-2">
+              <div class="space-y-4 map-sidebar">
+                <div class="pixel-card space-y-2">
                   <h3 class="font-semibold text-sm">Pet Reminders</h3>
                   <div class="flex items-center gap-2 text-[11px]">
                     <span>🗓️</span>
@@ -341,7 +1536,7 @@
                     Xiao Bai's birthday in 3 days
                   </div>
                 </div>
-                <div class="pixel-card bg-white space-y-3" id="sticky-note-container">
+                <div class="pixel-card space-y-3" id="sticky-note-container">
                   <div class="flex items-center justify-between">
                     <h3 class="font-semibold text-sm flex items-center gap-2">
                       <i class="fas fa-sticky-note text-primary"></i>Sticky Notes
@@ -362,7 +1557,7 @@
                     <p id="sticky-note-empty" class="text-[11px] text-gray-400 italic">No notes yet.</p>
                   </div>
                 </div>
-                <div class="pixel-card bg-white space-y-2">
+                <div class="pixel-card space-y-2 map-location-card">
                   <div class="flex items-center justify-between">
                     <h3 class="font-semibold text-sm flex items-center gap-2">
                       <i class="fas fa-store text-primary"></i>Pet-friendly Spots
@@ -381,9 +1576,9 @@
               <div>
                 <h2 class="text-xl font-bold flex items-center gap-2">
                   <i class="fas fa-paw text-primary"></i>
-                  My Pets
+                  Pets
                 </h2>
-                <p class="text-xs text-gray-600">Manage all your pets in one place.</p>
+                <p class="text-xs text-gray-600">Community updates and your pack timeline.</p>
               </div>
               <div class="flex gap-2">
                 <button id="btn-pet-checkin" class="pixel-button flex items-center gap-2 text-xs">
@@ -394,107 +1589,139 @@
                 </button>
               </div>
             </div>
-            <div class="pixel-card bg-white space-y-3">
-              <div class="flex items-center justify-between">
-                <h3 class="font-semibold text-sm flex items-center gap-2">
-                  <i class="fas fa-users text-primary"></i>Community Pets
-                </h3>
-                <span class="text-[10px] text-gray-500">Tap a card to chat with the owner</span>
-              </div>
-              <div id="community-pet-feed" class="grid md:grid-cols-2 xl:grid-cols-3 gap-4"></div>
-            </div>
-            <div class="flex items-center justify-between mt-6 mb-2">
-              <h3 class="font-semibold text-sm flex items-center gap-2">
-                <i class="fas fa-heart text-primary"></i>My Pets
-              </h3>
-              <p class="text-[11px] text-gray-500">Only visible to you</p>
-            </div>
-            <form id="pet-form" class="pixel-card bg-white space-y-3 text-xs animate-slideIn hidden">
-              <div class="flex items-center justify-between gap-2">
-                <div class="flex items-center gap-2">
-                  <i class="fas fa-plus-circle text-primary"></i>
-                  <h3 class="font-semibold text-sm">Register a new pet</h3>
+            <div class="space-y-4">
+              <div class="pixel-card space-y-3 pet-scroll-card">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <h3 class="font-semibold text-sm flex items-center gap-2">
+                      <i class="fas fa-users text-primary"></i>Community Pets
+                    </h3>
+                    <p class="text-[11px] text-gray-500">Tap a card to chat with the owner.</p>
+                  </div>
+                  <span class="text-[10px] text-gray-500">6 pals online</span>
                 </div>
-                <button type="button" id="btn-close-pet-form" class="text-[11px] text-gray-500 hover:text-dark flex items-center gap-1">
-                  <i class="fas fa-times"></i>Close
-                </button>
-              </div>
-              <div class="grid md:grid-cols-[220px,1fr] gap-4">
-                <div class="bg-secondary/40 rounded-sm p-3 flex flex-col items-center">
-                  <div id="pet-image-preview" class="w-24 h-24 rounded-full bg-white pixel-border flex items-center justify-center overflow-hidden mb-2">
-                    <img id="pet-image-preview-img" class="w-full h-full object-cover hidden" alt="Pet preview" />
-                    <span id="pet-image-placeholder" class="text-[11px] text-gray-500">No photo</span>
-                  </div>
-                  <label class="text-[11px] font-semibold mb-1">Pet photo</label>
-                  <input id="new-pet-image" type="file" accept="image/*" class="pixel-input text-xs" />
-                  <p class="text-[10px] text-gray-500 mt-1 text-center">PNG/JPG up to 5MB</p>
-                </div>
-                <div class="space-y-2">
-                  <input id="new-pet-name" class="pixel-input text-xs" placeholder="Pet name" required />
-                  <div class="grid md:grid-cols-2 gap-2">
-                    <input id="new-pet-type" class="pixel-input text-xs" placeholder="Type (Dog, Cat...)" />
-                    <input id="new-pet-breed" class="pixel-input text-xs" placeholder="Breed" />
-                  </div>
-                  <div class="grid md:grid-cols-2 gap-2">
-                    <input id="new-pet-birthday" type="date" class="pixel-input text-xs" placeholder="Birthday" />
-                    <select id="new-pet-gender" class="pixel-input text-xs">
-                      <option value="">Gender</option>
-                      <option value="Male">Male</option>
-                      <option value="Female">Female</option>
-                      <option value="Other">Other</option>
-                    </select>
-                  </div>
-                  <div class="grid md:grid-cols-2 gap-2">
-                    <input id="new-pet-status" class="pixel-input text-xs" placeholder="Status (playful, shy, etc.)" />
-                    <input id="new-pet-health" class="pixel-input text-xs" placeholder="Health summary" />
-                  </div>
-                  <input id="new-pet-traits" class="pixel-input text-xs" placeholder="Traits (comma separated)" />
+                <div class="pet-scroll-body">
+                  <div id="community-pet-feed" class="grid md:grid-cols-2 xl:grid-cols-3 gap-4"></div>
                 </div>
               </div>
-              <div class="flex gap-2">
-                <button type="submit" class="pixel-button flex-1 text-xs flex items-center gap-2">
-                  <i class="fas fa-paw"></i><span>Save pet</span>
-                </button>
-                <button type="reset" class="pixel-button flex-1 text-xs bg-gray-400 hover:bg-gray-500">
-                  Reset
-                </button>
+              <div class="pixel-card space-y-3 pet-scroll-card">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <h3 class="font-semibold text-sm flex items-center gap-2">
+                      <i class="fas fa-heart text-primary"></i>My Pets
+                    </h3>
+                    <p class="text-[11px] text-gray-500">Only visible to you</p>
+                  </div>
+                  <span class="text-[10px] text-gray-500">Stay organized</span>
+                </div>
+                <div class="pet-scroll-body space-y-3">
+                  <div id="pet-list" class="grid gap-3 text-xs">
+                    <!-- Pets rendered by JS -->
+                  </div>
+                  <p id="pet-empty" class="text-[11px] text-gray-500 italic hidden">
+                    It looks empty. Add a pet and their info will appear here.
+                  </p>
+                    <div class="space-y-2 text-xs">
+                      <div class="flex items-center justify-between">
+                      <h4 class="font-semibold text-[11px] text-gray-500">Pet profile builder</h4>
+                      <span id="pet-form-subtitle" class="text-[10px] text-gray-500">Ready when you need it</span>
+                    </div>
+                    <form id="pet-form" class="space-y-3 hidden">
+                      <div class="flex items-center justify-between gap-2">
+                        <div class="flex items-center gap-2">
+                          <i class="fas fa-plus-circle text-primary"></i>
+                          <h3 id="pet-form-heading" class="font-semibold text-sm">Register a new pet</h3>
+                        </div>
+                        <button type="button" id="btn-close-pet-form" class="text-[11px] text-gray-500 hover:text-dark flex items-center gap-1">
+                          <i class="fas fa-times"></i>Close
+                        </button>
+                      </div>
+                      <div class="grid md:grid-cols-[220px,1fr] gap-4">
+                        <div class="bg-secondary/40 rounded-sm p-3 flex flex-col items-center">
+                          <div id="pet-image-preview" class="w-24 h-24 rounded-full bg-neutral pixel-border flex items-center justify-center overflow-hidden mb-2">
+                            <img id="pet-image-preview-img" class="w-full h-full object-cover hidden" alt="Pet preview" />
+                            <span id="pet-image-placeholder" class="text-[11px] text-gray-500">No photo</span>
+                          </div>
+                          <label class="text-[11px] font-semibold mb-1">Pet photo</label>
+                          <input id="new-pet-image" type="file" accept="image/*" class="pixel-input text-xs" />
+                          <p class="text-[10px] text-gray-500 mt-1 text-center">PNG/JPG up to 5MB</p>
+                        </div>
+                        <div class="space-y-2">
+                          <input id="new-pet-name" class="pixel-input text-xs" placeholder="Pet name" required />
+                          <div class="grid md:grid-cols-2 gap-2">
+                            <input id="new-pet-type" class="pixel-input text-xs" placeholder="Type (Dog, Cat...)" />
+                            <input id="new-pet-breed" class="pixel-input text-xs" placeholder="Breed" />
+                          </div>
+                          <div class="grid md:grid-cols-2 gap-2">
+                            <input id="new-pet-birthday" type="date" class="pixel-input text-xs" placeholder="Birthday" />
+                            <select id="new-pet-gender" class="pixel-input text-xs">
+                              <option value="">Gender</option>
+                              <option value="Male">Male</option>
+                              <option value="Female">Female</option>
+                              <option value="Other">Other</option>
+                            </select>
+                          </div>
+                          <div class="grid md:grid-cols-2 gap-2">
+                            <input id="new-pet-status" class="pixel-input text-xs" placeholder="Status (playful, shy, etc.)" />
+                            <input id="new-pet-health" class="pixel-input text-xs" placeholder="Health summary" />
+                          </div>
+                          <input id="new-pet-traits" class="pixel-input text-xs" placeholder="Traits (comma separated)" />
+                        </div>
+                      </div>
+                      <div class="flex gap-2">
+                        <button type="submit" class="pixel-button flex-1 text-xs flex items-center gap-2">
+                          <i class="fas fa-paw"></i><span id="pet-form-submit-label">Save pet</span>
+                        </button>
+                        <button type="reset" class="pixel-button flex-1 text-xs bg-gray-400 hover:bg-gray-500">
+                          Reset
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
               </div>
-            </form>
-            <div id="pet-empty" class="text-center text-gray-500 text-xs hidden">
-              It looks empty. Add a pet and their info will appear here.
             </div>
-            <div id="pet-list" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 text-xs">
-              <!-- Pets rendered by JS -->
-            </div>
-
           </div>
 
           <!-- CHAT TAB -->
           <div id="tab-chat" class="tab-page hidden scroll-section">
             <div class="flex items-center justify-between mb-4">
-              <div>
-                <h2 class="text-xl font-bold flex items-center gap-2">
-                  <i class="fas fa-comments text-primary"></i>
-                  Friends Chat
-                </h2>
-                <p class="text-xs text-gray-600">
-                  Connect with your pet-loving friends in the community.
-                </p>
+              <div class="flex items-center gap-3">
+                <button id="chat-back-btn" type="button" class="chat-back-btn pixel-button text-[11px] bg-white/80 border border-primary/30 text-dark px-3 py-2">
+                  <i class="fas fa-chevron-left"></i><span>Back</span>
+                </button>
+                <div>
+                  <h2 class="text-xl font-bold flex items-center gap-2">
+                    <i class="fas fa-comments text-primary"></i>
+                    Friends Chat
+                  </h2>
+                  <p class="text-xs text-gray-600">
+                    Connect with your pet-loving friends in the community.
+                  </p>
+                </div>
+              </div>
+              <div class="flex gap-2">
+                <button id="chat-tab-back" type="button" class="pixel-button text-[11px] bg-white/80 border border-primary/30 text-dark px-3 py-2">
+                  <i class="fas fa-arrow-left"></i><span>Back to pets</span>
+                </button>
+                <button id="chat-toggle-contacts" type="button" class="chat-toggle-contacts pixel-button text-[11px] bg-white/80 border border-primary/30 text-dark">
+                  Show friends
+                </button>
               </div>
             </div>
-            <div class="grid lg:grid-cols-[320px,1fr] gap-4 text-xs h-[60vh]">
+            <div class="grid lg:grid-cols-[320px,1fr] gap-4 text-xs lg:h-[60vh] lg:min-h-[420px] chat-layout">
               <!-- Contacts + Pet Info -->
-              <div class="flex flex-col gap-3">
-                <div class="pixel-card bg-white flex flex-col flex-1">
+              <div id="chat-left-pane" class="chat-left-pane flex flex-col gap-3 lg:min-h-0 lg:h-full order-2 lg:order-1">
+                <div class="pixel-card flex flex-col lg:flex-1 lg:min-h-0">
                   <div class="mb-3">
                     <input id="chat-search" class="pixel-input text-xs" placeholder="Search friends..." />
                   </div>
-                  <div id="contact-list" class="space-y-1 overflow-y-auto flex-1">
+                  <div id="contact-list" class="space-y-1 overflow-y-auto flex-1 pr-1 min-h-0">
                     <!-- Contacts rendered by JS -->
                   </div>
                 </div>
                 <!-- Pet Info Panel -->
-                <div class="pixel-card bg-white animate-slideInLeft">
+                <div class="pixel-card animate-slideInLeft">
                   <h3 class="text-xs font-semibold mb-2 flex items-center gap-2">
                     <i class="fas fa-paw text-primary"></i>Friend's Pet Info
                   </h3>
@@ -517,10 +1744,10 @@
                 </div>
               </div>
               <!-- Chat window -->
-                <div class="pixel-card bg-white flex flex-col">
-                  <div class="flex items-center justify-between border-b border-orange-100 pb-2 mb-2">
+              <div class="pixel-card flex flex-col lg:min-h-0 lg:h-full order-1 lg:order-2 chat-main">
+                  <div class="flex items-center justify-between border-b border-primary/25 pb-2 mb-2">
                     <div class="flex items-center gap-2 flex-1">
-                      <img id="chat-avatar" class="w-8 h-8 rounded-full object-cover pixel-border bg-secondary"
+                      <img id="chat-avatar" loading="lazy" decoding="async" class="w-8 h-8 rounded-full object-cover pixel-border bg-secondary"
                            src="" alt="Chat avatar" />
                     <div class="flex-1">
                       <div class="flex items-center gap-1">
@@ -535,81 +1762,27 @@
                   </div>
                   </div>
                   <div class="flex items-center justify-end text-[10px] text-gray-500 gap-1 mb-1">
-                    <button id="chat-scroll-up" class="px-2 py-1 border border-orange-100 rounded hover:bg-secondary transition-colors" type="button">
+                    <button id="chat-scroll-up" class="px-2 py-1 border border-primary/25 rounded hover:bg-secondary transition-colors" type="button">
                       <i class="fas fa-chevron-up"></i>
                     </button>
-                    <button id="chat-scroll-down" class="px-2 py-1 border border-orange-100 rounded hover:bg-secondary transition-colors" type="button">
+                    <button id="chat-scroll-down" class="px-2 py-1 border border-primary/25 rounded hover:bg-secondary transition-colors" type="button">
                       <i class="fas fa-chevron-down"></i>
                     </button>
                   </div>
-                  <div id="chat-messages" class="flex-1 overflow-y-auto space-y-3 pr-1">
+                  <div id="chat-messages" class="flex-1 overflow-y-auto space-y-3 pr-1 min-h-0">
                     <!-- Messages rendered by JS -->
                   </div>
-                <div class="pt-2 border-t border-orange-100 mt-2">
-                  <div class="flex gap-2 mb-2">
-                    <input id="chat-input" class="pixel-input text-xs" placeholder="Type a message..." />
-                    <button id="chat-send" class="pixel-button flex items-center gap-1 text-[11px] whitespace-nowrap">
-                      <i class="fas fa-paper-plane"></i><span>Send</span>
+                <div class="pt-2 border-t border-primary/25 mt-2 chat-input-bar">
+                  <div class="flex gap-2 mb-2 items-start">
+                    <button id="chat-attach-image" class="pixel-button text-[11px] h-10 flex items-center justify-center px-3" type="button" title="Share image">
+                      <i class="fas fa-image"></i>
+                    </button>
+                    <input id="chat-input" class="pixel-input text-xs flex-1" placeholder="Type a message..." />
+                    <button id="chat-send" class="pixel-button flex items-center gap-1 text-[11px] whitespace-nowrap" aria-label="Send message">
+                      <svg class="w-4 h-4" aria-hidden="true"><use href="#ico-send"></use></svg><span>Send</span>
                     </button>
                   </div>
                   <p id="chat-error" class="text-[10px] text-red-500 h-3"></p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- STORE TAB -->
-          <div id="tab-store" class="tab-page hidden scroll-section">
-            <div class="flex items-center justify-between mb-4">
-              <div>
-                <h2 class="text-xl font-bold flex items-center gap-2">
-                  <i class="fas fa-store text-primary"></i>
-                  PawTrace Store
-                </h2>
-                <p class="text-xs text-gray-600">
-                  15% of every purchase supports campus pet rescue programs.
-                </p>
-              </div>
-            </div>
-            <div class="pixel-card bg-white mb-4 text-xs text-gray-700">
-              <p class="font-semibold mb-1">Why buy here?</p>
-              <p>Curated snacks, toys, and gear that our community loves. Every receipt highlights how much you contributed to the PawTrace Fund.</p>
-            </div>
-            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4 text-xs">
-              <div class="pixel-card bg-white space-y-2">
-                <img src="https://design.gemcoder.com/staticResource/echoAiSystemImages/1a98a231cfe964a18cdd5f3502fb32bc.png" alt="Snack bundle" class="w-full h-32 object-cover rounded-sm pixel-border" />
-                <h3 class="font-semibold text-sm">Campus Snack Stack</h3>
-                <p class="text-gray-600">Dehydrated chicken cubes + yak cheese chews.</p>
-                <div class="flex items-center justify-between">
-                  <span class="font-bold text-primary text-base">¥88</span>
-                  <button class="pixel-button text-[11px] px-3 py-1">Add to cart</button>
-                </div>
-              </div>
-              <div class="pixel-card bg-white space-y-2">
-                <img src="https://design.gemcoder.com/staticResource/echoAiSystemImages/df853968f0a77fd6b43aed0bb28513f2.png" alt="Harness" class="w-full h-32 object-cover rounded-sm pixel-border" />
-                <h3 class="font-semibold text-sm">Reflective Walk Harness</h3>
-                <p class="text-gray-600">Night-safe straps sized for corgis to huskies.</p>
-                <div class="flex items-center justify-between">
-                  <span class="font-bold text-primary text-base">¥129</span>
-                  <button class="pixel-button text-[11px] px-3 py-1">Add to cart</button>
-                </div>
-              </div>
-              <div class="pixel-card bg-white space-y-2">
-                <img src="https://design.gemcoder.com/staticResource/echoAiSystemImages/a0c9378b7607e96469333185e4376a53.png" alt="Toy set" class="w-full h-32 object-cover rounded-sm pixel-border" />
-                <h3 class="font-semibold text-sm">Pixel Toy Duo</h3>
-                <p class="text-gray-600">Squeaky latte cup + rope dumpling.</p>
-                <div class="flex items-center justify-between">
-                  <span class="font-bold text-primary text-base">¥69</span>
-                  <button class="pixel-button text-[11px] px-3 py-1">Add to cart</button>
-                </div>
-              </div>
-              <div class="pixel-card bg-white space-y-2">
-                <img src="https://design.gemcoder.com/staticResource/echoAiSystemImages/95033e3192d642014a951f965ea4ed5b.png" alt="Cat kit" class="w-full h-32 object-cover rounded-sm pixel-border" />
-                <h3 class="font-semibold text-sm">Dorm Cat Care Kit</h3>
-                <p class="text-gray-600">Freeze-dried tuna, plush wand, calming spray.</p>
-                <div class="flex items-center justify-between">
-                  <span class="font-bold text-primary text-base">¥99</span>
-                  <button class="pixel-button text-[11px] px-3 py-1">Add to cart</button>
                 </div>
               </div>
             </div>
@@ -622,8 +1795,8 @@
               My Profile
             </h2>
             <div class="grid md:grid-cols-[1.3fr,1fr] gap-4 text-xs">
-          <div class="pixel-card bg-white flex gap-4">
-            <img id="profile-avatar" class="w-16 h-16 rounded-full object-cover pixel-border bg-secondary"
+          <div class="pixel-card flex gap-4">
+            <img id="profile-avatar" loading="lazy" decoding="async" class="w-16 h-16 rounded-full object-cover pixel-border bg-secondary"
                  src="https://design.gemcoder.com/staticResource/echoAiSystemImages/fdca457404bba5bf76bb0fd8378c6d8d.png"
                  alt="Profile avatar" />
             <div class="space-y-1 flex-1">
@@ -638,7 +1811,7 @@
               <p id="profile-campus" class="text-[11px] text-gray-600 mt-1"></p>
               <p id="profile-contact" class="text-[11px] text-gray-600"></p>
               <p id="profile-star-sign" class="text-[11px] text-gray-600"></p>
-              <div class="border-t border-orange-100 pt-2 mt-2 space-y-1">
+              <div class="border-t border-primary/25 pt-2 mt-2 space-y-1">
                 <p class="font-semibold text-[11px]">My pet focus</p>
                 <p id="profile-main-pet" class="text-[11px] text-gray-700"></p>
                 <p id="profile-pet-notes" class="text-[11px] text-gray-500"></p>
@@ -659,25 +1832,25 @@
                   </div>
                 </div>
               </div>
-          <div class="pixel-card bg-white space-y-2">
+          <div class="pixel-card space-y-2">
             <h3 class="font-semibold text-xs mb-2 flex items-center gap-2">
               <i class="fas fa-cog text-primary"></i>Settings
             </h3>
             <button id="btn-edit-profile" class="pixel-button w-full flex items-center justify-center gap-2 text-[11px]">
               <i class="fas fa-edit"></i><span>Edit Profile</span>
             </button>
-            <button id="btn-logout" class="pixel-button w-full flex items-center justify-center gap-2 text-[11px] bg-red-500 hover:bg-red-600">
+            <button class="pixel-button w-full flex items-center justify-center gap-2 text-[11px] bg-red-500 hover:bg-red-600 text-white" data-action="logout">
               <i class="fas fa-sign-out-alt"></i><span>Log out</span>
             </button>
           </div>
-          <div class="pixel-card bg-white space-y-2 text-xs">
+          <div class="pixel-card space-y-2 text-xs">
             <h3 class="font-semibold flex items-center gap-2">
               <i class="fas fa-dog text-primary"></i>Manage My Pets
             </h3>
             <p class="text-[11px] text-gray-600">All pets you add appear here. Remove any that are no longer active.</p>
             <div id="profile-pet-manager" class="space-y-2"></div>
           </div>
-          <div class="pixel-card bg-white space-y-3">
+          <div class="pixel-card space-y-3">
             <div class="flex items-center justify-between">
               <h3 class="font-semibold text-xs flex items-center gap-2">
                 <i class="fas fa-moon text-primary"></i>Pet Behavior Insight
@@ -690,17 +1863,242 @@
               Save your profile to generate personalized behavior tips.
             </p>
           </div>
-        </div>
           </div>
-        </section>
-      </div>
-    </main>
+        </div>
 
+        <!-- AI HEALTH TAB -->
+        <div id="tab-ai" class="tab-page hidden scroll-section">
+        <div class="pixel-card ai-panel space-y-6">
+            <div class="space-y-3">
+              <span class="ai-ribbon uppercase text-dark">AI Health Engine · Qwen Vision + Text</span>
+              <div class="flex flex-wrap items-baseline gap-3">
+                <h2 class="text-2xl md:text-3xl font-semibold text-dark">AI Wellness Suite</h2>
+                <span class="px-3 py-1 rounded-full bg-primary/15 text-xs font-semibold text-primary">Visual + Text</span>
+                <button id="ai-intro-toggle" type="button" class="hidden md:hidden text-[11px] font-semibold text-primary underline-offset-4 underline">
+                  Show details
+                </button>
+              </div>
+              <div id="ai-intro-body" class="space-y-2">
+                <p class="text-sm text-gray-600 max-w-3xl">
+                  Use <strong>Visual Diagnosis</strong> to upload a photo (or open the camera) and let Qwen Vision scan posture, skin, or injury issues.
+                  Text services still generate health, behavior, and diet reports from your pet profile—no changes to your other tabs.
+                </p>
+              </div>
+            </div>
+
+            <!-- Service Grid -->
+            <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 text-[10px] sm:text-[11px]">
+              <button type="button" class="ai-service-card ai-service-card-mobile text-left relative group ring-1 ring-primary/40 bg-white" data-ai-service="diagnosis" id="card-diagnosis">
+                <span class="absolute -top-2 -right-2 bg-red-500 text-white text-[9px] px-2 py-0.5 rounded-full font-bold shadow-sm z-10">NEW</span>
+                <div class="flex items-center gap-2 text-sm font-semibold text-dark">
+                  <div class="ai-card-icon w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center bg-primary text-white shadow-md">
+                    <i class="fas fa-microscope text-sm"></i>
+                  </div>
+                  <span>Visual Diagnosis</span>
+                </div>
+                <p class="ai-card-desc text-gray-600 leading-snug">Photo + symptoms for Qwen Vision to flag posture, skin, or injury signs.</p>
+              </button>
+              <button type="button" class="ai-service-card ai-service-card-mobile text-left" data-ai-service="health">
+                <div class="flex items-center gap-2 text-sm font-semibold text-dark">
+                  <div class="ai-card-icon w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center bg-primary/10 text-primary shadow-sm">
+                    <i class="fas fa-notes-medical"></i>
+                  </div>
+                  <span>Health Report</span>
+                </div>
+                <p class="ai-card-desc text-gray-600 leading-snug">Weight, vaccines, milestones, and next steps in one report.</p>
+              </button>
+              <button type="button" class="ai-service-card ai-service-card-mobile text-left" data-ai-service="behavior">
+                <div class="flex items-center gap-2 text-sm font-semibold text-dark">
+                  <div class="ai-card-icon w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center bg-primary/10 text-primary shadow-sm">
+                    <i class="fas fa-brain"></i>
+                  </div>
+                  <span>Behavior Insight</span>
+                </div>
+                <p class="ai-card-desc text-gray-600 leading-snug">Spot behavior shifts and get targeted training nudges.</p>
+              </button>
+              <button type="button" class="ai-service-card ai-service-card-mobile text-left" data-ai-service="diet">
+                <div class="flex items-center gap-2 text-sm font-semibold text-dark">
+                  <div class="ai-card-icon w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center bg-primary/10 text-primary shadow-sm">
+                    <i class="fas fa-carrot"></i>
+                  </div>
+                  <span>Diet Recommendation</span>
+                </div>
+                <p class="ai-card-desc text-gray-600 leading-snug">Weekly menu tuned to body condition and activity level.</p>
+              </button>
+            </div>
+
+            <!-- Visual Diagnosis Layout -->
+            <div id="diag-panel" class="glass-panel bg-white/60 border-white/60 flex flex-col gap-4">
+              <div class="flex items-center justify-between flex-wrap gap-2">
+                <div class="flex items-center gap-2">
+                  <div class="w-10 h-10 rounded-2xl bg-primary text-white flex items-center justify-center shadow-md">
+                    <i class="fas fa-camera-retro"></i>
+                  </div>
+                  <div>
+                    <p class="text-xs uppercase tracking-[0.3em] text-gray-500 font-semibold">Visual Diagnosis</p>
+                    <p class="text-sm text-gray-700">Qwen Vision · photo + symptoms</p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-2 text-[11px] text-gray-500">
+                  <i class="fas fa-circle text-green-500 text-[8px]"></i>Camera ready · microphone not used
+                </div>
+              </div>
+              <div class="grid lg:grid-cols-2 gap-6">
+                <div class="space-y-3">
+                  <div id="diag-dropzone" class="border-2 border-dashed rounded-2xl p-4 text-center transition-all duration-300 cursor-pointer relative overflow-hidden group bg-white/70 hover:border-primary/70 hover:bg-primary/5 min-h-[220px] flex flex-col justify-center items-center">
+                    <input type="file" id="diag-file" class="hidden" accept="image/*" capture="environment" />
+                    <div id="diag-preview" class="hidden w-full">
+                      <img id="diag-preview-img" src="" alt="Preview" class="max-w-full max-h-52 object-contain rounded-lg shadow-sm mx-auto" />
+                    </div>
+                    <div id="diag-placeholder" class="flex flex-col items-center gap-3 text-gray-500 py-4">
+                      <div class="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center group-hover:scale-110 group-hover:bg-primary/20 transition-all duration-300">
+                        <i class="fas fa-camera text-2xl text-primary/80"></i>
+                      </div>
+                      <div>
+                        <p class="text-sm font-semibold text-dark">Upload or take a photo</p>
+                        <p class="text-[10px] text-gray-400 mt-1">Tap to browse or open the camera</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider mb-2 text-gray-500">Symptoms (optional)</label>
+                    <textarea id="diag-symptoms" class="pixel-input h-24 resize-none text-xs bg-white/70 focus:bg-white transition-colors" placeholder="Describe visible issues like red spots, limping, appetite changes..."></textarea>
+                  </div>
+                  <div class="flex flex-wrap gap-2">
+                    <button id="diag-run" type="button" class="pixel-button flex items-center gap-2 text-sm">
+                      <i class="fas fa-wand-magic-sparkles"></i><span>Start AI Diagnosis</span>
+                    </button>
+                    <button id="diag-reset" type="button" class="pixel-button bg-white/80 text-dark border border-white/70 flex items-center gap-2 text-sm">
+                      <i class="fas fa-trash-alt"></i><span>Reset</span>
+                    </button>
+                  </div>
+                  <p id="diag-status" class="text-[11px] text-primary hidden"></p>
+                </div>
+                <div class="bg-white/60 rounded-2xl p-4 border border-white/60 h-full overflow-y-auto custom-scrollbar shadow-inner">
+                  <div id="diag-loading" class="hidden h-full flex flex-col items-center justify-center text-center space-y-3">
+                    <div class="relative">
+                      <div class="w-14 h-14 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+                      <div class="absolute inset-0 flex items-center justify-center">
+                        <i class="fas fa-paw text-primary/40 text-lg animate-pulse"></i>
+                      </div>
+                    </div>
+                    <div class="space-y-1">
+                      <p class="text-sm font-semibold text-dark">Analyzing pet photo</p>
+                      <p class="text-[11px] text-gray-500">Gemini is reviewing posture, skin, and fur details...</p>
+                    </div>
+                  </div>
+                  <div id="diag-result" class="text-[12px] text-gray-700 space-y-2 leading-relaxed">
+                    <div class="h-full flex flex-col items-center justify-center text-gray-400 text-center p-4">
+                      <div class="w-20 h-20 bg-gray-100/50 rounded-full flex items-center justify-center mb-4">
+                        <i class="fas fa-file-medical-alt text-3xl opacity-20 text-dark"></i>
+                      </div>
+                      <p class="text-sm font-medium text-gray-600">Results Waiting</p>
+                      <p class="text-[11px] mt-1 max-w-[220px] leading-relaxed">Upload a photo and describe symptoms to receive a detailed AI assessment.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- Text AI Panel -->
+            <div id="text-panel" class="hidden pixel-card space-y-3">
+              <div class="flex items-center justify-between gap-3 flex-wrap">
+                <div class="flex items-center gap-2">
+                  <div class="w-10 h-10 rounded-2xl bg-primary/90 text-white flex items-center justify-center shadow-md" id="text-service-icon">
+                    <i class="fas fa-notes-medical"></i>
+                  </div>
+                  <div>
+                    <p id="text-service-title" class="text-sm font-semibold text-dark">Health Report</p>
+                    <p id="text-service-subtitle" class="text-[11px] text-gray-500">Vitals, vaccines, and next steps</p>
+                  </div>
+                </div>
+                <span class="text-[10px] px-2 py-0.5 rounded-full bg-primary/15 text-primary border border-primary/30">Text generation</span>
+              </div>
+              <div>
+                <label class="block text-xs font-bold uppercase tracking-wider mb-2 text-gray-500">Context</label>
+                <textarea id="text-service-input" class="pixel-input h-28 resize-none text-xs bg-white/80 focus:bg-white transition-colors" placeholder="Describe your pet's recent health, behavior, or diet concerns..."></textarea>
+              </div>
+              <div class="flex flex-wrap gap-2">
+                <button id="text-service-run" type="button" class="pixel-button flex items-center gap-2 text-sm">
+                  <i class="fas fa-magic"></i><span>Generate with AI</span>
+                </button>
+                <button id="text-service-clear" type="button" class="pixel-button bg-white/80 text-dark border border-white/70 flex items-center gap-2 text-sm">
+                  <i class="fas fa-eraser"></i><span>Clear</span>
+                </button>
+              </div>
+              <p id="ai-service-status" class="text-[10px] text-primary hidden"></p>
+              <div class="ai-service-card ai-output-panel">
+                <p id="ai-service-output" class="text-[11px] text-gray-700">
+                  Select a text AI service and generate a tailored report. Visual Diagnosis uses Qwen Vision above.
+                </p>
+              </div>
+            </div>
+
+            <div class="flex flex-wrap gap-4 text-[11px] text-gray-600">
+              <div class="ai-service-card flex-1 min-w-[220px]">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="font-semibold text-sm text-dark">Plan Details</span>
+                  <span class="text-primary font-semibold">¥29/month</span>
+                </div>
+                <ul class="space-y-1 list-disc list-inside">
+                  <li>Visual + text health insights</li>
+                  <li>Automatic archiving with PDF exports</li>
+                  <li>Veterinarian collaboration coming soon</li>
+                </ul>
+                <button type="button" class="pixel-button w-full mt-3 text-[11px]" id="btn-ai-upgrade">
+                  <i class="fas fa-crown"></i><span>View Plan</span>
+                </button>
+              </div>
+              <div class="ai-service-card flex-1 min-w-[220px]">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="font-semibold text-sm text-dark">Connection Status</span>
+                  <span class="text-green-600 text-xs flex items-center gap-1"><i class="fas fa-circle text-[6px]"></i>Online</span>
+                </div>
+                <p class="text-[11px] text-gray-600 mb-3">
+                  Current models: <strong>Qwen-VL</strong> for images, <strong>Qwen-Plus</strong> for text. Inference usually completes in 2-4 seconds.
+                </p>
+                <div class="flex items-center gap-2 text-[10px] text-gray-500">
+                  <i class="fas fa-info-circle"></i>
+                  <span>Enable camera when prompted to capture a pet photo directly.</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        </section>
+        </main>
+      </div>
+    </div>
+  </div>
+</div>
+
+  <div id="mobile-tabbar" class="hidden fixed inset-x-0 bottom-4 px-4 z-40 lg:hidden">
+    <div class="mobile-tabbar">
+      <button type="button" class="app-tab active tab-shimmer" data-tab="map" aria-label="Open map tab">
+        <svg class="w-5 h-5 text-primary" aria-hidden="true"><use href="#ico-map"></use></svg>
+        <span>Map</span>
+      </button>
+      <button type="button" class="app-tab tab-shimmer" data-tab="pets" aria-label="Open pets tab">
+        <svg class="w-5 h-5 text-primary" aria-hidden="true"><use href="#ico-paw"></use></svg>
+        <span>Pets</span>
+      </button>
+      <button type="button" class="app-tab tab-shimmer" data-tab="chat" aria-label="Open chat tab">
+        <svg class="w-5 h-5 text-primary" aria-hidden="true"><use href="#ico-chat"></use></svg>
+        <span>Chat</span>
+      </button>
+      <button type="button" class="app-tab tab-shimmer" data-tab="ai" aria-label="Open AI health tab">
+        <svg class="w-5 h-5 text-primary" aria-hidden="true"><use href="#ico-heart"></use></svg>
+        <span>AI Health</span>
+      </button>
+      <button type="button" class="app-tab tab-shimmer" data-tab="profile" aria-label="Open profile tab">
+        <svg class="w-5 h-5 text-primary" aria-hidden="true"><use href="#ico-user"></use></svg>
+        <span>Profile</span>
+      </button>
+    </div>
   </div>
 
   <!-- PROFILE EDIT MODAL -->
   <div id="profile-edit-modal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 animate-fadeIn">
-    <div class="pixel-card bg-white max-w-md w-full">
+    <div class="pixel-card max-w-md w-full">
       <div class="flex justify-between items-center mb-4">
         <h2 class="text-lg font-bold">Edit Profile</h2>
         <button onclick="closeProfileEditModal()" class="text-gray-500 hover:text-dark">
@@ -708,11 +2106,11 @@
         </button>
       </div>
       <div class="space-y-3 text-xs max-h-96 overflow-y-auto">
-        <div class="space-y-2">
+          <div class="space-y-2">
           <label class="block font-semibold mb-1">Avatar</label>
           <div class="flex items-center gap-3">
             <div class="w-16 h-16 rounded-full pixel-border bg-secondary overflow-hidden flex items-center justify-center">
-              <img id="profile-avatar-preview-img" src="" alt="Avatar preview" class="w-full h-full object-cover" />
+              <img id="profile-avatar-preview-img" loading="lazy" decoding="async" src="" alt="Avatar preview" class="w-full h-full object-cover" />
             </div>
             <div class="flex-1 space-y-1 text-[11px]">
               <input id="edit-avatar-file" type="file" accept="image/*" class="pixel-input text-xs" />
@@ -772,7 +2170,7 @@
 
   <!-- IMAGE SHARE MODAL -->
   <div id="share-image-modal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 animate-fadeIn">
-    <div class="pixel-card bg-white max-w-md w-full">
+    <div class="pixel-card max-w-md w-full">
       <div class="flex justify-between items-center mb-4">
         <h2 class="text-lg font-bold">Share Image with Friend</h2>
         <button onclick="closeShareImageModal()" class="text-gray-500 hover:text-dark">
@@ -781,15 +2179,16 @@
       </div>
       <div class="space-y-3 text-xs max-h-96 overflow-y-auto">
         <div>
-          <label class="block font-semibold mb-1">Image URL</label>
-          <input id="share-image-url" type="url" class="pixel-input" placeholder="https://example.com/pet.jpg" />
+          <label class="block font-semibold mb-1">or Upload Image</label>
+          <input id="share-image-file" type="file" accept="image/*" class="pixel-input text-xs" />
+          <p class="text-[10px] text-gray-500 mt-1">JPG/PNG up to 5MB. Uploading clears the URL above.</p>
         </div>
         <div>
           <label class="block font-semibold mb-1">Caption</label>
           <textarea id="share-image-caption" class="pixel-input h-12 resize-none" placeholder="Add a caption..."></textarea>
         </div>
         <div id="share-image-preview" class="hidden mt-2">
-          <img id="share-preview-img" src="" alt="Preview" class="w-full rounded-sm border-2 border-dark" />
+          <img id="share-preview-img" loading="lazy" decoding="async" src="" alt="Preview" class="w-full rounded-sm border-2 border-dark" />
         </div>
         <div class="flex gap-2 pt-2">
           <button id="btn-send-image" class="pixel-button flex-1 text-xs">
@@ -804,6 +2203,36 @@
   </div>
 
   <script>
+    let pendingAvatarData = null;
+    let editAvatarFileInput = null;
+    let profileAvatarPreviewImg = null;
+    let shareImageSource = '';
+    let shareImageIsUpload = false;
+    let mapController = null;
+    let aiServiceOutputEl = null;
+    let aiServiceStatusEl = null;
+    let aiServiceStatusTimer = null;
+    let aiServiceButtons = [];
+    let diagFileInput = null;
+    let diagDropzone = null;
+    let diagPreview = null;
+    let diagPreviewImg = null;
+    let diagPlaceholder = null;
+    let diagSymptoms = null;
+    let diagRunBtn = null;
+    let diagResetBtn = null;
+    let diagResult = null;
+    let diagLoading = null;
+    let diagStatus = null;
+    let textPanel = null;
+    let diagPanel = null;
+    let textServiceInput = null;
+    let textServiceTitle = null;
+    let textServiceSubtitle = null;
+    let textServiceIcon = null;
+    let textServiceRunBtn = null;
+    let textServiceClearBtn = null;
+    let selectedAIService = 'diagnosis';
     // --- Modal Functions ---
     function openProfileEditModal() {
       const currentUser = getCurrentUser();
@@ -920,17 +2349,38 @@
       document.getElementById('profile-edit-modal').classList.add('hidden');
     }
 
+    function openShareImageModal() {
+      const modal = document.getElementById('share-image-modal');
+      const preview = document.getElementById('share-image-preview');
+      const previewImg = document.getElementById('share-preview-img');
+      const urlInput = document.getElementById('share-image-url');
+      const captionInput = document.getElementById('share-image-caption');
+      const fileInput = document.getElementById('share-image-file');
+      shareImageSource = '';
+      shareImageIsUpload = false;
+      if (urlInput) urlInput.value = '';
+      if (captionInput) captionInput.value = '';
+      if (fileInput) fileInput.value = '';
+      if (preview) preview.classList.add('hidden');
+      if (previewImg) previewImg.src = '';
+      modal?.classList.remove('hidden');
+    }
+
     function closeShareImageModal() {
       const modal = document.getElementById('share-image-modal');
       const preview = document.getElementById('share-image-preview');
       const previewImg = document.getElementById('share-preview-img');
       const urlInput = document.getElementById('share-image-url');
       const captionInput = document.getElementById('share-image-caption');
+      const fileInput = document.getElementById('share-image-file');
+      shareImageSource = '';
+      shareImageIsUpload = false;
       if (modal) modal.classList.add('hidden');
       if (preview) preview.classList.add('hidden');
       if (previewImg) previewImg.src = '';
       if (urlInput) urlInput.value = '';
       if (captionInput) captionInput.value = '';
+      if (fileInput) fileInput.value = '';
     }
 
     // --- Simple scroll reveal ---
@@ -959,6 +2409,13 @@
     function saveUsers(users) {
       localStorage.setItem(LS_USERS_KEY, JSON.stringify(users));
     }
+    function persistCurrentUser(user) {
+      if (!user) return;
+      setCurrentUser(user);
+      let users = loadUsers();
+      users = users.map(u => u.username === user.username ? user : u);
+      saveUsers(users);
+    }
     function setCurrentUser(user) {
       if (user) localStorage.setItem(LS_CURRENT_USER_KEY, JSON.stringify(user));
       else localStorage.removeItem(LS_CURRENT_USER_KEY);
@@ -969,34 +2426,104 @@
       } catch { return null; }
     }
 
-    function seedDemoUser() {
-      let users = loadUsers();
-      if (!users.find(u => u.username === 'demo')) {
-        users.push({
-          username: 'demo',
-          displayName: 'Pet Lover',
-          password: 'demo123',
-          avatar: 'https://design.gemcoder.com/staticResource/echoAiSystemImages/fdca457404bba5bf76bb0fd8378c6d8d.png',
-          bio: 'Welcome to PawTrace!',
-          campus: 'Taicang',
-          contact: 'WeChat',
-          starSign: 'Libra',
-          mainPetName: 'Mocha',
-          mainPetType: 'Corgi',
-          mainPetBirth: '2021-05-15',
-          mainPetNotes: 'Loves fetch and sunset walks.',
-          petInsight: ''
-        });
-        saveUsers(users);
+    function createGuestUser() {
+      return {
+        username: 'guest',
+        displayName: 'Guest Explorer',
+        password: '',
+        avatar: 'https://design.gemcoder.com/staticResource/echoAiSystemImages/fdca457404bba5bf76bb0fd8378c6d8d.png',
+        bio: 'Exploring PawTrace without logging in.',
+        campus: 'Taicang',
+        contact: 'N/A',
+        starSign: '',
+        mainPetName: '',
+        mainPetType: '',
+        mainPetBirth: '',
+        mainPetNotes: '',
+        petInsight: ''
+      };
+    }
+
+    function getDefaultUser() {
+      const users = loadUsers();
+      return users[0] || createGuestUser();
+    }
+
+    // True Focus (feature highlight)
+    function initTrueFocus() {
+      const container = document.getElementById('core-focus');
+      if (!container) return;
+      const words = Array.from(container.querySelectorAll('.true-focus-word'));
+      if (!words.length) return;
+      const frame = document.createElement('div');
+      frame.className = 'true-focus-frame';
+      frame.innerHTML = `
+        <span class="true-focus-corner tl"></span>
+        <span class="true-focus-corner tr"></span>
+        <span class="true-focus-corner bl"></span>
+        <span class="true-focus-corner br"></span>
+      `;
+      container.appendChild(frame);
+      let currentIndex = 0;
+      const duration = 2000;
+      const pause = 800;
+
+      function highlight(idx) {
+        words.forEach((w, i) => w.classList.toggle('active', i === idx));
+        const active = words[idx];
+        if (!active) return;
+        const parentRect = container.getBoundingClientRect();
+        const rect = active.getBoundingClientRect();
+        const x = rect.left - parentRect.left;
+        const y = rect.top - parentRect.top;
+        frame.style.width = rect.width + 'px';
+        frame.style.height = rect.height + 'px';
+        frame.style.transform = `translate(${x}px, ${y}px)`;
+        frame.classList.add('show');
       }
+
+      highlight(currentIndex);
+      setInterval(() => {
+        currentIndex = (currentIndex + 1) % words.length;
+        highlight(currentIndex);
+      }, duration + pause);
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-      seedDemoUser();
-
       const loginScreen = document.getElementById('login-screen');
       const appRoot = document.getElementById('app-root');
       const authMsg = document.getElementById('auth-message');
+      const mobileTabbar = document.getElementById('mobile-tabbar');
+      const guestAccessBtn = document.getElementById('btn-guest-access');
+      aiServiceOutputEl = document.getElementById('ai-service-output');
+      aiServiceStatusEl = document.getElementById('ai-service-status');
+      aiServiceButtons = Array.from(document.querySelectorAll('.ai-service-card[data-ai-service]'));
+      const aiIntroBody = document.getElementById('ai-intro-body');
+      const aiIntroToggle = document.getElementById('ai-intro-toggle');
+      const chatToggleContacts = document.getElementById('chat-toggle-contacts');
+      const chatLeftPane = document.getElementById('chat-left-pane');
+      const chatBackBtn = document.getElementById('chat-back-btn');
+      const chatTabBack = document.getElementById('chat-tab-back');
+      diagFileInput = document.getElementById('diag-file');
+      diagDropzone = document.getElementById('diag-dropzone');
+      diagPreview = document.getElementById('diag-preview');
+      diagPreviewImg = document.getElementById('diag-preview-img');
+      diagPlaceholder = document.getElementById('diag-placeholder');
+      diagSymptoms = document.getElementById('diag-symptoms');
+      diagRunBtn = document.getElementById('diag-run');
+      diagResetBtn = document.getElementById('diag-reset');
+      diagResult = document.getElementById('diag-result');
+      diagLoading = document.getElementById('diag-loading');
+      diagStatus = document.getElementById('diag-status');
+      diagPanel = document.getElementById('diag-panel');
+      textPanel = document.getElementById('text-panel');
+      textServiceInput = document.getElementById('text-service-input');
+      textServiceTitle = document.getElementById('text-service-title');
+      textServiceSubtitle = document.getElementById('text-service-subtitle');
+      textServiceIcon = document.getElementById('text-service-icon');
+      textServiceRunBtn = document.getElementById('text-service-run');
+      textServiceClearBtn = document.getElementById('text-service-clear');
+      const aiUpgradeBtn = document.getElementById('btn-ai-upgrade');
 
       const tabLogin = document.getElementById('tab-login');
       const tabRegister = document.getElementById('tab-register');
@@ -1009,9 +2536,137 @@
       const regDisplayName = document.getElementById('reg-displayname');
       const regPassword = document.getElementById('reg-password');
       const regAvatar = document.getElementById('reg-avatar');
+      const mapOptions = {
+        container: document.getElementById('map-container'),
+        background: document.getElementById('map-background'),
+        markersLayer: document.getElementById('map-markers-layer'),
+        petsLayer: document.getElementById('map-pets-layer'),
+        locationListEl: document.getElementById('location-list'),
+        locationCountEl: document.getElementById('location-count'),
+        cardElements: {
+          wrapper: document.getElementById('location-card'),
+          name: document.getElementById('loc-name'),
+          type: document.getElementById('loc-type'),
+          desc: document.getElementById('loc-desc'),
+          rating: document.getElementById('loc-rating'),
+          tags: document.getElementById('loc-tags'),
+          pets: document.getElementById('loc-pets'),
+          hours: document.getElementById('loc-hours'),
+          phone: document.getElementById('loc-phone'),
+          address: document.getElementById('loc-address'),
+          status: document.getElementById('loc-status'),
+          linkButton: document.getElementById('loc-link'),
+          closeButton: document.getElementById('loc-close')
+        },
+        onMapFocus: () => {
+          document.querySelector('[data-tab=\"map\"]')?.click();
+        }
+      };
+      if (mapOptions.container && window.PawMapController) {
+        mapController = new window.PawMapController(mapOptions);
+        mapController.init();
+      }
+
+      const appShellEl = document.querySelector('.app-shell');
+      function setSidebarState(collapsed) {
+        if (!appShellEl) return;
+        const isCollapsed = typeof collapsed === 'boolean' ? collapsed : !appShellEl.classList.contains('collapsed');
+        appShellEl.classList.toggle('collapsed', isCollapsed);
+        localStorage.setItem('pawtraceSidebarCollapsed', isCollapsed ? '1' : '0');
+      }
+      const SIDEBAR_PREF_VERSION = 'v2';
+      const storedSidebarPrefVersion = localStorage.getItem('pawtraceSidebarPrefVersion');
+      if (storedSidebarPrefVersion !== SIDEBAR_PREF_VERSION) {
+        localStorage.removeItem('pawtraceSidebarCollapsed');
+        localStorage.setItem('pawtraceSidebarPrefVersion', SIDEBAR_PREF_VERSION);
+      }
+      const storedCollapsed = localStorage.getItem('pawtraceSidebarCollapsed');
+      const defaultCollapsed = storedCollapsed ? storedCollapsed === '1' : false;
+      setSidebarState(defaultCollapsed);
+      initTrueFocus();
+      aiServiceButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const key = btn.getAttribute('data-ai-service');
+          setSelectedAIService(key);
+        });
+      });
+      if (aiIntroToggle && aiIntroBody) {
+        aiIntroToggle.addEventListener('click', () => {
+          const isOpen = aiIntroBody.classList.toggle('show');
+          aiIntroToggle.textContent = isOpen ? 'Hide details' : 'Show details';
+        });
+      }
+      if (chatToggleContacts && chatLeftPane) {
+        chatToggleContacts.addEventListener('click', () => {
+          const isOpen = chatLeftPane.classList.toggle('open');
+          chatToggleContacts.textContent = isOpen ? 'Hide friends' : 'Show friends';
+        });
+      }
+      if (chatBackBtn && chatLeftPane) {
+        chatBackBtn.addEventListener('click', () => {
+          chatLeftPane.classList.add('open');
+          if (chatToggleContacts) chatToggleContacts.textContent = 'Hide friends';
+        });
+      }
+      if (chatTabBack) {
+        chatTabBack.addEventListener('click', () => {
+          document.querySelector('.app-tab[data-tab="pets"]')?.click();
+        });
+      }
+      aiUpgradeBtn?.addEventListener('click', () => {
+      alert('AI Wellness plan: ¥29/month for unlimited health, behavior, and diet recommendations.');
+      });
+
+      // Visual Diagnosis handlers
+      if (diagDropzone && diagFileInput) {
+        const openPicker = () => diagFileInput.click();
+        diagDropzone.setAttribute('tabindex', '0');
+        diagDropzone.addEventListener('click', openPicker);
+        diagDropzone.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            openPicker();
+          }
+        });
+      }
+
+      diagFileInput?.addEventListener('change', async (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        if (file.size > 5 * 1024 * 1024) {
+          alert('Please choose an image under 5MB.');
+          diagFileInput.value = '';
+          return;
+        }
+        try {
+          const dataUrl = await fileToDataURL(file);
+          if (diagPreviewImg) diagPreviewImg.src = dataUrl;
+          diagPreview?.classList.remove('hidden');
+          diagPlaceholder?.classList.add('hidden');
+          if (diagResult) {
+            diagResult.innerHTML = `
+              <div class="text-[11px] text-gray-600">
+                Photo ready. Add symptoms (optional) and click Start AI Diagnosis.
+              </div>
+            `;
+          }
+        } catch (err) {
+          console.warn('Preview load failed', err);
+          diagFileInput.value = '';
+          resetDiagnosisUI();
+        }
+      });
+
+      diagRunBtn?.addEventListener('click', handleDiagnosisRun);
+      diagResetBtn?.addEventListener('click', resetDiagnosisUI);
+      textServiceRunBtn?.addEventListener('click', handleTextServiceRun);
+      textServiceClearBtn?.addEventListener('click', clearTextService);
+      setSelectedAIService('diagnosis');
+      resetDiagnosisUI();
 
       const currentUserNameEl = document.getElementById('current-user-name');
       const currentUserAvatarEl = document.getElementById('current-user-avatar');
+      const sidebarUserNameEl = document.getElementById('sidebar-user-name');
       const profileAvatarEl = document.getElementById('profile-avatar');
       const profileNameEl = document.getElementById('profile-name');
       const profileUsernameEl = document.getElementById('profile-username');
@@ -1025,18 +2680,29 @@
       const btnRefreshPetInsight = document.getElementById('btn-refresh-pet-insight');
       const btnEditProfile = document.getElementById('btn-edit-profile');
       const btnSaveProfile = document.getElementById('btn-save-profile');
-      const editAvatarFileInput = document.getElementById('edit-avatar-file');
-      const profileAvatarPreviewImg = document.getElementById('profile-avatar-preview-img');
+      editAvatarFileInput = document.getElementById('edit-avatar-file');
+      profileAvatarPreviewImg = document.getElementById('profile-avatar-preview-img');
       const editStarSign = document.getElementById('edit-star-sign');
       const editMainPetName = document.getElementById('edit-main-pet-name');
       const editMainPetType = document.getElementById('edit-main-pet-type');
       const editMainPetBirth = document.getElementById('edit-main-pet-birth');
       const editMainPetNotes = document.getElementById('edit-main-pet-notes');
-      let pendingAvatarData = null;
+      editMainPetBirth?.addEventListener('change', () => {
+        const computedSign = computeStarSign(editMainPetBirth.value);
+        if (computedSign) {
+          editStarSign.value = computedSign;
+        }
+      });
+
 
       function updateProfileDetails(user) {
         if (!user) return;
-        if (profileStarSignEl) profileStarSignEl.textContent = user.starSign ? `Star sign: ${user.starSign}` : 'Star sign: Not set';
+        if (profileStarSignEl) {
+          const tagline = user.starSign ? STAR_SIGN_DESCRIPTIONS[user.starSign] : '';
+          profileStarSignEl.textContent = user.starSign
+            ? `Star sign: ${user.starSign}${tagline ? ' · ' + tagline : ''}`
+            : 'Star sign: Not set';
+        }
         if (profileMainPetEl) profileMainPetEl.textContent = user.mainPetName ? `${user.mainPetName} · ${user.mainPetType || 'Pet'}` : 'Add your main pet to personalize insights.';
         if (profilePetNotesEl) profilePetNotesEl.textContent = user.mainPetNotes || 'Share habits and quirks to give the AI more context.';
         if (petInsightText) {
@@ -1047,6 +2713,14 @@
       async function fetchPetInsight(force = false) {
         const user = getCurrentUser();
         if (!user || !petInsightText) return;
+        if (!user.starSign && user.mainPetBirth) {
+          const derivedSign = computeStarSign(user.mainPetBirth);
+          if (derivedSign) {
+            user.starSign = derivedSign;
+            persistCurrentUser(user);
+            updateProfileDetails(user);
+          }
+        }
         if (!user.starSign && !user.mainPetName) {
           petInsightText.textContent = 'Add your star sign or main pet info to unlock insights.';
           return;
@@ -1085,6 +2759,299 @@
         }
       }
 
+      function setAIServiceStatus(message, persistent = false) {
+        if (!aiServiceStatusEl) return;
+        aiServiceStatusEl.textContent = message;
+        aiServiceStatusEl.classList.remove('hidden');
+        if (!persistent) {
+          if (aiServiceStatusTimer) clearTimeout(aiServiceStatusTimer);
+          aiServiceStatusTimer = window.setTimeout(() => {
+            aiServiceStatusEl?.classList.add('hidden');
+          }, 4000);
+        }
+      }
+
+      function setDiagStatus(message, isError = false) {
+        if (!diagStatus) return;
+        diagStatus.textContent = message;
+        diagStatus.classList.remove('hidden');
+        diagStatus.classList.toggle('text-red-500', isError);
+        diagStatus.classList.toggle('text-primary', !isError);
+      }
+
+      function toggleDiagLoading(show) {
+        if (diagLoading) diagLoading.classList.toggle('hidden', !show);
+      }
+
+      function resetDiagnosisUI() {
+        if (diagPreview) diagPreview.classList.add('hidden');
+        if (diagPlaceholder) diagPlaceholder.classList.remove('hidden');
+        if (diagPreviewImg) diagPreviewImg.src = '';
+        if (diagFileInput) diagFileInput.value = '';
+        if (diagSymptoms) diagSymptoms.value = '';
+        if (diagResult) {
+          diagResult.innerHTML = `
+            <div class="h-full flex flex-col items-center justify-center text-gray-400 text-center p-4">
+              <div class="w-20 h-20 bg-gray-100/50 rounded-full flex items-center justify-center mb-4">
+                <i class="fas fa-file-medical-alt text-3xl opacity-20 text-dark"></i>
+              </div>
+              <p class="text-sm font-medium text-gray-600">Results Waiting</p>
+              <p class="text-[11px] mt-1 max-w-[220px] leading-relaxed">Upload a photo and describe symptoms to receive a detailed AI assessment.</p>
+            </div>
+          `;
+        }
+        toggleDiagLoading(false);
+        if (diagStatus) diagStatus.classList.add('hidden');
+      }
+
+      function renderDiagnosisResult(text) {
+        if (!diagResult) return;
+        const formatted = text
+          .replace(/\n/g, '<br/>')
+          .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+          .replace(/### (.*?)(<br\/>|$)/g, '<h4 class="text-primary font-bold text-sm mt-3 mb-2 border-b border-primary/20 pb-1">$1</h4>')
+          .replace(/- (.*?)(<br\/>|$)/g, '<div class="flex items-start gap-2 mb-1"><span class="text-primary">•</span><span>$1</span></div>');
+        diagResult.innerHTML = `<div class="prose prose-sm max-w-none text-xs text-dark leading-relaxed ai-fade">${formatted}</div>`;
+      }
+
+      async function handleDiagnosisRun() {
+        const file = diagFileInput?.files?.[0] || null;
+        const symptoms = (diagSymptoms && diagSymptoms.value.trim()) || '';
+        const user = getCurrentUser();
+        if (!file && !symptoms) {
+          alert('Upload a pet photo or enter symptoms to ask AI.');
+          return;
+        }
+        diagRunBtn?.setAttribute('disabled', 'true');
+        diagRunBtn?.classList.add('opacity-60', 'cursor-not-allowed');
+        toggleDiagLoading(true);
+        setDiagStatus(file ? 'Analyzing pet health with Gemini...' : 'Analyzing symptoms (no photo)...');
+        try {
+          if (diagResult) {
+            diagResult.innerHTML = `
+              <div class="space-y-2 ai-fade">
+                <div class="skeleton h-4 rounded"></div>
+                <div class="skeleton h-4 rounded w-5/6"></div>
+                <div class="skeleton h-4 rounded w-2/3"></div>
+              </div>
+            `;
+          }
+          if (file) {
+            const base64 = await fileToBase64(file);
+            const response = await fetch('/api/ai/gemini-diagnosis', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                imageBase64: base64,
+                mimeType: file.type || 'image/jpeg',
+                symptoms
+              })
+            });
+            if (!response.ok) {
+              const errText = await response.text();
+              throw new Error(errText || 'Gemini request failed');
+            }
+            const data = await response.json();
+            const text = data?.result || data?.text || 'Unable to generate analysis. Please try a clearer photo.';
+            renderDiagnosisResult(text);
+            setDiagStatus('Gemini analysis complete');
+          } else {
+            const response = await fetch('/api/ai/qwen-advice', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                service: 'health',
+                context: symptoms,
+                profile: sanitizeUserProfile(user),
+                pets: gatherOwnedPetsForPayload()
+              })
+            });
+            if (response.ok) {
+              const data = await response.json();
+              const text = data?.result || data?.text || 'No response received.';
+              renderDiagnosisResult(text);
+              setDiagStatus('AI analysis complete (text only)');
+            } else {
+              throw new Error('Text-only AI request failed');
+            }
+          }
+        } catch (err) {
+          console.warn('Gemini diagnosis error', err);
+          setDiagStatus('AI request failed', true);
+          if (diagResult) {
+            const fallback = generateMockAIResponse('health', user) || 'Unable to analyze right now. Please try again.';
+            diagResult.innerHTML = `<p class="text-xs text-gray-700">${fallback}</p>`;
+          }
+        } finally {
+          toggleDiagLoading(false);
+          diagRunBtn?.removeAttribute('disabled');
+          diagRunBtn?.classList.remove('opacity-60', 'cursor-not-allowed');
+        }
+      }
+
+      function buildProfileContext(user) {
+        if (!user) return '';
+        const parts = [];
+        if (user.displayName) parts.push(`Owner: ${user.displayName}`);
+        if (user.mainPetName) parts.push(`Pet: ${user.mainPetName} (${user.mainPetType || 'Pet'})`);
+        if (user.mainPetBirth) parts.push(`Birthday: ${user.mainPetBirth}`);
+        if (user.mainPetNotes) parts.push(`Notes: ${user.mainPetNotes}`);
+        return parts.join(' | ');
+      }
+
+      function getTextPlaceholder(serviceKey) {
+        const meta = AI_SERVICE_CONFIG[serviceKey] || {};
+        return meta.placeholder || "Describe your pet's recent health, behavior, or diet concerns...";
+      }
+
+      function setSelectedAIService(serviceKey) {
+        selectedAIService = serviceKey;
+        document.querySelectorAll('.ai-service-card[data-ai-service]').forEach(btn => {
+          btn.classList.toggle('ring-2', btn.getAttribute('data-ai-service') === serviceKey);
+          btn.classList.toggle('ring-primary', btn.getAttribute('data-ai-service') === serviceKey);
+          btn.classList.toggle('bg-white', btn.getAttribute('data-ai-service') === serviceKey);
+          btn.classList.toggle('scale-[1.02]', btn.getAttribute('data-ai-service') === serviceKey);
+        });
+        if (serviceKey === 'diagnosis') {
+          diagPanel?.classList.remove('hidden');
+          textPanel?.classList.add('hidden');
+          return;
+        }
+        diagPanel?.classList.add('hidden');
+        textPanel?.classList.remove('hidden');
+        const meta = AI_SERVICE_CONFIG[serviceKey] || AI_SERVICE_CONFIG.health;
+        if (textServiceTitle) textServiceTitle.textContent = meta.label || 'AI Report';
+        if (textServiceSubtitle) textServiceSubtitle.textContent = meta.subtitle || meta.summary || '';
+        if (textServiceIcon) textServiceIcon.innerHTML = `<i class="${meta.icon || 'fas fa-magic'}"></i>`;
+        if (textServiceInput && !textServiceInput.value) {
+          textServiceInput.placeholder = getTextPlaceholder(serviceKey);
+        }
+      }
+
+      function renderTextResult(text) {
+        if (!aiServiceOutputEl) return;
+        const formatted = text
+          .replace(/\n/g, '<br/>')
+          .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+          .replace(/### (.*?)(<br\/>|$)/g, '<h4 class="text-primary font-bold text-sm mt-3 mb-2 border-b border-primary/20 pb-1">$1</h4>')
+          .replace(/- (.*?)(<br\/>|$)/g, '<div class="flex items-start gap-2 mb-1"><span class="text-primary">•</span><span>$1</span></div>');
+        aiServiceOutputEl.innerHTML = `<div class="prose prose-sm max-w-none text-xs text-dark leading-relaxed ai-fade">${formatted}</div>`;
+      }
+
+      async function handleTextServiceRun() {
+        if (selectedAIService === 'diagnosis') return;
+        const user = getCurrentUser();
+        if (!user) {
+          alert('Please log in before using AI services.');
+          return;
+        }
+        const config = AI_SERVICE_CONFIG[selectedAIService];
+        if (!config || !config.endpoint) {
+          alert('This AI service is not configured yet.');
+          return;
+        }
+        const context = (textServiceInput?.value || '').trim() || buildProfileContext(user);
+        if (!context) {
+          alert('Please provide some context for the AI.');
+          return;
+        }
+        setAIButtonsDisabled(true);
+        setAIServiceStatus(`Generating ${AI_SERVICE_CONFIG[selectedAIService]?.label || 'report'} ...`);
+        if (aiServiceOutputEl) {
+          aiServiceOutputEl.innerHTML = `
+            <div class="space-y-2 ai-fade">
+              <div class="skeleton h-4 rounded"></div>
+              <div class="skeleton h-4 rounded w-5/6"></div>
+              <div class="skeleton h-4 rounded w-2/3"></div>
+            </div>
+          `;
+        }
+        try {
+          const response = await fetch(config.endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              service: selectedAIService,
+              context,
+              profile: sanitizeUserProfile(user),
+              pets: gatherOwnedPetsForPayload()
+            })
+          });
+          if (!response.ok) throw new Error('AI endpoint unavailable');
+          const data = await response.json();
+          const result = data?.result || data?.text;
+          if (result) {
+            renderTextResult(result);
+            setAIServiceStatus(`Complete · ${AI_SERVICE_CONFIG[selectedAIService]?.label || 'AI report'}`);
+            return;
+          }
+        } catch (err) {
+          console.warn('Text AI service error', err);
+          renderTextResult(generateMockAIResponse(selectedAIService, user));
+          setAIServiceStatus('AI request failed, using mock data', true);
+        } finally {
+          setAIButtonsDisabled(false);
+        }
+      }
+
+      function clearTextService() {
+        if (textServiceInput) textServiceInput.value = '';
+        if (textServiceInput) textServiceInput.placeholder = getTextPlaceholder(selectedAIService);
+        if (aiServiceOutputEl) {
+          aiServiceOutputEl.innerHTML = 'Select a text AI service and generate a tailored report.';
+        }
+        if (aiServiceStatusEl) aiServiceStatusEl.classList.add('hidden');
+      }
+
+      function setAIButtonsDisabled(disabled) {
+        aiServiceButtons.forEach(btn => {
+          btn.disabled = disabled;
+          btn.classList.toggle('opacity-60', disabled);
+          btn.classList.toggle('cursor-not-allowed', disabled);
+        });
+      }
+
+      async function requestAIService(serviceKey) {
+        if (serviceKey === 'diagnosis') {
+          setSelectedAIService('diagnosis');
+          return;
+        }
+        setSelectedAIService(serviceKey);
+        await handleTextServiceRun();
+      }
+
+      function generateMockAIResponse(serviceKey, user) {
+        const petName = user?.mainPetName || 'your pet';
+        const campus = user?.campus || 'Taicang Campus';
+        const rand = (arr) => arr[Math.floor(Math.random() * arr.length)];
+        switch (serviceKey) {
+          case 'health':
+            return `
+              <strong>${petName} · Health Report</strong><br>
+              • ${rand(['Weight and body fat are steady', 'Weight trending up 0.1kg, monitor treats', 'Body score 4/9, lean and active'])}; keep ${rand(['2-3 weekly 30-minute walks', 'one brisk 20-min walk daily', 'mixed sniff walks + short jogs'])}.<br>
+              • Vaccine reminder: ${rand(['rabies next month', 'DHPP in 6 weeks', 'annual boosters due in 2 months'])}.<br>
+              • ${rand(['Add dental chews twice a week', 'Check ears after outdoor play', 'Moisturize paw pads in dry weather'])}.
+            `;
+          case 'behavior':
+            return `
+              <strong>Behavior Insight</strong><br>
+              1. ${rand(['Restless sniffing = searching for outlets; add nosework mats 10 min/day', 'Low tail + pacing suggests uncertainty; use short approach/retreat games', 'Extra zoomies indoors; rotate puzzle toys before bedtime'])}.<br>
+              2. ${rand(['Reward quiet observation on walks to reduce reactivity', 'Use 3-step settle cue before guests arrive', 'Short clicker sessions to channel energy'])}.<br>
+              3. ${rand(['Schedule decompression walk on soft surfaces', 'Increase chew time to lower stress hormones', 'Keep greetings short and predictable this week'])}.
+            `;
+          case 'diet':
+            return `
+              <strong>Diet Recommendation</strong><br>
+              • Breakfast: ${rand(['60g low-fat kibble + 20g pumpkin', 'lean turkey 50g + oat topper', 'salmon kibble 55g + carrot shreds'])}.<br>
+              • Dinner: ${rand(['70g wet food + 30g yam', '65g kibble + 1 boiled egg white', '70g chicken wet + green bean mix'])}.<br>
+              • Snacks: ${rand(['freeze-dried chicken 1-2 cubes', 'blueberries 6-8 pcs', 'dental chew after dinner'])}.<br>
+              • Hydration: ${rand(['target 50-60ml/kg/day', 'add goat milk cube after play', 'use broths if appetite dips'])}.
+            `;
+          default:
+            return 'AI services are evolving; stay tuned.';
+        }
+      }
+
       btnRefreshPetInsight?.addEventListener('click', () => {
         fetchPetInsight(true);
       });
@@ -1113,12 +3080,15 @@
       });
 
       function showApp(user) {
-        loginScreen.classList.add('hidden');
+        authMsg.textContent = '';
+        loginScreen?.classList.add('hidden');
         appRoot.classList.remove('hidden');
+        mobileTabbar?.classList.remove('hidden');
         const displayName = user.displayName || user.username;
         const avatar = user.avatar || 'https://design.gemcoder.com/staticResource/echoAiSystemImages/fdca457404bba5bf76bb0fd8378c6d8d.png';
         currentUserNameEl.textContent = displayName;
         currentUserAvatarEl.src = avatar;
+        if (sidebarUserNameEl) sidebarUserNameEl.textContent = displayName;
         profileAvatarEl.src = avatar;
         profileNameEl.textContent = displayName;
         profileUsernameEl.textContent = '@' + user.username;
@@ -1126,9 +3096,7 @@
         profileCampusEl.textContent = user.campus || 'Taicang';
         profileContactEl.textContent = user.contact || 'Contact: N/A';
         updateProfileDetails(user);
-        document.body.classList.remove('overflow-hidden');
         initTabs();
-        initMap();
         initStickyNotes();
         initPets();
         initChat();
@@ -1216,56 +3184,92 @@
         currentUser.bio = document.getElementById('edit-bio').value;
         currentUser.campus = document.getElementById('edit-campus').value;
         currentUser.contact = document.getElementById('edit-contact').value;
-        currentUser.starSign = editStarSign.value;
+        const derivedStarSign = editStarSign.value.trim() || computeStarSign(editMainPetBirth.value);
+        if (!editStarSign.value && derivedStarSign) {
+          editStarSign.value = derivedStarSign;
+        }
+        currentUser.starSign = derivedStarSign || '';
         currentUser.mainPetName = editMainPetName.value;
         currentUser.mainPetType = editMainPetType.value;
         currentUser.mainPetBirth = editMainPetBirth.value;
         currentUser.mainPetNotes = editMainPetNotes.value;
         currentUser.petInsight = '';
-        setCurrentUser(currentUser);
-        let users = loadUsers();
-        users = users.map(u => u.username === currentUser.username ? currentUser : u);
-        saveUsers(users);
+        persistCurrentUser(currentUser);
         showApp(currentUser);
         closeProfileEditModal();
+        sendMonitoringPayload({
+          personalInfo: {
+            username: currentUser.username,
+            displayName: currentUser.displayName,
+            campus: currentUser.campus,
+            contact: currentUser.contact
+          },
+          userProfile: sanitizeUserProfile(currentUser),
+          pets: gatherOwnedPetsForPayload(),
+          metadata: { source: 'profile-update' }
+        });
+      });
+
+
+      guestAccessBtn?.addEventListener('click', () => {
+        const guestUser = getDefaultUser();
+        setCurrentUser(guestUser);
+        showApp(guestUser);
       });
 
       const existing = getCurrentUser();
       if (existing) {
         showApp(existing);
       } else {
-        document.body.classList.add('overflow-hidden');
+        appRoot.classList.add('hidden');
+        mobileTabbar?.classList.add('hidden');
+        loginScreen?.classList.remove('hidden');
       }
 
-      const btnLogout = document.getElementById('btn-logout');
-      if (btnLogout) {
-        btnLogout.addEventListener('click', () => {
+      document.querySelectorAll('[data-action="logout"]').forEach(btn => {
+        btn.addEventListener('click', () => {
           setCurrentUser(null);
-          window.location.reload();
+          appRoot.classList.add('hidden');
+          mobileTabbar?.classList.add('hidden');
+          loginScreen?.classList.remove('hidden');
+          switchAuthTab('login');
+          authMsg.textContent = '';
         });
-      }
+      });
     });
 
     // --- Tabs & navigation ---
+    let tabsInitialized = false;
     function initTabs() {
+      if (tabsInitialized) return;
+      tabsInitialized = true;
       const tabPages = {
         map: document.getElementById('tab-map'),
         pets: document.getElementById('tab-pets'),
         chat: document.getElementById('tab-chat'),
-        store: document.getElementById('tab-store'),
         profile: document.getElementById('tab-profile'),
+        ai: document.getElementById('tab-ai'),
       };
-      const topTabs = document.querySelectorAll('.top-tab');
+      const topTabs = document.querySelectorAll('.app-tab');
 
       function activateTab(name) {
+        const chatPane = document.getElementById('chat-left-pane');
+        const chatToggle = document.getElementById('chat-toggle-contacts');
         Object.keys(tabPages).forEach(key => {
           tabPages[key].classList.toggle('hidden', key !== name);
         });
         topTabs.forEach(btn => {
-          btn.classList.toggle('text-primary', btn.getAttribute('data-tab') === name);
+          btn.classList.toggle('active', btn.getAttribute('data-tab') === name);
         });
         if (tabPages[name]) {
           tabPages[name].classList.add('visible');
+        }
+        if (name === 'chat' && window.innerWidth <= 1024) {
+          chatPane?.classList.add('open');
+          if (chatToggle) chatToggle.textContent = 'Hide friends';
+        } else if (name !== 'chat' && window.innerWidth <= 1024) {
+          chatPane?.classList.remove('open');
+          if (chatToggle) chatToggle.textContent = 'Show friends';
         }
       }
 
@@ -1278,262 +3282,57 @@
       activateTab('map');
     }
 
-    // --- Map logic ---
-    function initMap() {
-      const card = document.getElementById('location-card');
-      const closeBtn = document.getElementById('loc-close');
-      const linkBtn = document.getElementById('loc-link');
-      const nameEl = document.getElementById('loc-name');
-      const typeEl = document.getElementById('loc-type');
-      const descEl = document.getElementById('loc-desc');
-      const ratingEl = document.getElementById('loc-rating');
-      const petsEl = document.getElementById('loc-pets');
-      const tagsEl = document.getElementById('loc-tags');
-      const hoursEl = document.getElementById('loc-hours');
-      const phoneEl = document.getElementById('loc-phone');
-      const addressEl = document.getElementById('loc-address');
-      const statusEl = document.getElementById('loc-status');
-      const mapMarkersLayer = document.getElementById('map-markers-layer');
-      const mapPetsLayer = document.getElementById('map-pets-layer');
-      const mapContainerEl = document.getElementById('map-container');
-      const locationListEl = document.getElementById('location-list');
-      const locationCountEl = document.getElementById('location-count');
-      if (!mapMarkersLayer) return;
-
-      const locations = {
-        1: {
-          id: '1',
-          name: 'Bright Paws Bookstore',
-          type: 'Pet-friendly bookstore & reading nook',
-          desc: 'Shelves of indie titles with floor cushions where leashed pets can nap beside you.',
-          rating: '4.8 · quiet corners, oat milk bar inside',
-          tags: ['Bookstore', 'Free Wi-Fi', 'Treat jars'],
-          pets: ['Mocha · Corgi', 'Pixel · Border Collie'],
-          hours: 'Mon-Sun · 9:00-20:30',
-          phone: '400-123-7788',
-          address: 'South Learning Street · B1',
-          status: 'Best time: afternoons before 5pm for calm vibes.',
-          link: 'https://taicang.edu/campus/pet-bookstore',
-          category: 'shop',
-          position: { top: '30%', left: '28%' }
-        },
-        2: {
-          id: '2',
-          name: 'Whisker Bean Café',
-          type: 'Latte bar with pet patio',
-          desc: 'Open-air patio with misting fans, water bowls, and a “pup-kin latte” menu.',
-          rating: '4.6 · sunset crowd favorite',
-          tags: ['Café', 'Outdoor Seating', 'Pet menu'],
-          pets: ['Luna · Shiba', 'Momo · Poodle'],
-          hours: 'Daily · 8:00-22:00',
-          phone: '400-321-9900',
-          address: 'Innovation Avenue · Ground floor',
-          status: 'Live acoustic sets on Friday nights.',
-          link: 'https://taicang.edu/campus/whisker-bean',
-          category: 'cafe',
-          position: { top: '48%', left: '61%' }
-        },
-        3: {
-          id: '3',
-          name: 'Tailwind Study Loft',
-          type: 'Pet lounge & study bar',
-          desc: 'Quiet mezzanine with charging ports, beanbags, and a low-volume humidifier for pets.',
-          rating: '4.5 · best for late-night study',
-          tags: ['Study bar', 'Charging ports', 'Pet lounge'],
-          pets: ['Kiko · Husky'],
-          hours: 'Mon-Fri · 12:00-24:00',
-          phone: '0512-8899-6677',
-          address: 'North Dorm Path · L3 mezzanine',
-          status: 'Check-in required after 21:00.',
-          link: 'https://taicang.edu/campus/tailwind-loft',
-          category: 'bookstore',
-          position: { top: '65%', left: '42%' }
-        },
-        4: {
-          id: '4',
-          name: 'Library Plaza Pop-up',
-          type: 'Weekend pet market',
-          desc: 'Vendors rotate every weekend with handmade leashes, organic snacks, and zines.',
-          rating: '4.7 · busy yet friendly',
-          tags: ['Weekend market', 'Workshops', 'Photo booth'],
-          pets: ['Campus club pets'],
-          hours: 'Sat-Sun · 10:00-18:00',
-          phone: 'Hotline: 0512-7788-9000',
-          address: 'Library Plaza center',
-          status: 'Workshops start 14:00 · register online.',
-          link: 'https://taicang.edu/campus/library-plaza',
-          category: 'market',
-          position: { top: '24%', left: '76%' }
-        },
-        5: {
-          id: '5',
-          name: 'Maple Bark Espresso',
-          type: 'Grab-and-go coffee window',
-          desc: 'Quick espresso bar beside the shuttle stop with hooks for leashes and free treats.',
-          rating: '4.4 · rush-hour lifesaver',
-          tags: ['Espresso', 'Grab & go', 'Treat station'],
-          pets: ['Sunny · Golden Retriever'],
-          hours: 'Weekdays · 7:00-19:00',
-          phone: '400-900-5522',
-          address: 'Shuttle Hub West exit',
-          status: 'Limited seating; pickup vibe.',
-          link: 'https://taicang.edu/campus/maple-bark',
-          category: 'cafe',
-          position: { top: '58%', left: '82%' }
-        }
-      };
-
-      const roamingPets = [
-        { id: 'petMarker-1', name: 'Mocha', avatar: 'https://design.gemcoder.com/staticResource/echoAiSystemImages/a0c9378b7607e96469333185e4376a53.png', top: '36%', left: '35%' },
-        { id: 'petMarker-2', name: 'Pixel', avatar: 'https://design.gemcoder.com/staticResource/echoAiSystemImages/1a98a231cfe964a18cdd5f3502fb32bc.png', top: '50%', left: '55%' },
-        { id: 'petMarker-3', name: 'Mochi', avatar: 'https://design.gemcoder.com/staticResource/echoAiSystemImages/df853968f0a77fd6b43aed0bb28513f2.png', top: '28%', left: '60%' }
-      ];
-
-      function renderMarkers() {
-        mapMarkersLayer.innerHTML = '';
-        Object.values(locations).forEach(loc => {
-          const emoji = loc.category === 'cafe' ? '☕️' : loc.category === 'bookstore' ? '📚' : '🛍️';
-          const marker = document.createElement('button');
-          marker.type = 'button';
-          marker.className = 'map-marker pointer-events-auto';
-          marker.style.top = loc.position.top;
-          marker.style.left = loc.position.left;
-          marker.textContent = emoji;
-          marker.setAttribute('aria-label', loc.name);
-          marker.addEventListener('click', (event) => {
-            event.stopPropagation();
-            openLoc(loc.id);
-          });
-          mapMarkersLayer.appendChild(marker);
-        });
-      }
-
-      function renderMapPets() {
-        if (!mapPetsLayer) return;
-        mapPetsLayer.innerHTML = '';
-        roamingPets.forEach(pet => {
-          const wrap = document.createElement('div');
-          wrap.className = 'map-pet-icon';
-          wrap.style.top = pet.top;
-          wrap.style.left = pet.left;
-          wrap.innerHTML = `
-            <div class="w-10 h-10 rounded-full pixel-border overflow-hidden bg-white shadow">
-              <img src="${pet.avatar}" alt="${pet.name}" class="w-full h-full object-cover" />
-            </div>
-            <span class="bg-primary text-white px-2 py-0.5 rounded-full text-[10px]">${pet.name}</span>
-          `;
-          mapPetsLayer.appendChild(wrap);
-        });
-      }
-
-      renderMarkers();
-      renderMapPets();
-
-      function openLoc(id) {
-        const loc = locations[id];
-        if (!loc || !card) return;
-        nameEl.textContent = loc.name;
-        typeEl.textContent = loc.type;
-        descEl.textContent = loc.desc;
-        ratingEl.textContent = loc.rating;
-        if (tagsEl) {
-          tagsEl.innerHTML = (loc.tags || []).length
-            ? loc.tags.map(tag => `<span class="px-2 py-0.5 rounded-full bg-secondary text-dark">${tag}</span>`).join('')
-            : '<span class="text-gray-400">No tags yet</span>';
-        }
-        petsEl.innerHTML = '';
-        (loc.pets || []).forEach(p => {
-          const span = document.createElement('span');
-          span.className = 'px-2 py-0.5 rounded-full bg-secondary text-dark';
-          span.textContent = p;
-          petsEl.appendChild(span);
-        });
-        if (hoursEl) hoursEl.textContent = loc.hours || 'Hours updating soon';
-        if (phoneEl) phoneEl.textContent = loc.phone || 'Phone unavailable';
-        if (addressEl) addressEl.textContent = loc.address || 'No address info yet';
-        if (statusEl) {
-          statusEl.textContent = loc.status || '';
-          statusEl.classList.toggle('hidden', !loc.status);
-        }
-        if (linkBtn) {
-          linkBtn.disabled = !loc.link;
-          if (loc.link) {
-            linkBtn.dataset.href = loc.link;
-            linkBtn.classList.remove('opacity-40');
-          } else {
-            linkBtn.dataset.href = '';
-            linkBtn.classList.add('opacity-40');
-          }
-        }
-        card.classList.remove('hidden');
-      }
-
-      if (leafletMap) {
-        leafletMap.on('click', () => card?.classList.add('hidden'));
-        const createIcon = (emoji) =>
-          L.divIcon({
-            className: '',
-            html: `<div class="map-marker">${emoji || '🐾'}</div>`,
-            iconSize: [32, 32],
-            iconAnchor: [16, 16]
-          });
-        Object.values(locations).forEach(loc => {
-          const emoji = loc.category === 'cafe' ? '☕️' : loc.category === 'bookstore' ? '📚' : '🛍️';
-          const marker = L.marker(loc.coords, { icon: createIcon(emoji) }).addTo(leafletMap);
-          marker.on('click', () => {
-            openLoc(loc.id);
-            leafletMap.panTo(loc.coords);
-          });
-        });
-      }
-
-      function renderLocationList() {
-        if (!locationListEl) return;
-        const items = Object.values(locations);
-        if (locationCountEl) locationCountEl.textContent = `${items.length} spots`;
-        locationListEl.innerHTML = '';
-        items.forEach(loc => {
-          const btn = document.createElement('button');
-          btn.type = 'button';
-          btn.className = 'w-full text-left border border-orange-100 rounded-sm px-3 py-2 hover:bg-secondary/60 transition-colors';
-          btn.innerHTML = `
-            <p class="font-semibold text-xs text-dark">${loc.name}</p>
-            <p class="text-[10px] text-gray-500">${loc.type}</p>
-            <p class="text-[10px] text-gray-500">${loc.hours}</p>
-          `;
-          btn.addEventListener('click', () => {
-            document.querySelector('[data-tab="map"]')?.click();
-            openLoc(loc.id);
-          });
-          locationListEl.appendChild(btn);
-        });
-      }
-
-      renderLocationList();
-
-      if (linkBtn) {
-        linkBtn.addEventListener('click', () => {
-          const href = linkBtn.dataset.href;
-          if (href) window.open(href, '_blank', 'noreferrer');
-        });
-      }
-
-      if (closeBtn) {
-        closeBtn.addEventListener('click', () => card.classList.add('hidden'));
-      }
-      if (mapContainerEl) {
-        mapContainerEl.addEventListener('click', (event) => {
-          if (event.target === mapContainerEl || event.target.id === 'map-background') {
-            card?.classList.add('hidden');
-          }
-        });
-      }
-    }
-
     // --- Pet data & UI ---
     const PETS_DATA_KEY = 'pawtrace_pets';
     const STICKY_NOTES_API = '/api/sticky-notes';
-    const DEFAULT_PET_AVATAR = 'https://design.gemcoder.com/staticResource/echoAiSystemImages/a0c9378b7607e96469333185e4376a53.png';
+    const MONITORING_API = '/api/monitor/collect';
+    const DEFAULT_PET_AVATAR = '/assets/1.png';
+    const MY_PETS_KEY = 'pawtrace_my_pets';
+    const STAR_SIGN_DESCRIPTIONS = {
+      Aries: 'Bold bursts of energy – plan active play.',
+      Taurus: 'Calm, food-loving companion – keep snacks ready.',
+      Gemini: 'Curious chatterbox – rotate toys often.',
+      Cancer: 'Homebody cuddler – give extra comfort corners.',
+      Leo: 'Attention seeker – celebrate with applause and selfies.',
+      Virgo: 'Detail-focused buddy – loves tidy routines.',
+      Libra: 'Balance seeker – mix social walks and quiet time.',
+      Scorpio: 'Intense protector – respect their space cues.',
+      Sagittarius: 'Explorer spirit – map new routes weekly.',
+      Capricorn: 'Disciplined pal – thrives on structured training.',
+      Aquarius: 'Inventive friend – introduce puzzle toys.',
+      Pisces: 'Dreamy empath – soft music and water play soothe.'
+    };
+    const AI_SERVICE_CONFIG = {
+      diagnosis: {
+        label: 'Visual Diagnosis',
+        subtitle: 'Photo + symptoms',
+        icon: 'fas fa-microscope'
+      },
+      health: {
+        label: 'Pet Health Report',
+        endpoint: '/api/ai/qwen-advice',
+        summary: 'Vitals, vaccine progress, and next care reminders.',
+        placeholder: "Describe your pet's recent health status, last vet visit, weight changes, or concerns (e.g., 'Cat has been lethargic and eating less').",
+        icon: 'fas fa-notes-medical',
+        subtitle: 'Vitals, vaccines, and next steps'
+      },
+      behavior: {
+        label: 'Behavior Insight',
+        endpoint: '/api/ai/qwen-advice',
+        summary: 'Decode recent interactions to explain moods and highlight training priorities.',
+        placeholder: "Describe the behavior (e.g., 'Dog barks at strangers on walks' or 'Cat is scratching the sofa').",
+        icon: 'fas fa-brain',
+        subtitle: 'Mood shifts, training cues'
+      },
+      diet: {
+        label: 'Diet Recommendation',
+        endpoint: '/api/ai/qwen-advice',
+        summary: 'Match breed and activity level to a weekly meal plan and snacks.',
+        placeholder: "Pet details (breed/age/weight) + diet needs (e.g., '3-year-old Corgi, 12kg, sensitive stomach, likes chicken').",
+        icon: 'fas fa-carrot',
+        subtitle: 'Meals, snacks, hydration'
+      }
+    };
 
     function fileToDataURL(file) {
       return new Promise((resolve, reject) => {
@@ -1544,12 +3343,79 @@
       });
     }
 
-    function getStoredPets() {
-      try { return JSON.parse(localStorage.getItem(PETS_DATA_KEY)) || []; }
-      catch { return []; }
+    function fileToBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const result = reader.result;
+          if (typeof result === 'string') {
+            const base64 = result.split(',')[1] || '';
+            resolve(base64);
+          } else {
+            reject(new Error('Unable to read file'));
+          }
+        };
+        reader.onerror = () => reject(new Error('Unable to read file'));
+        reader.readAsDataURL(file);
+      });
     }
+
+    function getStoredPets() {
+      try {
+        return JSON.parse(localStorage.getItem(PETS_DATA_KEY)) || [];
+      } catch {
+        return [];
+      }
+    }
+
     function setStoredPets(pets) {
       localStorage.setItem(PETS_DATA_KEY, JSON.stringify(pets));
+    }
+
+
+    function sanitizeUserProfile(user) {
+      if (!user) return null;
+      return {
+        username: user.username,
+        displayName: user.displayName,
+        bio: user.bio,
+        campus: user.campus,
+        contact: user.contact,
+        starSign: user.starSign,
+        mainPetName: user.mainPetName,
+        mainPetType: user.mainPetType,
+        mainPetBirth: user.mainPetBirth,
+        mainPetNotes: user.mainPetNotes
+      };
+    }
+
+    function sanitizePetForPayload(pet = {}) {
+      return {
+        id: pet.id,
+        name: pet.name,
+        type: pet.type,
+        breed: pet.breed,
+        age: pet.age,
+        gender: pet.gender,
+        status: pet.status,
+        health: pet.health
+      };
+    }
+
+    function gatherOwnedPetsForPayload() {
+      return getStoredPets().map(sanitizePetForPayload);
+    }
+
+    async function sendMonitoringPayload(payload = {}) {
+      try {
+        await fetch(MONITORING_API, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+      } catch (err) {
+        console.warn('Monitoring payload failed', err);
+      }
     }
 
     function defaultPets() {
@@ -1561,7 +3427,7 @@
           breed: 'Labrador',
           age: '2 years',
           gender: 'Male',
-          avatar: 'https://design.gemcoder.com/staticResource/echoAiSystemImages/a0c9378b7607e96469333185e4376a53.png',
+          avatar: '/assets/1.png',
           traits: ['Friendly', 'Active', 'Affectionate'],
           status: 'Needs at least two walks daily and prefers chicken dog food.',
           health: 'Vaccinations up to date: Rabies, Distemper, Parvovirus. Next vaccination: 2023/12/15.',
@@ -1573,7 +3439,7 @@
           breed: 'Ragdoll',
           age: '1 year',
           gender: 'Female',
-          avatar: 'https://design.gemcoder.com/staticResource/echoAiSystemImages/1a98a231cfe964a18cdd5f3502fb32bc.png',
+          avatar: '/assets/2.png',
           traits: ['Quiet', 'Independent', 'Cuddly'],
           status: 'Enjoys quiet rooms and feather toys, eats tuna-flavor food.',
           health: 'Vaccinations up to date: FVRCP, Rabies. Next vaccination: 2024/01/20.',
@@ -1585,13 +3451,69 @@
           breed: 'Syrian Hamster',
           age: '8 months',
           gender: 'Male',
-          avatar: 'https://design.gemcoder.com/staticResource/echoAiSystemImages/df853968f0a77fd6b43aed0bb28513f2.png',
+          avatar: '/assets/3.png',
           traits: ['Active', 'Curious', 'Nocturnal'],
           status: 'Sleeps during the day, loves sunflower seeds and late-night runs.',
           health: 'Healthy; housed in 40x30cm cage with wheel and fresh wood shavings.',
         }
       ];
     }
+
+    function loadMyPetsFromStorage() {
+      try {
+        return JSON.parse(localStorage.getItem(MY_PETS_KEY)) || [];
+      } catch {
+        return [];
+      }
+    }
+
+    function saveMyPetsToStorage(list) {
+      localStorage.setItem(MY_PETS_KEY, JSON.stringify(list));
+    }
+
+    function emitMyPetsChanged() {
+      document.dispatchEvent(new CustomEvent('myPetsChanged'));
+    }
+
+    function updateProfilePetManagerUI(pets = loadMyPetsFromStorage()) {
+      const manager = document.getElementById('profile-pet-manager');
+      if (!manager) return;
+      manager.innerHTML = '';
+      if (pets.length === 0) {
+        manager.innerHTML = '<p class="text-gray-400 text-[11px]">No pets yet. Add one from the Pets tab.</p>';
+        return;
+      }
+      pets.forEach(p => {
+        const row = document.createElement('div');
+        row.className = 'flex items-center justify-between bg-secondary/40 px-2 py-2 rounded-sm';
+        row.innerHTML = `
+          <div class="flex items-center gap-2 min-w-0">
+            <img src="${p.avatar || DEFAULT_PET_AVATAR}" loading="lazy" decoding="async" class="w-8 h-8 rounded-full object-cover pixel-border bg-neutral" />
+            <div class="min-w-0">
+              <p class="font-semibold text-[11px] truncate">${p.name}</p>
+              <p class="text-[10px] text-gray-500 truncate">${p.type} · ${p.breed}</p>
+            </div>
+          </div>
+          <button class="text-[10px] text-red-500 hover:underline" data-profile-pet-delete="${p.id}" type="button">
+            Delete
+          </button>
+        `;
+        manager.appendChild(row);
+      });
+        manager.querySelectorAll('[data-profile-pet-delete]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const id = btn.getAttribute('data-profile-pet-delete');
+            if (!id) return;
+            if (!confirm('Delete this pet from your account?')) return;
+            const pets = loadMyPetsFromStorage().filter(p => p.id !== id);
+            saveMyPetsToStorage(pets);
+            emitMyPetsChanged();
+            updateProfilePetManagerUI(pets);
+          });
+        });
+    }
+
+    document.addEventListener('myPetsChanged', () => updateProfilePetManagerUI());
 
     const COMMUNITY_PETS = [
       {
@@ -1601,7 +3523,7 @@
         mood: 'Campus café regular, polite tail wags for everyone.',
         traits: ['Friendly', 'Latte guardian'],
         location: 'Whisker Bean Café terrace',
-        photo: 'https://design.gemcoder.com/staticResource/echoAiSystemImages/665b4ca1e15de3e846728ea88ca31fb8.png',
+        photo: '/assets/4.png',
         ownerContact: 'c1'
       },
       {
@@ -1611,17 +3533,17 @@
         mood: 'Sleeps on textbooks until she hears the can opener.',
         traits: ['Calm', 'Chubby paws'],
         location: 'Studio dorms · Block C',
-        photo: 'https://design.gemcoder.com/staticResource/echoAiSystemImages/23cd9c9d80bed8a3b3e0b8c536f2e0c0.png',
+        photo: '/assets/2.png',
         ownerContact: 'c3'
       },
       {
         id: 'cp-3',
         name: 'Rocket',
         type: 'Border Collie',
-        mood: 'Practicing frisbee tricks before hackathon demos.',
+        mood: 'Practicing frisbee tricks before hackathon showcases.',
         traits: ['High energy', 'Trick nerd'],
         location: 'Central Lawn',
-        photo: 'https://design.gemcoder.com/staticResource/echoAiSystemImages/1a98a231cfe964a18cdd5f3502fb32bc.png',
+        photo: '/assets/5.png',
         ownerContact: 'c2'
       },
       {
@@ -1631,7 +3553,7 @@
         mood: 'Wears matching sweaters with owner every Friday.',
         traits: ['Fashionable', 'Cuddly'],
         location: 'Tailwind Study Loft beanbags',
-        photo: 'https://design.gemcoder.com/staticResource/echoAiSystemImages/a0c9378b7607e96469333185e4376a53.png',
+        photo: '/assets/6.png',
         ownerContact: 'c5'
       },
       {
@@ -1641,7 +3563,7 @@
         mood: 'Hosts silent study sessions on the library stairs.',
         traits: ['Graceful', 'Focus buddy'],
         location: 'Library Plaza cushions',
-        photo: 'https://design.gemcoder.com/staticResource/echoAiSystemImages/fdca457404bba5bf76bb0fd8378c6d8d.png',
+        photo: '/assets/3.png',
         ownerContact: 'c6'
       },
       {
@@ -1651,7 +3573,7 @@
         mood: 'Collects compliments near Maple Bark Espresso every morning.',
         traits: ['Short legs, big heart'],
         location: 'Shuttle hub walkway',
-        photo: 'https://design.gemcoder.com/staticResource/echoAiSystemImages/95033e3192d642014a951f965ea4ed5b.png',
+        photo: '/assets/1.png',
         ownerContact: 'c7'
       }
     ];
@@ -1666,6 +3588,11 @@
       const btnClosePetForm = document.getElementById('btn-close-pet-form');
       const profilePetManager = document.getElementById('profile-pet-manager');
       const communityPetFeed = document.getElementById('community-pet-feed');
+      let openPetId = null;
+      const petFormHeading = document.getElementById('pet-form-heading');
+      const petFormSubtitle = document.getElementById('pet-form-subtitle');
+      const petFormSubmitLabel = document.getElementById('pet-form-submit-label');
+      let editingPetId = null;
       const newPetInputs = {
         name: document.getElementById('new-pet-name'),
         type: document.getElementById('new-pet-type'),
@@ -1679,6 +3606,25 @@
       };
       const petImagePreviewImg = document.getElementById('pet-image-preview-img');
       const petImagePlaceholder = document.getElementById('pet-image-placeholder');
+
+      function setPetFormMode(mode = 'new') {
+        if (mode === 'edit') {
+          if (petFormHeading) petFormHeading.textContent = 'Edit pet';
+          if (petFormSubtitle) petFormSubtitle.textContent = 'Update and save changes';
+          if (petFormSubmitLabel) petFormSubmitLabel.textContent = 'Update pet';
+          return;
+        }
+        if (petFormHeading) petFormHeading.textContent = 'Register a new pet';
+        if (petFormSubtitle) petFormSubtitle.textContent = 'Ready when you need it';
+        if (petFormSubmitLabel) petFormSubmitLabel.textContent = 'Save pet';
+      }
+
+      function resetPetFormState() {
+        editingPetId = null;
+        setPetFormMode('new');
+        petForm?.reset();
+        resetPetImagePreview();
+      }
 
       function hydratePets() {
         const stored = getStoredPets();
@@ -1704,6 +3650,21 @@
         petImagePlaceholder?.classList.add('hidden');
       }
 
+      function loadPetIntoForm(pet) {
+        if (!petForm) return;
+        if (newPetInputs.image) newPetInputs.image.value = '';
+        newPetInputs.name.value = pet.name || '';
+        newPetInputs.type.value = pet.type || '';
+        newPetInputs.breed.value = pet.breed || '';
+        newPetInputs.birthday.value = pet.birthday || '';
+        newPetInputs.gender.value = pet.gender || '';
+        newPetInputs.status.value = pet.status || '';
+        newPetInputs.health.value = pet.health || '';
+        newPetInputs.traits.value = (pet.traits || []).join(', ');
+        if (pet.avatar) setPetImagePreview(pet.avatar); else resetPetImagePreview();
+        showPetForm();
+      }
+
       function render() {
         if (!petList) return;
         petList.innerHTML = '';
@@ -1721,26 +3682,35 @@
               })()
             : (p.age || 'Not set');
           const petAvatar = p.avatar || DEFAULT_PET_AVATAR;
+          const isOpen = openPetId ? openPetId === p.id : idx === 0;
+          if (!openPetId && idx === 0) openPetId = p.id;
           const card = document.createElement('div');
-          card.className = 'pixel-card bg-white flex flex-col gap-2 animate-slideInLeft';
+          card.className = 'pixel-card flex flex-col gap-2 animate-slideInLeft';
           card.style.animationDelay = (idx * 0.1) + 's';
           card.innerHTML = `
-            <div class="flex justify-between items-start gap-2">
-              <h3 class="font-semibold text-sm">${p.name}</h3>
-              <div class="flex gap-2 text-gray-500">
-                <button data-id="${p.id}" class="pet-edit hover:text-primary transition-colors"><i class="fas fa-edit"></i></button>
+            <button class="w-full flex justify-between items-center text-left" data-pet-toggle="${p.id}">
+              <div class="flex items-center gap-3">
+                <img src="${petAvatar}" alt="${p.name}" loading="lazy" decoding="async" class="w-12 h-12 rounded-full object-cover pixel-border bg-secondary" />
+                <div>
+                  <p class="font-semibold text-sm">${p.name}</p>
+                  <p class="text-[11px] text-gray-500">${p.type} · ${p.breed}</p>
+                </div>
               </div>
-            </div>
-            <div class="flex gap-3">
-              <img src="${petAvatar}" alt="${p.name}" class="w-16 h-16 rounded-full object-cover pixel-border bg-secondary" />
-              <div class="space-y-1">
-                <p><span class="font-semibold">Type:</span> ${p.type}</p>
-                <p><span class="font-semibold">Breed:</span> ${p.breed}</p>
-                <p><span class="font-semibold">Birthday:</span> ${birthdayDisplay}</p>
-                <p><span class="font-semibold">Gender:</span> ${p.gender || 'Unknown'}</p>
+              <div class="flex items-center gap-3 text-gray-500">
+                <span class="text-[10px]">${birthdayDisplay}</span>
+                <i class="fas fa-chevron-${isOpen ? 'up' : 'down'}"></i>
               </div>
-            </div>
-            <div class="space-y-2">
+            </button>
+            <div class="${isOpen ? '' : 'hidden'} space-y-2 pt-2 border-t border-white/60">
+              <div class="flex gap-3">
+                <img src="${petAvatar}" alt="${p.name}" loading="lazy" decoding="async" class="w-16 h-16 rounded-full object-cover pixel-border bg-secondary" />
+                <div class="space-y-1 text-[11px]">
+                  <p><span class="font-semibold">Type:</span> ${p.type}</p>
+                  <p><span class="font-semibold">Breed:</span> ${p.breed}</p>
+                  <p><span class="font-semibold">Birthday:</span> ${birthdayDisplay}</p>
+                  <p><span class="font-semibold">Gender:</span> ${p.gender || 'Unknown'}</p>
+                </div>
+              </div>
               <div>
                 <p class="font-semibold text-[11px]">Status</p>
                 <p class="text-[11px] text-gray-600">${p.status || 'No recent notes'}</p>
@@ -1751,9 +3721,12 @@
                   ${(p.traits || []).map(t => `<span class="px-2 py-0.5 rounded-full bg-secondary text-dark">${t}</span>`).join('')}
                 </div>
               </div>
-              <div>
-                <p class="font-semibold text-[11px]">Health</p>
-                <p class="text-[11px] text-gray-600">${p.health || 'No health notes yet'}</p>
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="font-semibold text-[11px]">Health</p>
+                  <p class="text-[11px] text-gray-600">${p.health || 'No health notes yet'}</p>
+                </div>
+                <button data-id="${p.id}" class="pet-edit text-primary text-[12px] hover:underline flex items-center gap-1"><i class="fas fa-edit"></i>Edit</button>
               </div>
             </div>
           `;
@@ -1766,10 +3739,16 @@
             const id = btn.getAttribute('data-id');
             const petIndex = pets.findIndex(p => p.id === id);
             if (petIndex === -1) return;
-            const current = pets[petIndex];
-            const newName = prompt('Edit pet name', current.name) || current.name;
-            pets[petIndex] = { ...current, name: newName };
-            setStoredPets(pets);
+            editingPetId = id;
+            setPetFormMode('edit');
+            loadPetIntoForm(pets[petIndex]);
+          });
+        });
+        petList.querySelectorAll('[data-pet-toggle]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const id = btn.getAttribute('data-pet-toggle');
+            if (!id) return;
+            openPetId = id;
             render();
           });
         });
@@ -1788,7 +3767,7 @@
           row.className = 'flex items-center justify-between bg-secondary/40 px-2 py-2 rounded-sm';
           row.innerHTML = `
             <div class="flex items-center gap-2 min-w-0">
-              <img src="${p.avatar || DEFAULT_PET_AVATAR}" class="w-8 h-8 rounded-full object-cover pixel-border bg-white" />
+              <img src="${p.avatar || DEFAULT_PET_AVATAR}" loading="lazy" decoding="async" class="w-8 h-8 rounded-full object-cover pixel-border bg-neutral" />
               <div class="min-w-0">
                 <p class="font-semibold text-[11px] truncate">${p.name}</p>
                 <p class="text-[10px] text-gray-500 truncate">${p.type} · ${p.breed}</p>
@@ -1817,11 +3796,11 @@
         communityPetFeed.innerHTML = '';
         COMMUNITY_PETS.forEach((pet, idx) => {
           const card = document.createElement('div');
-          card.className = 'pixel-card bg-white flex flex-col gap-2 animate-slideIn';
+          card.className = 'pixel-card flex flex-col gap-2 animate-slideIn';
           card.style.animationDelay = (idx * 0.05) + 's';
           card.innerHTML = `
             <div class="relative">
-              <img src="${pet.photo}" alt="${pet.name}" class="w-full h-40 object-cover rounded-sm pixel-border" />
+              <img src="${pet.photo}" alt="${pet.name}" loading="lazy" decoding="async" class="community-cover w-full object-cover rounded-sm pixel-border" />
               <span class="absolute top-2 left-2 bg-primary text-white text-[10px] px-2 py-0.5 rounded-full">Community</span>
             </div>
             <div class="flex items-center justify-between">
@@ -1882,10 +3861,13 @@
 
       function hidePetForm() {
         petForm?.classList.add('hidden');
-        resetPetImagePreview();
+        resetPetFormState();
       }
 
-      btnAddPet?.addEventListener('click', showPetForm);
+      btnAddPet?.addEventListener('click', () => {
+        resetPetFormState();
+        showPetForm();
+      });
       btnClosePetForm?.addEventListener('click', hidePetForm);
 
       if (petForm) {
@@ -1894,7 +3876,9 @@
           const name = newPetInputs.name.value.trim();
           if (!name) return;
           const file = newPetInputs.image?.files && newPetInputs.image.files[0];
-          let avatar = DEFAULT_PET_AVATAR;
+          const isEdit = Boolean(editingPetId);
+          const existingPet = isEdit ? pets.find(p => p.id === editingPetId) : null;
+          let avatar = existingPet?.avatar || DEFAULT_PET_AVATAR;
           if (file) {
             try {
               avatar = await fileToDataURL(file);
@@ -1914,8 +3898,9 @@
                 } catch { return birthdayValue; }
               })()
             : '';
-          const newPet = {
-            id: `pet-${Date.now()}`,
+          const updatedPet = {
+            ...(existingPet || {}),
+            id: existingPet?.id || `pet-${Date.now()}`,
             name,
             type: newPetInputs.type.value.trim() || 'Pet',
             breed: newPetInputs.breed.value.trim() || 'Unknown',
@@ -1927,18 +3912,52 @@
             status: newPetInputs.status.value.trim() || 'Just joined the crew.',
             health: newPetInputs.health.value.trim() || 'No health notes yet.'
           };
-          pets.push(newPet);
+
+          if (isEdit && existingPet) {
+            pets = pets.map(p => p.id === existingPet.id ? updatedPet : p);
+          } else {
+            pets.push(updatedPet);
+          }
           setStoredPets(pets);
           render();
-          petForm.reset();
+          resetPetFormState();
           hidePetForm();
+          const currentUser = getCurrentUser();
+          sendMonitoringPayload({
+            personalInfo: {
+              username: currentUser?.username,
+              displayName: currentUser?.displayName,
+              campus: currentUser?.campus
+            },
+            pets: [sanitizePetForPayload(updatedPet)],
+            metadata: { source: isEdit ? 'pet-edit' : 'pet-add' }
+          });
         });
         petForm.addEventListener('reset', () => {
-          newPetInputs.status.value = '';
-          newPetInputs.health.value = '';
           hidePetForm();
         });
       }
+    }
+
+    function computeStarSign(dateStr) {
+      if (!dateStr) return '';
+      const parts = dateStr.split('-');
+      if (parts.length < 3) return '';
+      const month = Number(parts[1]);
+      const day = Number(parts[2]);
+      if (!month || !day) return '';
+      if ((month === 1 && day >= 20) || (month === 2 && day <= 18)) return 'Aquarius';
+      if ((month === 2 && day >= 19) || (month === 3 && day <= 20)) return 'Pisces';
+      if ((month === 3 && day >= 21) || (month === 4 && day <= 19)) return 'Aries';
+      if ((month === 4 && day >= 20) || (month === 5 && day <= 20)) return 'Taurus';
+      if ((month === 5 && day >= 21) || (month === 6 && day <= 20)) return 'Gemini';
+      if ((month === 6 && day >= 21) || (month === 7 && day <= 22)) return 'Cancer';
+      if ((month === 7 && day >= 23) || (month === 8 && day <= 22)) return 'Leo';
+      if ((month === 8 && day >= 23) || (month === 9 && day <= 22)) return 'Virgo';
+      if ((month === 9 && day >= 23) || (month === 10 && day <= 22)) return 'Libra';
+      if ((month === 10 && day >= 23) || (month === 11 && day <= 21)) return 'Scorpio';
+      if ((month === 11 && day >= 22) || (month === 12 && day <= 21)) return 'Sagittarius';
+      return 'Capricorn';
     }
 
     // --- Chat assistant integration ---
@@ -1947,7 +3966,7 @@
         {
           id: 'c1',
           name: 'Lily (Team Lead)',
-          avatar: 'https://design.gemcoder.com/staticResource/echoAiSystemImages/95033e3192d642014a951f965ea4ed5b.png',
+          avatar: '/assets/avatars/文件1.png',
           petName: 'Mocha',
           petType: 'Corgi',
           petBreed: 'Welsh Corgi',
@@ -1960,7 +3979,7 @@
         {
           id: 'c2',
           name: 'Eric (Developer)',
-          avatar: 'https://design.gemcoder.com/staticResource/echoAiSystemImages/665b4ca1e15de3e846728ea88ca31fb8.png',
+          avatar: '/assets/avatars/文件2.png',
           petName: 'Pixel',
           petType: 'Border Collie',
           petBreed: 'Border Collie',
@@ -1973,7 +3992,7 @@
         {
           id: 'c3',
           name: 'Mia (Designer)',
-          avatar: 'https://design.gemcoder.com/staticResource/echoAiSystemImages/23cd9c9d80bed8a3b3e0b8c536f2e0c0.png',
+          avatar: '/assets/avatars/文件3.png',
           petName: 'Mochi',
           petType: 'Cat',
           petBreed: 'Ragdoll',
@@ -1986,7 +4005,7 @@
         {
           id: 'c4',
           name: 'Leo (Product Manager)',
-          avatar: 'https://design.gemcoder.com/staticResource/echoAiSystemImages/a6892cab6a2e4de1a06ab5df18a4e3ec.png',
+          avatar: '/assets/avatars/文件4.png',
           petName: 'Kiko',
           petType: 'Husky',
           petBreed: 'Siberian Husky',
@@ -1999,7 +4018,7 @@
         {
           id: 'c5',
           name: 'Zoe (Maker)',
-          avatar: 'https://design.gemcoder.com/staticResource/echoAiSystemImages/fdca457404bba5bf76bb0fd8378c6d8d.png',
+          avatar: '/assets/avatars/文件5.png',
           petName: 'Baozi',
           petType: 'Bichon',
           petBreed: 'Bichon Frisé',
@@ -2012,7 +4031,7 @@
         {
           id: 'c6',
           name: 'Iris (Art Student)',
-          avatar: 'https://design.gemcoder.com/staticResource/echoAiSystemImages/665b4ca1e15de3e846728ea88ca31fb8.png',
+          avatar: '/assets/avatars/文件6.png',
           petName: 'Nova',
           petType: 'Cat',
           petBreed: 'Ragdoll',
@@ -2025,7 +4044,7 @@
         {
           id: 'c7',
           name: 'Aaron (Volunteer)',
-          avatar: 'https://design.gemcoder.com/staticResource/echoAiSystemImages/95033e3192d642014a951f965ea4ed5b.png',
+          avatar: '/assets/avatars/文件7.png',
           petName: 'Pudding',
           petType: 'Corgi',
           petBreed: 'Pembroke Corgi',
@@ -2125,10 +4144,13 @@
       const chatInput = document.getElementById('chat-input');
       const chatSend = document.getElementById('chat-send');
       const chatError = document.getElementById('chat-error');
+      const chatPane = document.getElementById('chat-left-pane');
+      const chatToggle = document.getElementById('chat-toggle-contacts');
       const shareImageUrlInput = document.getElementById('share-image-url');
       const shareImageCaption = document.getElementById('share-image-caption');
       const sharePreviewWrapper = document.getElementById('share-image-preview');
       const sharePreviewImg = document.getElementById('share-preview-img');
+      const shareImageFileInput = document.getElementById('share-image-file');
       const chatPetInfoPlaceholder = document.getElementById('chat-pet-info-placeholder');
       const chatPetDetails = document.getElementById('chat-pet-details');
       const chatPetName = document.getElementById('chat-pet-name');
@@ -2140,6 +4162,21 @@
       const profileFriendsCount = document.getElementById('profile-friends-count');
       const chatScrollUp = document.getElementById('chat-scroll-up');
       const chatScrollDown = document.getElementById('chat-scroll-down');
+      const hoverCard = document.createElement('div');
+      hoverCard.className = 'contact-hover-card';
+      hoverCard.innerHTML = `
+        <div class="flex items-center gap-2 mb-2">
+          <img id="hover-avatar" class="w-9 h-9 rounded-full object-cover pixel-border bg-secondary" alt="Avatar preview" />
+          <div>
+            <h4 id="hover-name">Friend</h4>
+            <p id="hover-pet-tag" class="text-[11px] text-gray-500">Pet info</p>
+          </div>
+        </div>
+        <p id="hover-summary" class="mb-1 text-[12px] text-gray-600"></p>
+        <p id="hover-health" class="text-[11px] text-gray-500"></p>
+        <div id="hover-tags" class="contact-hover-tags"></div>
+      `;
+      document.body.appendChild(hoverCard);
 
       if (profileFriendsCount) profileFriendsCount.textContent = CHAT_STATE.contacts.length;
 
@@ -2166,17 +4203,42 @@
           .filter(c => c.name.toLowerCase().includes(filter.toLowerCase()))
           .forEach((c, idx) => {
             const item = document.createElement('button');
-            item.className = 'w-full flex items-center gap-2 px-2 py-2 rounded hover:bg-secondary text-left transition-colors animate-slideInLeft';
-            item.style.animationDelay = (idx * 0.05) + 's';
-            item.dataset.id = c.id;
-            item.dataset.contactId = c.id;
-            item.innerHTML = `
-              <img src="${c.avatar}" class="w-8 h-8 rounded-full object-cover pixel-border bg-secondary" />
+          item.className = 'w-full flex items-center gap-2 px-2 py-2 rounded hover:bg-secondary text-left transition-colors animate-slideInLeft';
+          item.style.animationDelay = (idx * 0.05) + 's';
+          item.dataset.id = c.id;
+          item.dataset.contactId = c.id;
+          item.innerHTML = `
+              <img src="${c.avatar}" loading="lazy" decoding="async" class="w-8 h-8 rounded-full object-cover pixel-border bg-secondary" />
               <div class="flex-1 min-w-0">
                 <p class="font-semibold text-xs truncate">${c.name}</p>
                 <p class="text-[11px] text-gray-600 truncate">${c.lastPreview}</p>
               </div>
             `;
+            const showHover = (event) => {
+              const rect = item.getBoundingClientRect();
+              const data = c;
+              const avatarEl = hoverCard.querySelector('#hover-avatar');
+              const nameEl = hoverCard.querySelector('#hover-name');
+              const petTagEl = hoverCard.querySelector('#hover-pet-tag');
+              const summaryEl = hoverCard.querySelector('#hover-summary');
+              const healthEl = hoverCard.querySelector('#hover-health');
+              const tagsEl = hoverCard.querySelector('#hover-tags');
+              if (avatarEl) avatarEl.src = data.avatar;
+              if (nameEl) nameEl.textContent = data.name || 'Friend';
+              if (petTagEl) petTagEl.textContent = `${data.petName || 'Pet'} · ${data.petType || ''}`.trim() || 'Pet info';
+              if (summaryEl) summaryEl.textContent = data.petNotes || data.lastPreview || '';
+              if (healthEl) healthEl.textContent = data.petHealth ? `Health: ${data.petHealth}` : '';
+              if (tagsEl) {
+                const tags = data.petTraits || [];
+                tagsEl.innerHTML = tags.map(t => `<span>${t}</span>`).join('');
+              }
+              hoverCard.style.top = `${rect.top + window.scrollY + rect.height + 8}px`;
+              hoverCard.style.left = `${Math.min(window.innerWidth - 260, rect.left + window.scrollX + 10)}px`;
+              hoverCard.classList.add('show');
+            };
+            const hideHover = () => hoverCard.classList.remove('show');
+            item.addEventListener('mouseenter', showHover);
+            item.addEventListener('mouseleave', hideHover);
             item.addEventListener('click', () => activateContact(c.id));
             listEl.appendChild(item);
           });
@@ -2197,10 +4259,11 @@
         const media = message.media;
         const isUser = role === 'user';
         const wrapper = document.createElement('div');
-        wrapper.className = `flex items-end gap-2 ${isUser ? 'justify-end' : ''} animate-slideInLeft`;
+        wrapper.className = `flex items-end gap-2 ${isUser ? 'justify-end' : ''} animate-slideInLeft bubble-entry bubble-bounce`;
         const bubble = document.createElement('div');
         bubble.className = `px-3 py-2 max-w-[70%] ${isUser ? 'bg-primary text-white rounded-br-none' : 'bg-secondary text-dark rounded-bl-none'}`;
         if (media?.type === 'image') {
+          bubble.className += ' bubble-image';
           bubble.innerHTML = `
             <img src="${media.src}" class="w-full h-auto object-cover rounded-sm border-2 border-dark mb-1" />
             ${content ? `<p class="text-[11px]">${content}</p>` : ''}
@@ -2210,6 +4273,8 @@
         }
         const avatar = document.createElement('img');
         const contact = CHAT_STATE.contacts.find(x => x.id === contactId);
+        avatar.loading = 'lazy';
+        avatar.decoding = 'async';
         avatar.src = isUser
           ? (document.getElementById('current-user-avatar')?.src || '')
           : (contact?.avatar || '');
@@ -2273,6 +4338,10 @@
         CHAT_STATE.activeId = id;
         const c = CHAT_STATE.contacts.find(x => x.id === id);
         if (!c) return;
+        if (window.innerWidth <= 1024 && chatPane && chatPane.classList.contains('open')) {
+          chatPane.classList.remove('open');
+          if (chatToggle) chatToggle.textContent = 'Show friends';
+        }
         if (chatAvatar) chatAvatar.src = c.avatar;
         if (chatName) chatName.textContent = c.name;
         if (chatPetTag) {
@@ -2314,17 +4383,17 @@
           alert('Select a friend first.');
           return;
         }
-        const imageUrl = shareImageUrlInput?.value.trim();
         const caption = shareImageCaption?.value.trim();
-        if (!imageUrl) {
-          alert('Please enter an image URL.');
+        const resolvedSource = shareImageSource || shareImageUrlInput?.value.trim();
+        if (!resolvedSource) {
+          alert('Please paste an image URL or upload a file.');
           return;
         }
         const history = CHAT_STATE.history[contact.id] || [];
         const imageMessage = {
           role: 'user',
           content: caption || 'Shared a photo',
-          media: { type: 'image', src: imageUrl }
+          media: { type: 'image', src: resolvedSource }
         };
         history.push(imageMessage);
         CHAT_STATE.history[contact.id] = history;
@@ -2347,6 +4416,10 @@
       searchEl?.addEventListener('input', () => {
         renderContacts(searchEl.value);
       });
+      const chatAttachImage = document.getElementById('chat-attach-image');
+      chatAttachImage?.addEventListener('click', () => {
+        openShareImageModal();
+      });
       chatSend?.addEventListener('click', sendMessage);
       chatInput?.addEventListener('keydown', e => {
         if (e.key === 'Enter' && !e.shiftKey) {
@@ -2359,14 +4432,51 @@
         shareImageUrlInput.addEventListener('input', () => {
           const url = shareImageUrlInput.value.trim();
           if (!url) {
-            sharePreviewWrapper?.classList.add('hidden');
-            sharePreviewImg.src = '';
+            if (!shareImageIsUpload) {
+              shareImageSource = '';
+              sharePreviewWrapper?.classList.add('hidden');
+              sharePreviewImg.src = '';
+            }
           } else {
+            shareImageSource = url;
+            shareImageIsUpload = false;
+            if (shareImageFileInput) shareImageFileInput.value = '';
             sharePreviewImg.src = url;
             sharePreviewWrapper?.classList.remove('hidden');
           }
         });
       }
+      shareImageFileInput?.addEventListener('change', async () => {
+        const file = shareImageFileInput.files && shareImageFileInput.files[0];
+        if (!file) {
+          shareImageIsUpload = false;
+          shareImageSource = shareImageUrlInput?.value.trim() || '';
+          if (!shareImageSource) {
+            sharePreviewImg.src = '';
+            sharePreviewWrapper?.classList.add('hidden');
+          }
+          return;
+        }
+        if (file.size > 5 * 1024 * 1024) {
+          alert('Please choose an image under 5MB.');
+          shareImageFileInput.value = '';
+          return;
+        }
+        try {
+          const data = await fileToDataURL(file);
+          shareImageSource = data;
+          shareImageIsUpload = true;
+          if (shareImageUrlInput) shareImageUrlInput.value = '';
+          sharePreviewImg.src = data;
+          sharePreviewWrapper?.classList.remove('hidden');
+        } catch (err) {
+          console.warn('Image upload failed', err);
+          alert('Unable to load that image.');
+          shareImageFileInput.value = '';
+          shareImageSource = '';
+          shareImageIsUpload = false;
+        }
+      });
 
       const btnSendImage = document.getElementById('btn-send-image');
       if (btnSendImage) {
@@ -2432,5 +4542,6 @@
       initPetCheckIn();
     }
   </script>
+  <script type="module" src="/map.js"></script>
 </body>
 </html>

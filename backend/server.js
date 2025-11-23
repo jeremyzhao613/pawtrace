@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const compression = require('compression');
 const path = require('path');
 const fs = require('fs');
 const { Low } = require('lowdb');
@@ -9,7 +10,11 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // IMPORTANT: Put your real DashScope API key here or in environment variable DASHSCOPE_API_KEY
-const DASHSCOPE_API_KEY = process.env.DASHSCOPE_API_KEY || 'sk-23fd035cf9844c79a5814b368293f744';
+const DASHSCOPE_API_KEY = process.env.DASHSCOPE_API_KEY || '';
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY || process.env.API_KEY || '';
+const NODE_ENV = process.env.NODE_ENV || 'development';
+const AI_TIMEOUT_MS = Number(process.env.AI_TIMEOUT_MS || 15000);
+const MONITOR_MAX = Number(process.env.MONITOR_MAX || 500);
 
 const SYSTEM_PROMPTS = {
   c1: "You are Lily, a friendly student at XJTLU Taicang who owns a corgi named Mocha. You love easy walks, coffee near campus, and short English chat messages.",
@@ -26,7 +31,7 @@ const defaultPets = [
     breed: 'Corgi',
     age: '2 years',
     gender: 'Male',
-    avatar: 'https://design.gemcoder.com/staticResource/echoAiSystemImages/a0c9378b7607e96469333185e4376a53.png',
+    avatar: '/assets/1.png',
     traits: ['Friendly', 'Food-motivated', 'Short legs, fast heart'],
     health: 'Vaccinations up to date. Last vet check 2 months ago.',
     status: 'Always ready for a fetch session.'
@@ -38,7 +43,7 @@ const defaultPets = [
     breed: 'Border Collie',
     age: '3 years',
     gender: 'Female',
-    avatar: 'https://design.gemcoder.com/staticResource/echoAiSystemImages/1a98a231cfe964a18cdd5f3502fb32bc.png',
+    avatar: '/assets/2.png',
     traits: ['Smart', 'High energy', 'Ball addict'],
     health: 'Needs daily long walks. Joint check scheduled next month.',
     status: 'Learning trick combos every week.'
@@ -50,7 +55,7 @@ const defaultPets = [
     breed: 'Ragdoll',
     age: '1 year',
     gender: 'Female',
-    avatar: 'https://design.gemcoder.com/staticResource/echoAiSystemImages/df853968f0a77fd6b43aed0bb28513f2.png',
+    avatar: '/assets/3.png',
     traits: ['Quiet', 'Cuddly', 'Window watcher'],
     health: 'Indoor only, spayed, no known issues.',
     status: 'Prefers sunlit shelves and calm corners.'
@@ -62,7 +67,7 @@ const defaultPets = [
     breed: 'Husky',
     age: '4 years',
     gender: 'Female',
-    avatar: 'https://design.gemcoder.com/staticResource/echoAiSystemImages/a6892cab6a2e4de1a06ab5df18a4e3ec.png',
+    avatar: '/assets/4.png',
     traits: ['Pack leader', 'Snow lover'],
     health: 'Energetic and strong, needs long runs.',
     status: 'Dreaming about weekend meetups.'
@@ -74,7 +79,7 @@ const defaultPets = [
     breed: 'Siamese',
     age: '2 years',
     gender: 'Female',
-    avatar: 'https://design.gemcoder.com/staticResource/echoAiSystemImages/bfca1d0d7df0f66b8d2d3b5fc973e99c.png',
+    avatar: '/assets/5.png',
     traits: ['Playful', 'Curious', 'Talkative'],
     health: 'Indoor only, loves puzzles.',
     status: 'Chasing laser dots when not napping.'
@@ -110,18 +115,60 @@ async function initDb() {
     settings: { nextPetId: 6 }
   };
   db.data.stickyNotes = db.data.stickyNotes || [];
+  ensureMonitoring();
   await db.write();
+}
+
+const metrics = {
+  startedAt: Date.now(),
+  requests: 0,
+  routes: {}
+};
+
+function trimList(list = [], max = MONITOR_MAX) {
+  if (!Array.isArray(list)) return [];
+  if (list.length <= max) return list;
+  return list.slice(list.length - max);
 }
 
 const publicPath = path.join(__dirname, '..', 'frontend');
 const assetsPath = path.join(__dirname, '..', 'assets');
 
 app.use(cors());
-app.use(express.json());
-app.use(express.static(publicPath));
+app.use(express.json({ limit: '10mb' }));
+app.use(compression());
+app.set('etag', 'strong');
+
+const staticOpts = {
+  maxAge: NODE_ENV === 'production' ? '12h' : 0,
+  etag: true
+};
+app.use(express.static(publicPath, staticOpts));
 if (fs.existsSync(assetsPath)) {
-  app.use('/assets', express.static(assetsPath));
+  app.use('/assets', express.static(assetsPath, staticOpts));
 }
+
+// lightweight latency / status monitor
+app.use((req, res, next) => {
+  const start = process.hrtime.bigint();
+  res.on('finish', () => {
+    const durationMs = Number(process.hrtime.bigint() - start) / 1e6;
+    metrics.requests += 1;
+    const key = req.path.split('?')[0] || '/';
+    if (!metrics.routes[key]) {
+      metrics.routes[key] = { count: 0, sumMs: 0, maxMs: 0, status: {} };
+    }
+    const routeStat = metrics.routes[key];
+    routeStat.count += 1;
+    routeStat.sumMs += durationMs;
+    routeStat.maxMs = Math.max(routeStat.maxMs, durationMs);
+    routeStat.status[res.statusCode] = (routeStat.status[res.statusCode] || 0) + 1;
+    if (durationMs > 1200) {
+      console.warn(`[slow] ${req.method} ${key} ${durationMs.toFixed(1)}ms`);
+    }
+  });
+  next();
+});
 
 function getSystemPrompt(contactId, contactProfile) {
   let basePrompt = SYSTEM_PROMPTS[contactId] ||
@@ -135,6 +182,29 @@ function getSystemPrompt(contactId, contactProfile) {
 function ensureHistory(contactId) {
   db.data.chatHistory[contactId] = db.data.chatHistory[contactId] || [];
   return db.data.chatHistory[contactId];
+}
+
+function ensureMonitoring() {
+  db.data.monitoring = db.data.monitoring || {
+    userProfiles: [],
+    petProfiles: [],
+    purchases: [],
+    chatLogs: []
+  };
+  return db.data.monitoring;
+}
+
+function recordChatForMonitoring(contactId, messages = [], reply = '') {
+  const monitoring = ensureMonitoring();
+  monitoring.chatLogs = monitoring.chatLogs || [];
+  monitoring.chatLogs.push({
+    id: `chat-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
+    contactId,
+    messages,
+    reply,
+    capturedAt: new Date().toISOString()
+  });
+  monitoring.chatLogs = trimList(monitoring.chatLogs);
 }
 
 function buildPetPredictionPrompt(profile = {}) {
@@ -162,6 +232,133 @@ function getLocalPetPrediction(profile = {}) {
   return `${petName} ${focus} thanks to ${starSign}. Sprinkle in a longer walk and a familiar toy to keep them grounded.`;
 }
 
+function buildGeminiAdvicePrompt(service = 'health', context = '', profile = {}, pets = []) {
+  const owner = profile.displayName || 'Owner';
+  const petLine = profile.mainPetName ? `Pet: ${profile.mainPetName} (${profile.mainPetType || 'Pet'})` : '';
+  const notes = profile.mainPetNotes ? `Notes: ${profile.mainPetNotes}` : '';
+  const extraPets = Array.isArray(pets) && pets.length
+    ? `Other pets: ${pets.slice(0, 3).map(p => `${p.name || p.type || 'Pet'} (${p.type || p.breed || ''})`).join('; ')}`
+    : '';
+  const baseContext = [petLine, notes, extraPets].filter(Boolean).join('\n');
+  switch (service) {
+    case 'behavior':
+      return `
+You are a pet behavior specialist. Analyze the behavior and share positive reinforcement drills.
+Owner: ${owner}
+${baseContext}
+User context: "${context || 'No extra details provided'}"
+
+Respond in Markdown:
+### 🧠 Psychological Analysis
+### 🐕 Training Tips
+### 🏠 Environmental Changes
+### 🗓️ Practice Routine
+`;
+    case 'diet':
+      return `
+You are a pet nutritionist. Suggest balanced diet and hydration tips.
+Owner: ${owner}
+${baseContext}
+User context: "${context || 'No extra details provided'}"
+
+Respond in Markdown:
+### 🥩 Recommended Nutrition
+### 🥣 Daily Meal Plan (Morning/Evening)
+### 🚫 Foods to Avoid
+### 💧 Hydration & Supplements
+`;
+    case 'health':
+    default:
+      return `
+You are a veterinary assistant. Provide a general health checklist and preventive care.
+Owner: ${owner}
+${baseContext}
+User context: "${context || 'No extra details provided'}"
+
+Respond in Markdown:
+### 📋 Health Checklist
+### 💉 Vaccination & Care Status
+### 🚩 Flags to Watch
+### 🩺 Next Steps
+`;
+  }
+}
+
+function buildQwenAdviceMessages(service = 'health', context = '', profile = {}, pets = []) {
+  const system = 'You are a concise, friendly pet assistant. Reply in Markdown with clear sections and short bullets.';
+  const prompt = buildGeminiAdvicePrompt(service, context, profile, pets);
+  return [
+    { role: 'system', content: system },
+    { role: 'user', content: prompt }
+  ];
+}
+
+async function callQwen(messages = []) {
+  if (!DASHSCOPE_API_KEY || DASHSCOPE_API_KEY === 'YOUR_DASHSCOPE_API_KEY_HERE') {
+    throw new Error('DASHSCOPE_API_KEY missing');
+  }
+  const payload = { model: 'qwen-plus', messages };
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), AI_TIMEOUT_MS);
+  const response = await fetch(
+    'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions',
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${DASHSCOPE_API_KEY}`
+      },
+      body: JSON.stringify(payload),
+      signal: controller.signal
+    }
+  );
+  clearTimeout(timer);
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(text || 'Qwen API error');
+  }
+  const data = await response.json();
+  return data?.choices?.[0]?.message?.content;
+}
+
+async function callQwenVision({ imageBase64, mimeType, prompt }) {
+  if (!DASHSCOPE_API_KEY || DASHSCOPE_API_KEY === 'YOUR_DASHSCOPE_API_KEY_HERE') {
+    throw new Error('DASHSCOPE_API_KEY missing');
+  }
+  const dataUrl = `data:${mimeType || 'image/jpeg'};base64,${imageBase64}`;
+  const messages = [
+    {
+      role: 'user',
+      content: [
+        { type: 'image_url', image_url: { url: dataUrl } },
+        { type: 'text', text: prompt }
+      ]
+    }
+  ];
+  const payload = { model: 'qwen-vl-plus', messages };
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), AI_TIMEOUT_MS);
+  const response = await fetch(
+    'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions',
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${DASHSCOPE_API_KEY}`
+      },
+      body: JSON.stringify(payload),
+      signal: controller.signal
+    }
+  );
+  clearTimeout(timer);
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(text || 'Qwen-VL API error');
+  }
+  const data = await response.json();
+  return data?.choices?.[0]?.message?.content;
+}
+
 app.get('/api/pets', (_req, res) => {
   res.json({ pets: db.data.pets });
 });
@@ -171,6 +368,8 @@ app.post('/api/pets', async (req, res) => {
   if (!payload.name) {
     return res.status(400).json({ error: 'Pet name is required' });
   }
+  const petSprites = ['/assets/1.png','/assets/2.png','/assets/3.png','/assets/4.png','/assets/5.png','/assets/6.png'];
+  const randomSprite = petSprites[Math.floor(Math.random() * petSprites.length)];
   const newPet = {
     id: `p${Date.now()}`,
     name: payload.name,
@@ -178,7 +377,7 @@ app.post('/api/pets', async (req, res) => {
     breed: payload.breed || 'Unknown',
     age: payload.age || 'Unknown',
     gender: payload.gender || 'Unknown',
-    avatar: payload.avatar || 'https://design.gemcoder.com/staticResource/echoAiSystemImages/a0c9378b7607e96469333185e4376a53.png',
+    avatar: payload.avatar || randomSprite,
     traits: Array.isArray(payload.traits) ? payload.traits : (payload.traits || '').split(',').map(t => t.trim()).filter(Boolean),
     health: payload.health || 'No health notes yet.',
     status: payload.status || 'Just joined the crew.'
@@ -254,6 +453,114 @@ app.delete('/api/sticky-notes', async (_req, res) => {
   res.json({ success: true });
 });
 
+app.get('/api/monitor/metrics', (_req, res) => {
+  const summary = Object.entries(metrics.routes).reduce((acc, [route, stat]) => {
+    acc[route] = {
+      count: stat.count,
+      avgMs: stat.count ? Number(stat.sumMs / stat.count).toFixed(2) : '0',
+      maxMs: Number(stat.maxMs).toFixed(2),
+      status: stat.status
+    };
+    return acc;
+  }, {});
+  res.json({
+    uptimeSeconds: Math.floor((Date.now() - metrics.startedAt) / 1000),
+    requests: metrics.requests,
+    routes: summary
+  });
+});
+
+app.post('/api/monitor/collect', async (req, res) => {
+  const payload = req.body || {};
+  const monitoring = ensureMonitoring();
+  const capturedAt = new Date().toISOString();
+  const metadata = (payload && typeof payload.metadata === 'object' && payload.metadata !== null)
+    ? payload.metadata
+    : {};
+  const personalInfo = (payload && typeof payload.personalInfo === 'object' && payload.personalInfo !== null)
+    ? payload.personalInfo
+    : undefined;
+  const captured = { userProfiles: 0, petProfiles: 0, purchases: 0 };
+
+  if (payload.userProfile && typeof payload.userProfile === 'object') {
+    monitoring.userProfiles = monitoring.userProfiles || [];
+    monitoring.userProfiles.push({
+      id: `profile-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+      capturedAt,
+      profile: payload.userProfile,
+      ...(personalInfo ? { personalInfo } : {}),
+      metadata
+    });
+    captured.userProfiles += 1;
+  }
+
+  const petPayload = Array.isArray(payload.pets)
+    ? payload.pets.filter(p => p && typeof p === 'object')
+    : [];
+  if (petPayload.length) {
+    monitoring.petProfiles = monitoring.petProfiles || [];
+    petPayload.forEach(pet => {
+      monitoring.petProfiles.push({
+        id: `pet-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+        capturedAt,
+        owner: payload?.userProfile?.username || personalInfo?.username || metadata.username || 'anonymous',
+        pet,
+        metadata
+      });
+    });
+    captured.petProfiles += petPayload.length;
+    monitoring.petProfiles = trimList(monitoring.petProfiles);
+  }
+
+  const shoppingPayload = Array.isArray(payload.shopping)
+    ? payload.shopping.filter(item => item && typeof item === 'object')
+    : [];
+  if (shoppingPayload.length) {
+    monitoring.purchases = monitoring.purchases || [];
+    shoppingPayload.forEach(item => {
+      monitoring.purchases.push({
+        id: item.id || `purchase-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+        capturedAt,
+        purchase: item,
+        metadata
+      });
+    });
+    captured.purchases += shoppingPayload.length;
+    monitoring.purchases = trimList(monitoring.purchases);
+  }
+
+  await db.write();
+
+  res.json({
+    success: true,
+    captured,
+    totals: {
+      userProfiles: monitoring.userProfiles?.length || 0,
+      petProfiles: monitoring.petProfiles?.length || 0,
+      purchases: monitoring.purchases?.length || 0,
+      chatLogs: monitoring.chatLogs?.length || 0
+    }
+  });
+});
+
+app.get('/api/monitor/overview', (_req, res) => {
+  const monitoring = ensureMonitoring();
+  res.json({
+    capturedAt: new Date().toISOString(),
+    summary: {
+      userProfiles: monitoring.userProfiles?.length || 0,
+      petProfiles: monitoring.petProfiles?.length || 0,
+      purchases: monitoring.purchases?.length || 0,
+      chatLogs: monitoring.chatLogs?.length || 0,
+      contactsTracked: Object.keys(db.data.chatHistory || {}).length
+    },
+    monitoring,
+    chatHistory: db.data.chatHistory || {},
+    users: db.data.users || [],
+    pets: db.data.pets || []
+  });
+});
+
 app.post('/api/pet-prediction', async (req, res) => {
   const profile = req.body?.profile || {};
   if (!profile.starSign && !profile.petName) {
@@ -301,6 +608,101 @@ app.post('/api/pet-prediction', async (req, res) => {
   }
 });
 
+app.post('/api/ai/qwen-advice', async (req, res) => {
+  const { service, context, profile, pets } = req.body || {};
+  if (!service || !['health', 'behavior', 'diet'].includes(service)) {
+    return res.status(400).json({ error: 'service must be one of health | behavior | diet' });
+  }
+  const messages = buildQwenAdviceMessages(service, context, profile, pets);
+  try {
+    const result = await callQwen(messages);
+    res.json({ result: result || 'Unable to generate advice. Please try again.' });
+  } catch (err) {
+    console.error('Qwen advice server error:', err);
+    res.status(500).json({ error: 'Server error', detail: String(err) });
+  }
+});
+
+app.post('/api/ai/gemini-advice', async (req, res) => {
+  if (!GEMINI_API_KEY) {
+    return res.status(500).json({ error: 'GEMINI_API_KEY is missing on the server.' });
+  }
+  const { service, context, profile, pets } = req.body || {};
+  if (!service || !['health', 'behavior', 'diet'].includes(service)) {
+    return res.status(400).json({ error: 'service must be one of health | behavior | diet' });
+  }
+  const prompt = buildGeminiAdvicePrompt(service, context, profile, pets);
+  const body = {
+    contents: [{ parts: [{ text: prompt }] }]
+  };
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), AI_TIMEOUT_MS);
+    const response = await fetch(
+      'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-goog-api-key': GEMINI_API_KEY
+        },
+        body: JSON.stringify(body),
+        signal: controller.signal
+      }
+    );
+    clearTimeout(timer);
+    if (!response.ok) {
+      const errText = await response.text();
+      console.error('Gemini advice error:', errText);
+      return res.status(500).json({ error: 'Gemini API error', detail: errText });
+    }
+    const data = await response.json();
+    const text = data?.candidates?.[0]?.content?.parts?.map(p => p.text).filter(Boolean).join('\n\n');
+    res.json({ result: text || 'Unable to generate advice. Please try again.' });
+  } catch (err) {
+    console.error('Gemini advice server error:', err);
+    res.status(500).json({ error: 'Server error', detail: String(err) });
+  }
+});
+
+app.post('/api/ai/gemini-diagnosis', async (req, res) => {
+  const { imageBase64, mimeType, symptoms } = req.body || {};
+  if (!imageBase64) {
+    return res.status(400).json({ error: 'imageBase64 is required' });
+  }
+  const prompt = `
+You are an expert veterinary AI assistant named "PawTrace Health Engine".
+Analyze the provided pet image and symptoms: "${symptoms || 'No symptoms given; do a general visual check.'}"
+Provide a structured Markdown response:
+### 🩺 Visual Analysis
+### 🔍 Potential Causes
+### ⚠️ Severity Assessment
+### 💡 Recommended Actions
+**Disclaimer:** You are an AI, not a licensed veterinarian. This is informational only.
+`;
+  try {
+    // First try Qwen multimodal
+    const qwenVisionResult = await callQwenVision({ imageBase64, mimeType, prompt });
+    if (qwenVisionResult) return res.json({ result: qwenVisionResult });
+  } catch (err) {
+    console.error('Qwen-VL error:', err);
+  }
+  try {
+    // Fallback to text-only Qwen advice
+    const messages = buildQwenAdviceMessages(
+      'health',
+      `Symptoms: ${symptoms || 'not provided'}. Image attached but processed as text.`,
+      {},
+      []
+    );
+    const result = await callQwen(messages);
+    return res.json({ result: result || 'AI could not analyze the image; please try again.' });
+  } catch (err) {
+    console.error('Diagnosis AI error:', err);
+    return res.status(500).json({ error: 'AI service unavailable. Configure DASHSCOPE_API_KEY.', detail: String(err) });
+  }
+});
+
 app.post('/api/chat', async (req, res) => {
   const { contactId, messages, contactProfile } = req.body || {};
   if (!DASHSCOPE_API_KEY || DASHSCOPE_API_KEY === 'YOUR_DASHSCOPE_API_KEY_HERE') {
@@ -312,12 +714,19 @@ app.post('/api/chat', async (req, res) => {
     return res.status(400).json({ error: 'messages array is required' });
   }
 
+  const normalizedMessages = messages
+    .map(msg => ({
+      role: msg?.role === 'assistant' ? 'assistant' : 'user',
+      content: typeof msg?.content === 'string' ? msg.content.trim() : ''
+    }))
+    .filter(entry => entry.content);
+
   const sysPrompt = getSystemPrompt(contactId, contactProfile);
   const payload = {
     model: "qwen-plus",
     messages: [
       { role: "system", content: sysPrompt },
-      ...messages.map(m => ({ role: m.role, content: m.content }))
+      ...normalizedMessages
     ]
   };
 
@@ -346,8 +755,9 @@ app.post('/api/chat', async (req, res) => {
       : "I could not generate a proper reply, but your backend is reachable.";
 
     const history = ensureHistory(contactId);
-    history.push(...messages.map(m => ({ role: m.role, content: m.content })));
+    history.push(...normalizedMessages);
     history.push({ role: 'assistant', content: reply });
+    recordChatForMonitoring(contactId, normalizedMessages, reply);
     await db.write();
 
     res.json({ reply });
